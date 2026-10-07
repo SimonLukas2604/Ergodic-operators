@@ -29,8 +29,26 @@ namespace DF
 
 variable {d : ℕ}
 
+/-- Lebesgue measure on `𝕋^d` (built from Mathlib's `AddCircle.measureSpace`) is the product of
+the Haar probability measures used by Mathlib's Fourier theory on `UnitAddTorus`. -/
+lemma volume_torus_eq_haar (d : ℕ) :
+    (volume : Measure (Fin d → UnitAddCircle)) = Measure.pi fun _ => AddCircle.haarAddCircle := by
+  rw [volume_pi]
+  congr 1
+  funext _
+  rw [AddCircle.volume_eq_smul_haarAddCircle, ENNReal.ofReal_one, one_smul]
+
+/-! From here on `volume` on `𝕋 = ℝ/ℤ` is the Haar probability measure, as in
+`Mathlib.Analysis.Fourier.AddCircleMulti`. -/
+
+local instance (priority := high) haarMeasureSpace : MeasureSpace UnitAddCircle :=
+  ⟨AddCircle.haarAddCircle⟩
+
+local instance : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
+  inferInstanceAs (Measure.IsAddHaarMeasure AddCircle.haarAddCircle)
+
 local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
-  ⟨UnitAddCircle.measure_univ⟩
+  inferInstanceAs (IsProbabilityMeasure AddCircle.haarAddCircle)
 
 /-- The translation vector as a point of `𝕋^d`. -/
 def torusVec (α : Fin d → ℝ) : UnitAddTorus (Fin d) := fun i => (α i : UnitAddCircle)
@@ -63,7 +81,8 @@ lemma mFourier_torusVec (n : Fin d → ℤ) (α : Fin d → ℝ) :
   push_cast
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => ?_
-  simp
+  (try simp only [mul_one, div_one])
+  ring
 
 /-- `e_n(α) = 1` iff `∑ nᵢαᵢ` is an integer. -/
 lemma mFourier_torusVec_eq_one_iff (n : Fin d → ℤ) (α : Fin d → ℝ) :
@@ -135,8 +154,9 @@ lemma integral_mFourier_eq_zero {n : Fin d → ℤ} (hn : n ≠ 0) :
 
 /-- **Theorem 3.2.14**: Lebesgue measure on `𝕋^d` is ergodic for the translation by `α` iff
 `1, α₁, …, α_d` are rationally independent. -/
-theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
-  intro d α
+theorem torusTranslationErgodic_haar (d : ℕ) (α : Fin d → ℝ) :
+    Ergodic (torusTranslation α) (volume : Measure (UnitAddTorus (Fin d))) ↔
+      ∀ (k₀ : ℤ) (k : Fin d → ℤ), (k₀ : ℝ) = ∑ i, k i * α i → k₀ = 0 ∧ ∀ i, k i = 0 := by
   constructor
   · -- ergodic ⇒ independent
     intro hE k₀ k hk
@@ -176,7 +196,7 @@ theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
       have : (t + torusVec α ∈ s) ↔ t ∈ s := by
         rw [← torusTranslation_eq, ← mem_preimage, hinv]
       by_cases ht : t ∈ s
-      · rw [hg, indicator_of_mem ht, indicator_of_mem (this.2 ht)]
+      · rw [hg, indicator_of_mem ht, indicator_of_mem (this.2 ht)]; rfl
       · rw [hg, indicator_of_notMem ht, indicator_of_notMem (fun h => ht (this.1 h))]
     -- `ĝ(n) = 0` for `n ≠ 0`
     have hcoef : ∀ n : Fin d → ℤ, n ≠ 0 → mFourierCoeff g n = 0 := by
@@ -225,5 +245,16 @@ theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
       by_contra hts
       rw [hg, indicator_of_notMem hts, hc1] at ht
       exact zero_ne_one ht
+
+end DF
+
+namespace DF
+
+/-- **Theorem 3.2.14**: Lebesgue measure on `𝕋^d` is ergodic for the translation by `α` iff
+`1, α₁, …, α_d` are rationally independent. -/
+theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
+  intro d α
+  rw [volume_torus_eq_haar]
+  exact torusTranslationErgodic_haar d α
 
 end DF
