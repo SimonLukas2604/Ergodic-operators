@@ -12,7 +12,7 @@ project, one toolchain (`leanprover/lean4:v4.35.0-rc3`) and one Mathlib.
 | `CriticalAMOHausdorff` | Becker–Jitomirskaya–Krasovsky, *Critical almost Mathieu operator: hidden singularity, gap continuity, and the Hausdorff dimension of the spectrum* (arXiv:1909.04429v2) | `CAH` | [README](lean/CriticalAMOHausdorff/README.md) |
 | `AvilaGlobal` | A. Avila, *Global theory of one-frequency Schrödinger operators I* | | [README](lean/AvilaGlobal/README.md) |
 | `Reducibility` | reducibility of analytic one-frequency cocycles (Avila–Fayad–Krikorian), used in Paper I | `Red` | [README](lean/Reducibility/README.md) |
-| `DamanikFillman` | Damanik–Fillman, *One-dimensional ergodic Schrödinger operators* (work in progress; not a default target) | | |
+| `DamanikFillman` | Damanik–Fillman, *One-dimensional ergodic Schrödinger operators* (work in progress; not a default target, built by the separate [WIP workflow](.github/workflows/book.yml)) | `DF` | |
 
 ## Building
 

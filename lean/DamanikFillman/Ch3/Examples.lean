@@ -20,12 +20,15 @@ Main results:
   `AnalyticPerturbationsAMO.Equidistribution`);
 * `DF.rotation_minimal` — **Theorem 3.6.6(a)** for `d = 1`.
 
-Statements (stated, not proved): `DF.TorusTranslationErgodicStatement` (Theorem 3.2.14 for
-general `d`), `DF.SkewShiftErgodicStatement` (Theorem 3.2.15), `DF.CatMapErgodicStatement`
-(Theorem 3.2.16), `DF.BernoulliShiftErgodicStatement` (Theorem 3.2.17; **proved** in
-`DamanikFillman.Ch3.Bernoulli`, `DF.bernoulliShiftErgodic`), and
-`DF.SkewProductUniquelyErgodicStatement` (Lemma 3.5.10) and
-`DF.SkewShiftUniquelyErgodicStatement` (Theorem 3.5.11(b)).
+Statements: `DF.TorusTranslationErgodicStatement` (Theorem 3.2.14 for general `d`; **proved** in
+`DamanikFillman.Ch3.TorusErgodic`, `DF.torusTranslationErgodic`), `DF.SkewShiftErgodicStatement`
+(Theorem 3.2.15; **proved** in `DamanikFillman.Ch3.SkewShiftErgodic`, `DF.skewShiftErgodic`),
+`DF.CatMapErgodicStatement` (Theorem 3.2.16, stated only), `DF.BernoulliShiftErgodicStatement`
+(Theorem 3.2.17; **proved** in `DamanikFillman.Ch3.Bernoulli`, `DF.bernoulliShiftErgodic`),
+`DF.SkewProductUniquelyErgodicStatement` (Lemma 3.5.10; **proved** in
+`DamanikFillman.Ch3.SkewProduct`, `DF.skewProductUniquelyErgodic`) and
+`DF.SkewShiftUniquelyErgodicStatement` (Theorem 3.5.11(b); **proved** in
+`DamanikFillman.Ch3.SkewProduct`, `DF.skewShiftUniquelyErgodic`).
 -/
 import DamanikFillman.Ch3.Minimal
 import AnalyticPerturbationsAMO.Equidistribution
@@ -76,13 +79,13 @@ theorem ergodic_expandingMap {m : ℕ} (hm : 2 ≤ m) : Ergodic (expandingMap m)
   AddCircle.ergodic_nsmul hm
 
 /-- **Theorem 3.2.14** for general `d`: Lebesgue measure on `𝕋^d` is ergodic for the
-translation by `α` iff `1, α₁, …, α_d` are rationally independent. Stated, not proved. -/
+translation by `α` iff `1, α₁, …, α_d` are rationally independent. Proved in `DF.torusTranslationErgodic`. -/
 def TorusTranslationErgodicStatement : Prop :=
   ∀ (d : ℕ) (α : Fin d → ℝ), Ergodic (torusTranslation α) volume ↔
     ∀ (k₀ : ℤ) (k : Fin d → ℤ), (k₀ : ℝ) = ∑ i, k i * α i → k₀ = 0 ∧ ∀ i, k i = 0
 
 /-- **Theorem 3.2.15**: for irrational `α`, Lebesgue measure on `𝕋²` is ergodic for the
-skew-shift. Stated, not proved. -/
+skew-shift. Proved in `DF.skewShiftErgodic`. -/
 def SkewShiftErgodicStatement : Prop :=
   ∀ α : ℝ, Irrational α → Ergodic (skewShift α) volume
 
@@ -202,7 +205,7 @@ theorem rotation_minimal {α : ℝ} (hα : Irrational α) :
 /-- **Lemma 3.5.10**: if `T₁` is uniquely ergodic on the compact metric space `Ω₁` with invariant
 measure `μ₁`, `Ω₂` is a compact metrizable abelian group with Haar probability measure `μ₂`, and
 `φ : Ω₁ → Ω₂` is continuous, then ergodicity of `μ₁ × μ₂` for the skew-product
-`(ω₁, ω₂) ↦ (T₁ω₁, φ(ω₁) + ω₂)` (3.5.15) implies its unique ergodicity. Stated, not proved. -/
+`(ω₁, ω₂) ↦ (T₁ω₁, φ(ω₁) + ω₂)` (3.5.15) implies its unique ergodicity. Proved in `DF.skewProductUniquelyErgodic`. -/
 def SkewProductUniquelyErgodicStatement : Prop :=
   ∀ (X G : Type) [MetricSpace X] [CompactSpace X] [MeasurableSpace X] [BorelSpace X]
     [AddCommGroup G] [MetricSpace G] [CompactSpace G] [IsTopologicalAddGroup G] [MeasurableSpace G]
@@ -212,7 +215,7 @@ def SkewProductUniquelyErgodicStatement : Prop :=
     invMeasures (fun p : X × G => (T₁ p.1, φ p.1 + p.2)) = {μ₁.prod μ₂}
 
 /-- **Theorem 3.5.11(b)**: for irrational `α` the skew-shift on `𝕋²` is uniquely ergodic with
-Lebesgue measure as unique invariant measure. Stated, not proved. -/
+Lebesgue measure as unique invariant measure. Proved in `DF.skewShiftUniquelyErgodic`. -/
 def SkewShiftUniquelyErgodicStatement : Prop :=
   ∀ α : ℝ, Irrational α → invMeasures (skewShift α) = {volume}
 
