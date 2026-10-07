@@ -27,6 +27,7 @@ admissible perturbations are `SGD.SelfDual R` (`R = R*`, `𝓕R = R`), "every la
 | `Reductions.lean` | **Prop 3.9 (transfer) reduced** to the displayed identity (gap:eq:spectral-ids-transfer) and constancy of comparison labels: the level-set argument, the continuity contradiction and the persistence of comparison gaps (‖H_b − H_{b₀}‖ ≤ 4\|b − b₀\| plus spectral stability) are proved (`transfer_of_inertia`, `comparison_resolvent_persists`); refined input bundle `PaperIIInputsRefined` and Theorems 1.1, 1.2, 3.10 under it | proved |
 | `LargeWidth.lean` | Theorem 2.4's preparation **proved for widths S ≥ 7/2** from Paper I's `AMO.exists_jacobiPrep`; `JacobiPrepClaim` reduced to the small-width case `JacobiPrepSmallWidthClaim` | proved |
 | `ComparisonSign.lean` | sign symmetry `H_{−b,x} = Γ(−H_{b,x+1/2})Γ⁻¹`, `Σ_{−b} = −Σ_b`, DOS transforms by `t ↦ −t`; the comparison DOS is atomless (`dos_Hb_atomless`); `ComparisonClaim` reduced to `ComparisonNonnegClaim` (0 ≤ b < 1/2) | proved |
+| `LabelStability.lean` | **`ComparisonLabelStabilityClaim` proved** (`comparisonLabelStability`): the gap projections `P_b(x) = f(H_{b,x})` form a covariant family, `‖P_b(x) − P_{b₀}(x)‖ < 1` uniformly in `x` for `b` near `b₀` (tube lemma), nearby projections are similar (`P = VQV⁻¹`, `V = 1 + (P−Q)(2Q−1)`), and the covariant trace satisfies `τ(AB) = τ(BA)` (`ErgodicShared/CovariantTrace.lean`); so the gap-labelling theorem is not needed | proved |
 | `Frontier.lean` | **current smallest input set** `PaperIIRemainingInputs` and **`thm_joint_main` (Thm 1.1), `thm_liouville_main` (Thm 1.2), `thm_finite_exponent_main` (Thm 3.10)** | proved |
 | `MainTheorems.lean` | **Theorem 1.1** (`thm_joint`), **Theorem 1.2** (`thm_liouville`), **Theorem 3.10** (`thm_finite_exponent`), proved from the hypothesis `P : PaperIIInputs`; ‖H‖ ≤ 4 + ∑\|R\|, Σ ⊂ [−5,5], compactness, Cantor assertions, weight monotonicity | proved (conditional on the 7 stated inputs) |
 
@@ -34,30 +35,31 @@ The library contains **no `sorry` and no axioms**. The paper inputs whose proofs
 Mathlib are stated as propositions (`…Claim : Prop`, not asserted) and taken as explicit hypotheses.
 The headline theorems are in `Frontier.lean`: `thm_joint_main`, `thm_liouville_main` and
 `thm_finite_exponent_main`, proved from `structure PaperIIRemainingInputs`, the current smallest set of
-eight inputs:
+seven inputs:
 
 | Lean | Paper | needs |
 |---|---|---|
 | `ComparisonNonnegClaim` | Thm 3.6 for 0 ≤ b < 1/2 | Thouless formula, Jitomirskaya–Marx continuity, rooted resolvents |
 | `NormalizationClaim` | Prop 3.5 | annular Riccati analysis, small divisors in the rotation algebra |
 | `InertiaTransferClaim` | eq. (gap:eq:spectral-ids-transfer) | trace inertia (being formalized on ℓ²(ℤ²)) |
-| `GapLabellingClaim` | gap-labelling theorem (Bellissard; Pimsner–Voiculescu) | classical; rotation-number proof for Jacobi operators in progress |
 | `InfiniteExponentClaim` | Prop 5.6 | matrix Weyl calculus, Helffer–Sjöstrand corner quantization, K-theory labels |
 | `BrjunoCoverClaim` | Thm 4.1 | singular Jacobi preparation, return-block covers of BJK2026 §§7–8 |
 | `PacketCoverClaim` | Prop 4.12 | semiclassical finite compressions |
 | `JacobiPrepSmallWidthClaim` | Thm 2.4 for widths 0 < S < 7/2 | analytic Jacobi reduction at small width (Avila global theory, growth-based preparation) |
 
-Earlier stages of the reduction remain valid: `PaperIIRemainingInputs.toFinal` produces
-`structure PaperIIInputsFinal` (`thm_joint_final`, `thm_liouville_final`), and
-`PaperIIInputsFinal.toRefined` produces the intermediate bundle `structure PaperIIInputsRefined`
-(used by `thm_joint_refined`, `thm_liouville_refined`, `thm_finite_exponent_refined`):
+`PaperIIRemainingInputs.toRefined` produces the intermediate bundle `structure PaperIIInputsRefined`
+(used by `thm_joint_refined`, `thm_liouville_refined`, `thm_finite_exponent_refined`), with
+`ComparisonLabelStabilityClaim` now proved (`comparisonLabelStability`), `EigenspaceBoundClaim`
+from `JacobiPrepClaim` and `DOSExistsClaim` proved. The earlier bundle `structure PaperIIInputsFinal`
+(with the gap-labelling theorem `GapLabellingClaim` in place of label stability; `thm_joint_final`,
+`thm_liouville_final`) remains valid but is no longer on the main path. The refined bundle:
 
 | Lean | Paper | needs |
 |---|---|---|
 | `ComparisonClaim` | Thm 3.6 | Thouless formula, Jitomirskaya–Marx continuity, rooted resolvents |
 | `NormalizationClaim` | Prop 3.5 | annular Riccati analysis, small divisors in the rotation algebra |
 | `InertiaTransferClaim` | eq. (gap:eq:spectral-ids-transfer) | trace inertia in finite von Neumann algebras (Paper I Lemma 2.9), atomless comparison IDS (Paper I Lemma 2.8) |
-| `ComparisonLabelStabilityClaim` | proof of Prop 3.9 | equivalence of nearby spectral projections (K-theory): the comparison label is locally constant in `b` |
+| `ComparisonLabelStabilityClaim` | proof of Prop 3.9 | **proved** (`LabelStability.lean`): the comparison label is locally constant in `b` |
 | `InfiniteExponentClaim` | Prop 5.6 | matrix Weyl calculus, Helffer–Sjöstrand corner quantization, K-theory labels |
 | `BrjunoCoverClaim` | Thm 4.1 | singular Jacobi preparation, return-block covers of BJK2026 §§7–8 |
 | `PacketCoverClaim` | Prop 4.12 | semiclassical finite compressions |

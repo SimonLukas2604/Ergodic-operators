@@ -15,4 +15,5 @@ import SpectralGapsDimension.GapLabelling
 import SpectralGapsDimension.PaperIIIInputs
 import SpectralGapsDimension.LargeWidth
 import SpectralGapsDimension.ComparisonSign
+import SpectralGapsDimension.LabelStability
 import SpectralGapsDimension.Frontier

@@ -8,3 +8,4 @@ import ErgodicShared.IDSAveraging
 import ErgodicShared.AtomEigen
 import ErgodicShared.JacobiKernel
 import ErgodicShared.AtomlessDOS
+import ErgodicShared.CovariantTrace

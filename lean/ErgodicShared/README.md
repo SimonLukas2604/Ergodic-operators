@@ -16,5 +16,6 @@ To build it: `lake build ErgodicShared` (it is also a default target). It has no
 | `IDSAveraging` | existence of the DOS measure; covariance of diagonal matrix elements; averaging; the atom bound `ν{E} = 0` under a uniform eigenspace bound |
 | `AtomEigen` | atoms of spectral measures are eigenprojections, `μ_v{E} = ‖P_E v‖²`; trace bound by `dim ker` |
 | `JacobiKernel` | `dim ker(H_x − E) ≤ 2` from an exact Jacobi preparation |
+| `CovariantTrace` | the covariant trace `τ(A) = ∫₀¹⟪δ₀, A_x δ₀⟫dx` is a trace on covariant families, `τ(AB) = τ(BA)`; projections at distance `< 1` are similar; covariant projection families at uniform distance `< 1` have the same trace |
 
 The old module paths under `ContinuumMagnetic` are re-export shims.
