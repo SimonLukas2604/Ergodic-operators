@@ -21,6 +21,8 @@ The profiles themselves come from Avila's global theory and enter as the hypothe
 `AMOProfiles`.  Everything here is proved.
 -/
 import AnalyticPerturbationsAMO.UniformGrowth
+import AnalyticPerturbationsAMO.TailSymbol
+import AnalyticPerturbationsAMO.Spectral
 
 noncomputable section
 
@@ -325,5 +327,124 @@ theorem amo_strip_growth {α η s ℓ R : ℝ} (W : Widths η s ℓ) (hα : Irra
       ⟨k, hk, hEk.trans_le (min_le_left _ _)⟩ y hy m x
   · exact hg₂ α' (hα'.trans_le (min_le_right _ _)) E hE
       ⟨k, hk, hEk.trans_le (min_le_right _ _)⟩ y hy m x
+
+/-! ### Weights, Fourier duality and coefficient decay -/
+
+lemma wt_mono {s ℓ s' ℓ' : ℝ} (hs : s' ≤ s) (hℓ : ℓ' ≤ ℓ) (p : ℤ × ℤ) :
+    wt s' ℓ' p ≤ wt s ℓ p := by
+  unfold wt
+  apply Real.exp_le_exp.2
+  have h1 := mul_le_mul_of_nonneg_right hs (abs_nonneg ((p.1 : ℝ)))
+  have h2 := mul_le_mul_of_nonneg_right hℓ (abs_nonneg ((p.2 : ℝ)))
+  linarith
+
+/-- Smaller weights give smaller norms. -/
+lemma wnorm_mono {s ℓ s' ℓ' : ℝ} (hs : s' ≤ s) (hℓ : ℓ' ≤ ℓ) {R : Symbol} (hR : WSum s ℓ R) :
+    WSum s' ℓ' R ∧ wnorm s' ℓ' R ≤ wnorm s ℓ R := by
+  have hle : ∀ p, ‖R p‖ * wt s' ℓ' p ≤ ‖R p‖ * wt s ℓ p := fun p =>
+    mul_le_mul_of_nonneg_left (wt_mono hs hℓ p) (norm_nonneg _)
+  have hW : WSum s' ℓ' R :=
+    hR.of_nonneg_of_le (fun p => mul_nonneg (norm_nonneg _) (wt_pos p).le) hle
+  exact ⟨hW, Summable.tsum_le_tsum hle hW hR⟩
+
+/-- `‖𝓕(R)‖_{ℓ₀, r₀} = ‖R‖_{r₀, ℓ₀} ≤ ‖R‖_{s, ℓ}`: the Fourier dual of the perturbation is
+controlled in the dual weights. -/
+theorem fourier_weight_bound {η s ℓ : ℝ} (W : Widths η s ℓ) {R : Symbol} (hR : WSum s ℓ R) :
+    wnorm (Widths.ℓ₀ η s ℓ) (Widths.r₀ η s ℓ) (fourier R) ≤ wnorm s ℓ R := by
+  rw [wnorm_fourier]
+  have h1 := W.nested_ℓ
+  have h2 := W.nested_r
+  have hr : Widths.r₀ η s ℓ ≤ s := by linarith [h2.2.1, h2.2.2.1]
+  have hl : Widths.ℓ₀ η s ℓ ≤ ℓ := by linarith [h1.2.1, h1.2.2.1]
+  exact (wnorm_mono hr hl hR).2
+
+/-- `∑_{q ∈ ℤ} r^{|q|} = (1 + r)/(1 - r)` for `0 ≤ r < 1`. -/
+lemma hasSum_geom_two_sided {r : ℝ} (h0 : 0 ≤ r) (h1 : r < 1) :
+    HasSum (fun q : ℤ => r ^ q.natAbs) ((1 + r) / (1 - r)) := by
+  have ha : HasSum (fun n : ℕ => r ^ ((n : ℤ).natAbs)) (1 - r)⁻¹ := by
+    simp only [Int.natAbs_natCast]
+    exact hasSum_geometric_of_lt_one h0 h1
+  have hb : HasSum (fun n : ℕ => r ^ ((-((n : ℤ) + 1)).natAbs)) (r * (1 - r)⁻¹) := by
+    have hn : ∀ n : ℕ, (-((n : ℤ) + 1)).natAbs = n + 1 := fun n => by omega
+    simp only [hn, pow_succ']
+    exact (hasSum_geometric_of_lt_one h0 h1).mul_left r
+  have heq : (1 - r)⁻¹ + r * (1 - r)⁻¹ = (1 + r) / (1 - r) := by ring
+  rw [← heq]
+  exact ha.of_nat_of_neg_add_one hb
+
+/-- **Cauchy estimate for Fourier coefficients, summed.**  If `‖d_q‖ ≤ M e^{-ℓ₁|q|}` and
+`ℓ₀ < ℓ₁`, then `∑_q ‖d_q‖ e^{ℓ₀|q|} ≤ M (1 + e^{-(ℓ₁-ℓ₀)}) / (1 - e^{-(ℓ₁-ℓ₀)})`. -/
+theorem coeff_decay_bound {X : Type*} [NormedAddCommGroup X] {d : ℤ → X} {M ℓ₀ ℓ₁ : ℝ}
+    (hℓ : ℓ₀ < ℓ₁) (hd : ∀ q : ℤ, ‖d q‖ ≤ M * Real.exp (-(ℓ₁ * |(q : ℝ)|))) :
+    Summable (fun q : ℤ => ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|)) ∧
+      ∑' q : ℤ, ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|) ≤
+        M * ((1 + Real.exp (-(ℓ₁ - ℓ₀))) / (1 - Real.exp (-(ℓ₁ - ℓ₀)))) := by
+  set r := Real.exp (-(ℓ₁ - ℓ₀))
+  have hr0 : 0 ≤ r := (Real.exp_pos _).le
+  have hr1 : r < 1 := Real.exp_lt_one_iff.2 (by linarith)
+  have hg := hasSum_geom_two_sided hr0 hr1
+  have hpt : ∀ q : ℤ, ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|) ≤ M * r ^ q.natAbs := fun q => by
+    have hq : Real.exp (ℓ₀ * |(q : ℝ)|) * Real.exp (-(ℓ₁ * |(q : ℝ)|)) = r ^ q.natAbs := by
+      rw [← Real.exp_add, show r ^ q.natAbs = Real.exp ((q.natAbs : ℕ) * (-(ℓ₁ - ℓ₀))) by
+        rw [Real.exp_nat_mul]]
+      congr 1
+      rw [Nat.cast_natAbs, Int.cast_abs]
+      ring
+    calc ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|)
+        ≤ M * Real.exp (-(ℓ₁ * |(q : ℝ)|)) * Real.exp (ℓ₀ * |(q : ℝ)|) :=
+          mul_le_mul_of_nonneg_right (hd q) (Real.exp_pos _).le
+      _ = M * r ^ q.natAbs := by rw [← hq]; ring
+  have hM : 0 ≤ M := by
+    have := (norm_nonneg (d 0)).trans (hd 0)
+    simpa using this
+  have hs : Summable fun q : ℤ => ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|) :=
+    (hg.summable.mul_left M).of_nonneg_of_le (fun q => by positivity) hpt
+  refine ⟨hs, ?_⟩
+  calc ∑' q : ℤ, ‖d q‖ * Real.exp (ℓ₀ * |(q : ℝ)|) ≤ ∑' q : ℤ, M * r ^ q.natAbs :=
+        Summable.tsum_le_tsum hpt hs (hg.summable.mul_left M)
+    _ = M * ((1 + r) / (1 - r)) := by rw [tsum_mul_left, hg.tsum_eq]
+
+/-! ### The two applications of Lemma 2.4 with the sharp rates -/
+
+/-- **Lemma 2.4 with the rate `γ₁ = 3s/4`** (first application, in `𝒲_{s,ℓ₀}`): the inverse
+bound has denominator `1 - e^{-s/4}`. -/
+theorem tail_inverse_sharp {η s ℓ : ℝ} (W : Widths η s ℓ) (ω : Weights) (hωs : ω.s = s)
+    (α a : ℝ) (w D : Symbol) (ha : a ≠ 0) (hw : Hop0 w) (hwS : WSum ω.s ω.ℓ w)
+    (hD2 : HopGE D 2) (hD : WSum ω.s ω.ℓ D) {C : ℝ} (hC : 0 ≤ C)
+    (hP : ∀ j m, ‖Tail.P (TailSym.beta ω α a w) j m‖ ≤ C * Real.exp (Widths.γ₁ s * m)) :
+    ∃! K : Symbol, HopGE K 1 ∧ WSum ω.s ω.ℓ K ∧ P2 (tmul α (J0sym a w) K) = D ∧
+      wnorm ω.s ω.ℓ K ≤ C * Real.exp (-s) / (|a| * (1 - Real.exp (-(s / 4)))) *
+        wnorm ω.s ω.ℓ D := by
+  have hγ : Widths.γ₁ s < ω.s := by rw [hωs]; exact W.gap₁.2.2
+  have h := TailSym.tail_inverse_symbol ha hw hwS hD2 hD hC hP hγ
+  have hden : 1 - Real.exp (Widths.γ₁ s - ω.s) = 1 - Real.exp (-(s / 4)) := by
+    rw [hωs]; exact W.denominators.1
+  have hexp : Real.exp (-ω.s) = Real.exp (-s) := by rw [hωs]
+  rw [hden, hexp] at h
+  exact h
+
+/-! ### The proposition -/
+
+/-- **Proposition 2.4 (`ext-prop:sharp-width-preparation`)**, recorded as a statement.  For
+`α ∉ ℚ`, `0 < η < 1`, `s > 0`, `ℓ > log(1/η)` and `‖R‖_{s,ℓ}` small, at every real energy near
+the AMO spectrum `Σ₀`, `H = U + U^{-1} + η(V + V^{-1}) + R` and its Fourier dual have exact
+Jacobi preparations whose coefficients are close to the AMO ones on the sharp strips
+(`ℓ₀/(2π)` for `H`, `r₀/(2π)` for the dual).  (The `C²_E` closeness follows from the uniform
+closeness on a complex neighbourhood by `EnergyDerivatives.lean`.)
+
+Proved ingredients: `amo_strip_growth` (from `AMOProfiles`), `Widths`, `fourier_weight_bound`,
+`coeff_decay_bound`, `tail_inverse_sharp`, `TailSym.tail_inverse_symbol`,
+`ScaledPrep.scaled_preparation`, `exists_jacobiPrep`, `hausdorffDist_spectrum_le`. -/
+def SharpWidthPrepClaim (α η s ℓ : ℝ) : Prop :=
+  ∃ ε C δ : ℝ, 0 < ε ∧ 0 ≤ C ∧ 0 < δ ∧ ∀ R : Symbol, SymbolSelfAdjoint R → WSum s ℓ R →
+    wnorm s ℓ R < ε → ∀ E : ℝ, (∃ k ∈ Sigma α η 0, |E - k| < δ) →
+      (∃ P : JacobiPrep α (H α η R) E, Widths.ℓ₀ η s ℓ / (2 * Real.pi) ≤ P.w ∧
+        ∀ z ∈ strip (Widths.ℓ₀ η s ℓ / (2 * Real.pi)),
+          ‖P.a z - 1‖ ≤ C * wnorm s ℓ R ∧
+          ‖P.b z - (2 * η * Complex.cos (2 * Real.pi * z) - E)‖ ≤ C * wnorm s ℓ R) ∧
+      (∃ P : JacobiPrep α (Hdual α η R) E, Widths.r₀ η s ℓ / (2 * Real.pi) ≤ P.w ∧
+        ∀ z ∈ strip (Widths.r₀ η s ℓ / (2 * Real.pi)),
+          ‖P.a z - η‖ ≤ C * wnorm s ℓ R ∧
+          ‖P.b z - (2 * Complex.cos (2 * Real.pi * z) - E)‖ ≤ C * wnorm s ℓ R)
 
 end AMO

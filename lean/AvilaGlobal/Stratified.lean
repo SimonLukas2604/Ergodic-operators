@@ -19,6 +19,7 @@
 import AvilaGlobal.UniformHyperbolicity
 import AvilaGlobal.UHOpen
 import AvilaGlobal.RegularUH
+import AvilaGlobal.UHAnalytic
 
 noncomputable section
 

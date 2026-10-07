@@ -30,17 +30,16 @@ integrable `F` it agrees with `circleAverage` (`ecircleAverage_coe`).
 * `DF.logNorm f` — `log |f|` with value `-∞` at the zeros of `f`;
   `DF.subharmonicOn_logNorm` — `log |f|` is subharmonic for analytic `f` (Exercise 4.5.3),
   proved from Jensen's formula in Mathlib.
+* `DF.SubharmonicOn.le_of_le_on_sphere` — maximum principle on discs.
 * `DF.SubharmonicOn.truncBelow_le_circleAverage` — truncations `max F (-n)` of subharmonic
   functions satisfy the real sub-mean value inequality.
 * `DF.subharmonicOn_iInf` — the infimum of a decreasing sequence of (real valued,
   continuous) subharmonic functions is subharmonic (a version of Prop. 4.5.2(c) without the
   positivity assumption).
 
-## Statements (recorded, not proved)
-
-* `DF.RieszRepresentationStatement` — Theorem A.3.2 (Riesz decomposition), cited by the book.
-* `DF.RieszMeasureBoundStatement` — Theorem A.3.4, cited by the book.
-The Fourier-decay results Lemma A.3.5 and Theorem A.3.1 are in `DamanikFillman/AppA/FourierDecay`.
+The Riesz representation (Theorem A.3.2), Theorem A.3.4, Lemma A.3.5 and Theorem A.3.1 are in
+`DamanikFillman/AppA/FourierDecay.lean`; that `-Φ_μ` is subharmonic is
+`DF.subharmonic_neg_logPotential` in `DamanikFillman/AppA/Potential.lean`.
 -/
 import Mathlib.Analysis.Complex.JensenFormula
 import Mathlib.Analysis.SpecialFunctions.Integrals.PosLog
@@ -323,6 +322,20 @@ theorem subharmonicOn_iInf {u : ℕ → ℂ → ℝ} {U : Set ℂ} (hcont : ∀ 
     exact (hsub N c r hr hb).trans (circleAverage_mono (hintN N)
       (circleIntegrable_max_const (hintN N) _) fun x _ => le_max_left _ _)
   exact ge_of_tendsto' ((continuous_coe_real_ereal.tendsto _).comp htend) hle
+
+/-- Maximum principle on discs: a subharmonic function bounded by `M` on a circle is bounded by
+`M` at the centre. -/
+theorem SubharmonicOn.le_of_le_on_sphere {F : ℂ → EReal} {U : Set ℂ} (hF : SubharmonicOn F U)
+    {c : ℂ} {r : ℝ} (hr : 0 < r) (hb : closedBall c r ⊆ U) {M : ℝ}
+    (hM : ∀ z ∈ sphere c r, F z ≤ M) : F c ≤ M := by
+  obtain ⟨n, hn⟩ := exists_nat_ge (-M)
+  refine (hF.submean c r hr hb).trans ((iInf_le _ n).trans ?_)
+  rw [EReal.coe_le_coe_iff]
+  refine circleAverage_mono_on_of_le_circle (circleIntegrable_truncBelow hF.ne_top hF.usc
+    (by rw [abs_of_pos hr]; exact sphere_subset_closedBall.trans hb) n) (fun z hz => ?_)
+  rw [abs_of_pos hr] at hz
+  have := truncBelow_mono (n := n) (EReal.coe_ne_top M) (hM z hz)
+  rwa [truncBelow_coe, max_eq_left (by linarith)] at this
 
 /-! ### `log |f|` for analytic `f` (Exercise 4.5.3) -/
 

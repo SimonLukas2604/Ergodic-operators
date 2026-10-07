@@ -33,22 +33,32 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
 
 * Proposition A.2.2:
   (a) `logPotential_ne_bot`, `logPotential_eq_integral_of_dist`, `logPotential_lt_top_of_dist`;
-  (b) `lowerSemicontinuous_logPotential` (lower semicontinuity);
+  (b) `lowerSemicontinuous_logPotential` and `harmonicOnNhd_logPotential` (harmonic off the
+      support);
   (c) `mutualEnergy_comm`;
-  (d) `capCompact_mono`, `capacity_mono`;
+  (d) `capCompact_mono`, `capacity_mono` (and `capCompact_le_capacity`);
   (f) `measure_eq_zero_of_capacity_eq_zero`.
 * `logPotential_eq_integral` — `Φ_μ(z) = ∫ log|z-w|⁻¹ dμ(w)` whenever the latter makes sense.
 * `subharmonic_neg_logPotential` — `-Φ_μ` is subharmonic on `ℂ` (used for the Thouless
   formula, §4.6).
 * Example A.2.3: `energy_eq_top_of_atom`, `capCompact_eq_zero_of_countable`.
-* `expNeg_energy_le_capCompact` — `e^{-E(μ)} ≤ Cap(K)` for `μ ∈ M1(K)` (used in Lemma 4.6.6).
+* `capCompact_eq_zero_iff`, `expNeg_energy_le_capCompact` — `Cap(K) = 0` iff all `μ ∈ M1(K)`
+  have infinite energy; `e^{-E(μ)} ≤ Cap(K)` (used in Lemma 4.6.6).
+* Theorem A.2.9, first half: `logPotential_le_liminf`.
+* Definition A.2.7 / Theorem A.2.6: `IsEquilibriumMeasure`, `IsEquilibriumMeasure.capCompact_eq`
+  ((A.2.8)), `IsEquilibriumMeasure.unique` (uniqueness, from Prop. A.2.5).  Existence (via
+  Lemma A.2.4) is proved in `DamanikFillman/AppA/Equilibrium.lean`.
 
-## Statements (recorded as `Prop`s, not proved)
+## Statements (recorded as `Prop`s, not proved here)
 
-See the end of the file: `HarmonicOffSupportStatement` (Prop. A.2.2(b), second half),
-`CapacityContinuityStatement` (Prop. A.2.2(e)), `EnergyStrictConvexityStatement`
-(Prop. A.2.5), `FrostmanStatement` (Thm. A.2.8), `LowerEnvelopeStatement` (Thm. A.2.9),
-`ContinuousPotentialStatement` (Lemma A.2.10), `CapacityZeroDimStatement` (Thm. A.2.11).
+* `EnergyStrictConvexityStatement` — Prop. A.2.5 (the book only sketches the proof);
+* `EquilibriumExistenceStatement` — Thm. A.2.6, existence (proved in `Equilibrium.lean`:
+  `equilibriumExistenceStatement_holds`);
+* `CapacityRegularityStatement` — Prop. A.2.2(e) and consistency of (A.2.1) with (A.2.2)–(A.2.3);
+* `FrostmanStatement` — Thm. A.2.8;
+* `LowerEnvelopeStatement` — Thm. A.2.9, second half (equality q.e.);
+* `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature);
+* `CapacityZeroDimStatement` — Thm. A.2.11 (cited).
 -/
 import DamanikFillman.AppA.Subharmonic
 import Mathlib.MeasureTheory.Integral.Prod

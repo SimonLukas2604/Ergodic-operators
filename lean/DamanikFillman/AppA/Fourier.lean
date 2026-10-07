@@ -43,6 +43,7 @@ import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Group.Measure
+import Mathlib.Basic.Real.Sign
 
 noncomputable section
 
@@ -285,7 +286,7 @@ lemma memLp_comp_sub (hg : MemLp g 2) (t : ℝ) : MemLp (fun x => g (t - x)) 2 :
   hg.comp_measurePreserving ((volume : Measure ℝ).measurePreserving_sub_left t)
 
 lemma memLp_comp_add (hg : MemLp g 2) (t : ℝ) : MemLp (fun x => g (t + x)) 2 :=
-  hg.comp_measurePreserving ((volume : Measure ℝ).measurePreserving_add_left t)
+  hg.comp_measurePreserving (measurePreserving_add_left volume t)
 
 lemma aestronglyMeasurable_div_id {h : ℝ → ℂ} (hh : AEStronglyMeasurable h volume)
     (μ : Measure ℝ) (hμ : μ ≪ volume) :
@@ -364,25 +365,21 @@ lemma truncHilbert_eq (hg : MemLp g 2) (t : ℝ) {ε : ℝ} (hε : 0 < ε) (hε1
     rintro x ⟨h1, _⟩ ⟨_, h2⟩; linarith
   rw [hS, setIntegral_union hd1 (measurableSet_Ioc.union measurableSet_Ico)
     (hI.mono_set subset_union_left) (hI.mono_set subset_union_right),
-    setIntegral_union hd2 measurableSet_Ico (hI.mono_set (subset_union_right.trans' subset_union_left))
-    (hI.mono_set (subset_union_right.trans' subset_union_right))]
+    setIntegral_union hd2 measurableSet_Ico (hI.mono_set (subset_union_left.trans subset_union_right))
+    (hI.mono_set (subset_union_right.trans subset_union_right))]
   congr 1
   rw [integral_Ico_eq_integral_Ioc, ← intervalIntegral.integral_of_le hε1,
     ← intervalIntegral.integral_of_le (by linarith : (-1 : ℝ) ≤ -ε)]
   rw [← intervalIntegral.integral_comp_neg (fun x => g (t - x) / (x : ℂ))]
   have hint1 : IntervalIntegrable (fun x => g (t - x) / (x : ℂ)) volume ε 1 :=
     (intervalIntegrable_iff_integrableOn_Ioc_of_le hε1).2
-      (hI.mono_set (subset_union_left.trans' subset_union_right))
+      (hI.mono_set (subset_union_left.trans subset_union_right))
   have hint2 : IntervalIntegrable (fun x => g (t + x) / (x : ℂ)) volume ε 1 :=
     (intervalIntegrable_iff_integrableOn_Ioc_of_le hε1).2
-      (hI'.mono_set (subset_union_left.trans' subset_union_right))
-  rw [← intervalIntegral.integral_sub hint1 hint2, ← intervalIntegral.integral_add hint1]
-  · congr 1; funext x
-    simp only [sub_neg_eq_add, Complex.ofReal_neg, div_neg]
-    ring
-  · exact (hint2.neg).congr (by
-      filter_upwards with x
-      simp [sub_neg_eq_add, div_neg])
+      (hI'.mono_set (subset_union_left.trans subset_union_right))
+  simp only [sub_neg_eq_add, Complex.ofReal_neg, div_neg, intervalIntegral.integral_neg]
+  rw [← sub_eq_add_neg, ← intervalIntegral.integral_sub hint1 hint2]
+  congr 1; funext x; ring
 
 /-- The integrand `(g(t-x) - g(t+x))/x` is dominated by `2C x^{α-1}` on `(0,1]` under a local
 Hölder condition at `t`. -/
@@ -504,5 +501,47 @@ theorem tendstoUniformly_truncHilbert (hg : MemLp g 2) {α C : ℝ} (hα : 0 < �
   · exact le_abs_self C
 
 end HilbertLine
+
+/-! ### Proposition A.1.5 and Theorem A.1.6 (recorded as statements) -/
+
+section HilbertStatements
+
+open FourierTransform SchwartzMap
+
+/-- **Proposition A.1.5**: the Hilbert transform extends to a unitary operator `U` on `L²(ℝ)`
+with `U² = -1`, agreeing with the principal value `hilbertR` on Schwartz functions, and acting
+on the Fourier side as multiplication by `-i sgn(ξ)` (cf. (4.6.18); with the book's convention
+`ĝ(t) = ∫ e^{-2πixt} g(x) dx` this is the correct sign). -/
+def HilbertL2Statement : Prop :=
+  ∃ U : Lp (α := ℝ) ℂ 2 ≃ₗᵢ[ℂ] Lp (α := ℝ) ℂ 2,
+    (∀ g : 𝓢(ℝ, ℂ), ∀ᵐ t, (U (g.toLp 2)) t = hilbertR g t) ∧
+    (∀ f, U (U f) = -f) ∧
+    (∀ f : Lp (α := ℝ) ℂ 2, ∀ᵐ ξ,
+      ((𝓕 (U f) : Lp (α := ℝ) ℂ 2) : ℝ → ℂ) ξ =
+        -Complex.I * (Real.sign ξ : ℂ) * ((𝓕 f : Lp (α := ℝ) ℂ 2) : ℝ → ℂ) ξ)
+
+/-- **Theorem A.1.6 (Plemelj–Privalov)**: if `g ∈ L²(ℝ)` is uniformly `α`-Hölder continuous
+(at scales `≤ 1`) for some `0 < α < 1`, then so is `Hg`.  The book proves it for compactly
+supported `g` and leaves the general case as Exercise A.1.3. -/
+def HolderHilbertStatement : Prop :=
+  ∀ (g : ℝ → ℂ) (α C : ℝ), MemLp g 2 → 0 < α → α < 1 →
+    (∀ y t, |y - t| ≤ 1 → ‖g y - g t‖ ≤ C * |y - t| ^ α) →
+    ∃ C' : ℝ, ∀ s t, |s - t| ≤ 1 → ‖hilbertR g s - hilbertR g t‖ ≤ C' * |s - t| ^ α
+
+/-- Theorem A.1.6, second sentence, deduced from the first: Lipschitz `g ∈ L²(ℝ)` have
+`α`-Hölder continuous Hilbert transforms for every `α < 1`. -/
+theorem holder_hilbertR_of_lipschitz (hH : HolderHilbertStatement) {g : ℝ → ℂ} (hg : MemLp g 2)
+    {L : ℝ} (hL : ∀ y t, ‖g y - g t‖ ≤ L * |y - t|) {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
+    ∃ C' : ℝ, ∀ s t, |s - t| ≤ 1 → ‖hilbertR g s - hilbertR g t‖ ≤ C' * |s - t| ^ α := by
+  refine hH g α |L| hg hα hα1 fun y t hyt => (hL y t).trans ?_
+  have h1 : |y - t| ≤ |y - t| ^ α := by
+    rcases eq_or_lt_of_le (abs_nonneg (y - t)) with h | h
+    · rw [← h, Real.zero_rpow hα.ne']
+    · calc |y - t| = |y - t| ^ (1 : ℝ) := (Real.rpow_one _).symm
+        _ ≤ |y - t| ^ α := Real.rpow_le_rpow_of_exponent_ge h hyt hα1.le
+  calc L * |y - t| ≤ |L| * |y - t| := mul_le_mul_of_nonneg_right (le_abs_self L) (abs_nonneg _)
+    _ ≤ |L| * |y - t| ^ α := mul_le_mul_of_nonneg_left h1 (abs_nonneg L)
+
+end HilbertStatements
 
 end DF

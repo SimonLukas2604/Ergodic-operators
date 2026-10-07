@@ -56,14 +56,27 @@ variable {R : Type*} [Ring R] [Algebra ℂ R]
 `(z - A)⁻¹ = -R(A,z)`.) -/
 def res (A : R) (z : ℂ) : R := Ring.inverse (A - algebraMap ℂ R z)
 
+omit [Algebra ℂ R] in
+lemma inverse_neg' (x : R) : Ring.inverse (-x) = -Ring.inverse x := by
+  by_cases h : IsUnit x
+  · obtain ⟨u, rfl⟩ := h
+    rw [← Units.val_neg, Ring.inverse_unit, Ring.inverse_unit]; simp
+  · have h' : ¬IsUnit (-x) := fun h' => h (by simpa using h'.neg)
+    rw [Ring.inverse_non_unit _ h, Ring.inverse_non_unit _ h', neg_zero]
+
 lemma res_eq_neg_resolvent (A : R) (z : ℂ) : res A z = -resolvent A z := by
   unfold res resolvent
-  rw [← neg_sub, Ring.inverse_neg]
+  rw [← neg_sub, inverse_neg']
 
 /-- `z ∈ ρ(A)` iff `A - z` is invertible. -/
 lemma mem_resolventSet_iff (A : R) (z : ℂ) :
     z ∈ resolventSet ℂ A ↔ IsUnit (A - algebraMap ℂ R z) := by
-  rw [spectrum.mem_resolventSet_iff, ← isUnit_neg_iff, neg_sub]
+  rw [spectrum.mem_resolventSet_iff]
+  exact ⟨fun h => by simpa using h.neg, fun h => by simpa using h.neg⟩
+
+lemma mem_resolventSet_iff_notMem {A : R} {z : ℂ} :
+    z ∈ resolventSet ℂ A ↔ z ∉ spectrum ℂ A :=
+  spectrum.mem_resolventSet_iff.trans spectrum.notMem_iff.symm
 
 lemma isUnit_sub_of_mem_resolventSet {A : R} {z : ℂ} (hz : z ∈ resolventSet ℂ A) :
     IsUnit (A - algebraMap ℂ R z) := (mem_resolventSet_iff A z).1 hz
@@ -76,15 +89,17 @@ lemma res_mul_sub {A : R} {z : ℂ} (hz : z ∈ resolventSet ℂ A) :
     res A z * (A - algebraMap ℂ R z) = 1 :=
   Ring.inverse_mul_cancel _ (isUnit_sub_of_mem_resolventSet hz)
 
+omit [Algebra ℂ R] in
 /-- Abstract identity behind both resolvent identities: `u⁻¹ - v⁻¹ = u⁻¹ (v - u) v⁻¹`. -/
 lemma inverse_sub_inverse {u v : R} (hu : IsUnit u) (hv : IsUnit v) :
     Ring.inverse u - Ring.inverse v = Ring.inverse u * (v - u) * Ring.inverse v := by
-  rw [mul_sub, sub_mul, sub_mul, Ring.inverse_mul_cancel _ hu, one_mul, mul_assoc,
+  rw [mul_sub, sub_mul, Ring.inverse_mul_cancel _ hu, one_mul, mul_assoc,
     Ring.mul_inverse_cancel _ hv, mul_one]
 
+omit [Algebra ℂ R] in
 lemma inverse_sub_inverse' {u v : R} (hu : IsUnit u) (hv : IsUnit v) :
     Ring.inverse u - Ring.inverse v = Ring.inverse v * (v - u) * Ring.inverse u := by
-  rw [mul_sub, sub_mul, sub_mul, Ring.inverse_mul_cancel _ hv, one_mul, mul_assoc,
+  rw [mul_sub, sub_mul, Ring.inverse_mul_cancel _ hv, one_mul, mul_assoc,
     Ring.mul_inverse_cancel _ hu, mul_one]
 
 /-- **First resolvent identity** (1.3.15). -/
@@ -98,10 +113,10 @@ theorem res_sub_res {A : R} {z z' : ℂ} (hz : z ∈ resolventSet ℂ A)
     (isUnit_sub_of_mem_resolventSet hz')
   have hd : (A - algebraMap ℂ R z') - (A - algebraMap ℂ R z) = algebraMap ℂ R (z - z') := by
     rw [map_sub]; abel
-  rw [hd, Algebra.algebraMap_eq_smul_one] at h1 h2
+  rw [hd] at h1 h2
   refine ⟨?_, ?_⟩
-  · rw [res, res, h1, mul_smul_comm, mul_one, smul_mul_assoc]
-  · rw [res, res, h2, mul_smul_comm, mul_one, smul_mul_assoc]
+  · rw [res, res, h1, ← Algebra.commutes, mul_assoc, ← Algebra.smul_def]
+  · rw [res, res, h2, ← Algebra.commutes, mul_assoc, ← Algebra.smul_def]
 
 /-- **Second resolvent identity** (1.3.16). -/
 theorem res_sub_res' {A B : R} {z : ℂ} (hA : z ∈ resolventSet ℂ A)
@@ -124,6 +139,7 @@ section Banach
 
 variable {R : Type*} [NormedRing R] [NormedAlgebra ℂ R] [CompleteSpace R] [NormOneClass R]
 
+omit [NormedAlgebra ℂ R] [NormOneClass R] in
 /-- **Neumann series** (proof of Theorem 1.3.6): if `‖C‖ < 1` then `∑ Cⁿ = (1 - C)⁻¹`. -/
 theorem neumann_series (C : R) (hC : ‖C‖ < 1) :
     IsUnit (1 - C) ∧ ∑' n : ℕ, C ^ n = Ring.inverse (1 - C) :=
@@ -142,7 +158,7 @@ theorem inv_norm_res_le_infDist (A : R) {z : ℂ} (hz : z ∈ resolventSet ℂ A
   have hu : (↑u⁻¹ : R) = res A z := by
     rw [res, ← Ring.inverse_unit]; rfl
   have hsmall : ‖algebraMap ℂ R (z - w)‖ < ‖(↑u⁻¹ : R)‖⁻¹ := by
-    rw [hu, norm_algebraMap', ← dist_eq_norm, dist_comm]
+    rw [hu, norm_algebraMap', ← dist_eq_norm]
     exact hlt
   have hunit : IsUnit (A - algebraMap ℂ R w) := by
     have := (u.add _ hsmall).isUnit
@@ -165,7 +181,7 @@ lemma res_eq_cfc (A : H →L[ℂ] H) [IsStarNormal A] {z : ℂ} (hz : z ∈ reso
   have hne : ∀ w ∈ spectrum ℂ A, w - z ≠ 0 := by
     intro w hw h
     rw [sub_eq_zero] at h
-    exact (spectrum.mem_resolventSet_iff.1 hz) (h ▸ hw)
+    exact (mem_resolventSet_iff_notMem.1 hz) (h ▸ hw)
   have h1 : cfc (fun w : ℂ => w - z) A = A - algebraMap ℂ (H →L[ℂ] H) z := by
     rw [cfc_sub (a := A) (fun w => w) (fun _ => z), cfc_id' ℂ A, cfc_const z A]
   rw [cfc_inv (a := A) (fun w => w - z) hne, h1]
@@ -182,7 +198,7 @@ theorem norm_res_eq [Nontrivial H] (A : H →L[ℂ] H) [IsStarNormal A] {z : ℂ
   have hcont : ContinuousOn (fun w : ℂ => (w - z)⁻¹) (spectrum ℂ A) := by
     refine ContinuousOn.inv₀ (by fun_prop) fun w hw h => ?_
     rw [sub_eq_zero] at h
-    exact (spectrum.mem_resolventSet_iff.1 hz) (h ▸ hw)
+    exact (mem_resolventSet_iff_notMem.1 hz) (h ▸ hw)
   have hG := IsGreatest.norm_cfc (fun w : ℂ => (w - z)⁻¹) A hcont
   rw [← res_eq_cfc A hz] at hG
   have hG' : IsGreatest ((fun w => ‖(w - z)⁻¹‖) '' spectrum ℂ A) (infDist z (spectrum ℂ A))⁻¹ := by
@@ -194,13 +210,13 @@ theorem norm_res_eq [Nontrivial H] (A : H →L[ℂ] H) [IsStarNormal A] {z : ℂ
       have hpos : 0 < ‖w - z‖ := by
         rw [norm_pos_iff, sub_ne_zero]
         rintro rfl
-        exact spectrum.mem_resolventSet_iff.1 hz hw
+        exact mem_resolventSet_iff_notMem.1 hz hw
       have hle : infDist z (spectrum ℂ A) ≤ ‖w - z‖ := by
         rw [← dist_eq_norm, dist_comm]; exact infDist_le_dist_of_mem hw
       have h0 : 0 < infDist z (spectrum ℂ A) := by
         rw [hdist]
         refine dist_pos.2 fun h => ?_
-        exact spectrum.mem_resolventSet_iff.1 hz (h ▸ hx0)
+        exact mem_resolventSet_iff_notMem.1 hz (h ▸ hx0)
       exact inv_anti₀ h0 hle
   exact hG.unique hG'
 
@@ -210,7 +226,7 @@ theorem infDist_mul_norm_le [Nontrivial H] (A : H →L[ℂ] H) [IsStarNormal A] 
     infDist z (spectrum ℂ A) * ‖v‖ ≤ ‖(A - algebraMap ℂ (H →L[ℂ] H) z) v‖ := by
   by_cases hz : z ∈ spectrum ℂ A
   · rw [infDist_zero_of_mem hz, zero_mul]; exact norm_nonneg _
-  have hz' : z ∈ resolventSet ℂ A := hz
+  have hz' : z ∈ resolventSet ℂ A := mem_resolventSet_iff_notMem.2 hz
   have hv : v = res A z ((A - algebraMap ℂ (H →L[ℂ] H) z) v) := by
     rw [← ContinuousLinearMap.mul_apply, res_mul_sub hz', ContinuousLinearMap.one_apply]
   have hd : infDist z (spectrum ℂ A) * ‖res A z‖ ≤ 1 := by
@@ -235,7 +251,7 @@ theorem exists_unit_norm_sub_lt_of_mem_resolventSet [Nontrivial H] (A : H →L[�
   have hd0 : 0 < d := by
     have hne : (spectrum ℂ A).Nonempty := spectrum.nonempty A
     rw [← (spectrum.isCompact A).isClosed.notMem_iff_infDist_pos hne]
-    exact spectrum.mem_resolventSet_iff.1 hz
+    exact mem_resolventSet_iff_notMem.1 hz
   have hR : ‖res A z‖ = d⁻¹ := norm_res_eq A hz
   have hr : (d + ε)⁻¹ < ‖res A z‖ := by
     rw [hR]; exact inv_strictAnti₀ hd0 (by linarith)
@@ -271,7 +287,8 @@ theorem exists_unit_norm_sub_lt [Nontrivial H] {A : H →L[ℂ] H} (hA : IsSelfA
       simp only [z', Complex.add_im, Complex.mul_im, Complex.ofReal_re, Complex.I_im,
         Complex.ofReal_im, Complex.I_re, mul_one, mul_zero, add_zero]
       rw [hA.im_eq_zero_of_mem_spectrum hz, zero_add]; exact hδ.ne'
-    have hz' : z' ∈ resolventSet ℂ A := fun h => hz'im (hA.im_eq_zero_of_mem_spectrum h)
+    have hz' : z' ∈ resolventSet ℂ A :=
+      mem_resolventSet_iff_notMem.2 fun h => hz'im (hA.im_eq_zero_of_mem_spectrum h)
     obtain ⟨v, hv1, hv⟩ := exists_unit_norm_sub_lt_of_mem_resolventSet A hz' hδ
     have hdist : infDist z' (spectrum ℂ A) ≤ δ := by
       refine (infDist_le_dist_of_mem hz).trans ?_
@@ -282,17 +299,17 @@ theorem exists_unit_norm_sub_lt [Nontrivial H] {A : H →L[ℂ] H} (hA : IsSelfA
         (A - algebraMap ℂ (H →L[ℂ] H) z') v + ((δ : ℂ) * Complex.I) • v := by
       simp only [z', map_add, ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
         Algebra.algebraMap_eq_smul_one, ContinuousLinearMap.smul_apply,
-        ContinuousLinearMap.one_apply, add_smul]
+        ContinuousLinearMap.one_apply]
       abel
     rw [hsplit]
     calc ‖(A - algebraMap ℂ (H →L[ℂ] H) z') v + ((δ : ℂ) * Complex.I) • v‖
         ≤ ‖(A - algebraMap ℂ (H →L[ℂ] H) z') v‖ + ‖((δ : ℂ) * Complex.I) • v‖ := norm_add_le _ _
       _ < (δ + δ) + δ := by
-          gcongr
-          · linarith
-          · simp [norm_smul, hv1, Complex.norm_real, abs_of_pos hδ]
+          refine add_lt_add_of_lt_of_le (by linarith) (le_of_eq ?_)
+          rw [norm_smul, hv1, mul_one, norm_mul, Complex.norm_I, mul_one, Complex.norm_real,
+            Real.norm_of_nonneg hδ.le]
       _ = ε := by ring
-  · exact exists_unit_norm_sub_lt_of_mem_resolventSet A hz hε
+  · exact exists_unit_norm_sub_lt_of_mem_resolventSet A (mem_resolventSet_iff_notMem.2 hz) hε
 
 /-! ### Weyl sequences -/
 
@@ -365,9 +382,8 @@ theorem spectrum_subset_of_strong_limit [Nontrivial H] {An : ℕ → H →L[ℂ]
   rw [infDist_zero_of_mem hE, zero_add] at hψ
   have hconv : Tendsto (fun k => ‖(An k - algebraMap ℂ (H →L[ℂ] H) E) ψ‖) atTop
       (𝓝 ‖(A - algebraMap ℂ (H →L[ℂ] H) E) ψ‖) := by
-    refine (Tendsto.sub (hlim ψ) tendsto_const_nhds).norm.congr' ?_ |>.congr ?_
-    · exact Eventually.of_forall fun k => rfl
-    · intro k; simp
+    have h := ((hlim ψ).sub_const ((algebraMap ℂ (H →L[ℂ] H) E) ψ)).norm
+    simpa only [_root_.sub_apply] using h
   have hev := (hconv.eventually (gt_mem_nhds hψ)).and (eventually_ge_atTop n)
   obtain ⟨k, hk, hkn⟩ := hev.exists
   have : IsStarNormal (An k) := (hAn k).isStarNormal
@@ -380,8 +396,9 @@ theorem spectrum_subset_of_strong_limit [Nontrivial H] {An : ℕ → H →L[ℂ]
 
 /-- The **discrete spectrum** (Definition 1.3.7): isolated eigenvalues of finite multiplicity. -/
 def discSpectrum (A : H →L[ℂ] H) : Set ℂ :=
-  {z | z ∈ spectrum ℂ A ∧ LinearMap.ker (A - algebraMap ℂ (H →L[ℂ] H) z) ≠ ⊥ ∧
-    FiniteDimensional ℂ (LinearMap.ker (A - algebraMap ℂ (H →L[ℂ] H) z)) ∧
+  {z | z ∈ spectrum ℂ A ∧ LinearMap.ker ((A - algebraMap ℂ (H →L[ℂ] H) z : H →L[ℂ] H) : H →ₗ[ℂ] H) ≠ ⊥ ∧
+    FiniteDimensional ℂ
+      (LinearMap.ker ((A - algebraMap ℂ (H →L[ℂ] H) z : H →L[ℂ] H) : H →ₗ[ℂ] H)) ∧
     ∃ δ > 0, ball z δ ∩ spectrum ℂ A = {z}}
 
 /-- The **essential spectrum** `σ_ess(A) = σ(A) ∖ σ_disc(A)`. -/
@@ -389,7 +406,7 @@ def essSpectrum (A : H →L[ℂ] H) : Set ℂ := spectrum ℂ A \ discSpectrum A
 
 lemma discSpectrum_subset (A : H →L[ℂ] H) : discSpectrum A ⊆ spectrum ℂ A := fun _ h => h.1
 
-lemma essSpectrum_subset (A : H →L[ℂ] H) : essSpectrum A ⊆ spectrum ℂ A := diff_subset
+lemma essSpectrum_subset (A : H →L[ℂ] H) : essSpectrum A ⊆ spectrum ℂ A := sdiff_subset
 
 end Hilbert
 

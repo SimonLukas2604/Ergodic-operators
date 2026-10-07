@@ -23,6 +23,8 @@ import AnalyticPerturbationsAMO.EnergyDerivatives
 import AnalyticPerturbationsAMO.GreenHolomorphic
 import AnalyticPerturbationsAMO.TailSymbolEnergy
 import AnalyticPerturbationsAMO.PoissonBound
+import AnalyticPerturbationsAMO.SharpWidth
+import AnalyticPerturbationsAMO.HoloFixedPoint
 import AnalyticPerturbationsAMO.FourierSeries
 import AnalyticPerturbationsAMO.FirstPreparation
 import AnalyticPerturbationsAMO.ResolventComparison

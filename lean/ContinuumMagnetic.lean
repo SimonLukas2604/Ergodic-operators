@@ -15,3 +15,5 @@ import ContinuumMagnetic.PhysicalLocalization
 import ContinuumMagnetic.HallLabels
 import ContinuumMagnetic.MainTheorems
 import ContinuumMagnetic.PaperIIBridge
+import ContinuumMagnetic.HighLandauCorollaries
+import ContinuumMagnetic.PhysicalHall

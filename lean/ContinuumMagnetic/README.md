@@ -48,6 +48,9 @@ These are not formalized because they need:
 | `ScalarCriteria.lean` | **Thms `thm:noncritical-continuum`, `thm:continuum-2d-ac`, `thm:continuum-types`, `thm:continuum-SC`** for any exact scalar-island reduction (`IslandReduction`), in both orientations, with the sufficient conditions `β < log(t₂/t₁) - Cε` and `β > log(t₂/t₁) + Cε` | proved from `PaperInputs` |
 | `CriticalCriteria.lean` | **Thm `thm:critical-continuum`**: zero-measure dry Cantor island, purely s.c. 2D island, `L(E,y) = 2π\|y\|`, s.c. fibres for `β > 0`, `𝓗^{1/2} < ∞`, `dim_H ≤ 1/2`, and `dim_H = 0` at ordinary Liouville flux | proved from `PaperInputs` |
 | `MainTheorems.lean` | **Thm `cor:cosine`** for `μ ≠ 1` (`cosine_rectangular`) and `μ = 1` (`cosine_square`); branch separation; **Thm `thm:high-energy-spectrum`** (`high_landau`); the continuum claims and `ContinuumInputs` | proved from `PaperInputs` + continuum claims |
+| `HighLandauCorollaries.lean` | **Cor. `cor:high-energy-fibres`**: a.e. Bloch fibre has spectrum `𝒞_n`; a.c. for `a_y > a_x`; for `a_x > a_y` a complete eigenbasis on `{𝓛_n > β}`, no a.c. component, s.c. on `{𝓛_n < β}`, the sufficient conditions `β ≶ log(a_x/a_y) ∓ C‖R_n‖`, and localization of the whole cluster when `β(α_B) = 0`; (iv) s.c. fibres at criticality when `β > 0`. **Cor. `cor:high-critical-dimension`**: all gaps open, `𝓗^{1/2}(𝒞_n) < ∞`, and `dim_H 𝒞_n = 0` at Liouville flux. **The `W = 0` statements** on the density-one set `𝒢₀` for Thm `thm:high-energy-spectrum` and Cor. `cor:high-critical-dimension` | proved from `PaperInputs` + `LandauReductionClaim` |
+| `PhysicalHall.lean` | **Thm `thm:physical-hall`**: Hall integers `-k` (low energy), `r` and `-⌊kα_B⌋` (high energy), `0` and `1` for the full projections, and every nonzero relative Hall integer realized. **Lemma `lem:magnetic-gap-persistence`** is stated as a spectral-continuity bound (`GapPersistenceBound`); its consequence, that gaps persist under small changes of the field, is proved (`gap_persists`) | proved (the local-line density from `lem:physical-trace` is a hypothesis) |
+| `PaperIIBridge.lean` | `criticalGeometricInput_of_paperII`: the Paper II input derived from the Paper II formalization (`SpectralGapsDimension`) | proved from Paper II's inputs |
 
 ## Modelling choices
 
@@ -57,7 +60,5 @@ These are not formalized because they need:
   - Agmon curves are C¹ rather than absolutely continuous.
   - Hall integers are computed by the Středa formula from the physical densities, not from the trace-per-unit-area Chern character.
   - Spectral measures are characterized through the continuous functional calculus, as in Paper I.
-- **Not stated:**
-  - the fibre conclusions of Cor. `cor:high-energy-fibres`;
-  - Cor. `cor:high-critical-dimension`, which follows from `critical_continuum_geometry` with the Landau symbol;
-  - the field-continuity Lemma `lem:magnetic-gap-persistence`.
+- **Coverage:** every numbered result of §1 now has a Lean counterpart. The fibre statements hold for almost every Bloch momentum `k`, because the fibre reductions are assumed only for almost every `k`.
+- **`LandauReductionClaim`:** it records the paper's decay rate `δ_n = O(n^{-1/4} log n)` in the weaker form `δ_n n^{1/8} → 0`, which is all the `𝒢₀` statements need.

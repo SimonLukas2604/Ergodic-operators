@@ -52,7 +52,7 @@ def alphaR (α : ℝ) (μ : Measure ℝ) (E : ℝ) : ℝ≥0∞ :=
 theorem alphaQ_le_alphaR (α : ℝ) (μ : Measure ℝ) (E : ℝ) : alphaQ α μ E ≤ alphaR α μ E := by
   refine limsup_le_limsup ?_
   filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-  rw [ENNReal.ofReal_mul (by positivity), ← ofReal_norm_eq_enorm]
+  rw [ENNReal.ofReal_mul (by positivity), ← ofReal_norm]
   gcongr
   exact (le_abs_self _).trans (Complex.abs_im_le_norm _)
 
@@ -109,15 +109,15 @@ lemma inv_norm_superlevel_eq_ball {ε t : ℝ} (hε : 0 < ε) (ht : 0 < t) (E : 
     {x : ℝ | t < 1 / Real.sqrt ((x - E) ^ 2 + ε ^ 2)} =
       ball E (Real.sqrt ((1 / t) ^ 2 - ε ^ 2)) := by
   ext x
-  simp only [mem_setOf_eq, mem_ball, Real.dist_eq]
+  simp only [mem_ofPred_eq, mem_ball, Real.dist_eq]
   have hq : 0 < (x - E) ^ 2 + ε ^ 2 := by positivity
   rw [lt_one_div ht (Real.sqrt_pos.2 hq), Real.sqrt_lt' (by positivity),
     Real.lt_sqrt (abs_nonneg _), sq_abs]
   constructor <;> intro h <;> linarith
 
-lemma enorm_inv_sub (x E ε : ℝ) (hε : 0 < ε) :
+lemma enorm_inv_sub (x E ε : ℝ) :
     ‖((x : ℂ) - (E + ε * I))⁻¹‖ₑ = ENNReal.ofReal (1 / Real.sqrt ((x - E) ^ 2 + ε ^ 2)) := by
-  rw [← ofReal_norm_eq_enorm, norm_inv, Complex.norm_def, Complex.normSq_apply, one_div]
+  rw [← ofReal_norm, norm_inv, Complex.norm_def, Complex.normSq_apply, one_div]
   congr 3
   simp; ring
 
@@ -148,15 +148,14 @@ lemma exists_ball_le_of_upperAlphaDeriv_lt_top {α : ℝ} (hα : 0 < α) (μ : M
           have hu' : 0 < u ^ α := by positivity
           rw [div_mul_eq_mul_div, le_div_iff₀ hu']
           gcongr
-          exact measureReal_nonneg
       _ ≤ _ := by gcongr; exact le_max_right _ _
 
 lemma lintegral_rpow_neg_Ioo {α a : ℝ} (hα : α < 1) (ha : 0 < a) :
     ∫⁻ t in Ioo 0 a, ENNReal.ofReal (t ^ (-α)) = ENNReal.ofReal (a ^ (1 - α) / (1 - α)) := by
   have hint : IntervalIntegrable (fun t : ℝ => t ^ (-α)) volume 0 a :=
-    intervalIntegrable_rpow' (by linarith)
+    intervalIntegral.intervalIntegrable_rpow' (by linarith)
   have hint' : IntegrableOn (fun t : ℝ => t ^ (-α)) (Ioc 0 a) := hint.1
-  rw [← Measure.restrict_congr_set Ioo_ae_eq_Ioc, ← ofReal_integral_eq_lintegral_ofReal hint'
+  rw [Measure.restrict_congr_set Ioo_ae_eq_Ioc, ← ofReal_integral_eq_lintegral_ofReal hint'
     (ae_restrict_of_forall_mem measurableSet_Ioc fun t ht => Real.rpow_nonneg ht.1.le _),
     ← intervalIntegral.integral_of_le ha.le, integral_rpow (Or.inl (by linarith))]
   congr 1
@@ -173,7 +172,7 @@ lemma enorm_borelTransform_le {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) (μ : M
   have h1 : ‖borelTransform μ (E + ε * I)‖ₑ ≤ ∫⁻ x, ENNReal.ofReal (f x) ∂μ := by
     unfold borelTransform
     refine (enorm_integral_le_lintegral_enorm _).trans (le_of_eq ?_)
-    congr 1; ext x; exact enorm_inv_sub x E ε hε
+    congr 1; ext x; exact enorm_inv_sub x E ε
   have h2 : ∫⁻ x, ENNReal.ofReal (f x) ∂μ ≤
       ∫⁻ t in Ioo 0 (1 / ε), ENNReal.ofReal (K * t ^ (-α)) := by
     rw [lintegral_eq_lintegral_meas_lt μ (Eventually.of_forall fun x => by positivity)
@@ -190,10 +189,11 @@ lemma enorm_borelTransform_le {α : ℝ} (hα0 : 0 < α) (hα1 : α < 1) (μ : M
     rw [hsplit]
     refine (lintegral_union_le _ _ _).trans ?_
     have hzero : ∫⁻ t in Ici (1 / ε), μ {x | t < f x} = 0 := by
-      apply setLIntegral_eq_zero_of_forall_eq_zero measurableSet_Ici fun t ht => ?_
+      refine le_antisymm ((setLIntegral_mono (g := fun _ => (0 : ℝ≥0∞)) measurable_const
+        fun t ht => ?_).trans (by simp)) bot_le
       have : {x | t < f x} = ∅ := by
         ext x
-        simp only [mem_setOf_eq, mem_empty_iff_false, iff_false, not_lt, hf]
+        simp only [mem_ofPred_eq, mem_empty_iff_false, iff_false, not_lt, hf]
         refine le_trans ?_ ht
         rw [one_div_le_one_div (Real.sqrt_pos.2 (by positivity)) hε]
         calc ε = Real.sqrt (ε ^ 2) := (Real.sqrt_sq hε.le).symm

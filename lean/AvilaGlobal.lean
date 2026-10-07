@@ -8,6 +8,7 @@ import AvilaGlobal.RegularUH
 import AvilaGlobal.Stratified
 import AvilaGlobal.Codimension
 import AvilaGlobal.DerivFormula
+import AvilaGlobal.UHAnalytic
 import AvilaGlobal.Cod1
 import AvilaGlobal.AlmostMathieu
 import AvilaGlobal.RationalExample

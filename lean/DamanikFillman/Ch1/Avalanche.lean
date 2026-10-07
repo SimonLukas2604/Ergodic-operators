@@ -144,10 +144,10 @@ theorem abs_cross_le_rho {A B : M2R} (DA : SVData A) (DB : SVData B) :
 `ϱ(A, B) ≤ sin Θ(A, B) + ‖A‖⁻² + ‖B‖⁻²`. -/
 theorem rho_le {A B : M2R} (DA : SVData A) (DB : SVData B) :
     rho A B ≤ |cross DA.uOut (perp DB.u)| + ‖A‖⁻¹ ^ 2 + ‖B‖⁻¹ ^ 2 := by
+  have hsn : |cross DA.uOut (perp DB.u)| = |⟪DA.uOut, DB.u⟫| := by rw [cross_perp_right]
   set sn := |cross DA.uOut (perp DB.u)|
   have hA := DA.norm_pos
   have hB := DB.norm_pos
-  have hsn : sn = |⟪DA.uOut, DB.u⟫| := by rw [cross_perp_right]
   rw [rho, div_le_iff₀ (mul_pos hA hB), ← norm_act_eq]
   refine (act (B * A)).opNorm_le_bound (by positivity) fun w => ?_
   rw [act_mul, DA.act_decomp w, map_add, map_smul, map_smul, DA.act_u_eq, map_smul]
@@ -336,7 +336,7 @@ lemma ap_step {T : ℕ → M2R} {j : ℕ} (hε : 0 < ε) (hε1 : ε ≤ 1) (hμ 
           gcongr; exact h1.trans (by gcongr)
       _ = 1 / (rho A B * ‖B‖ ^ 2) := by rw [hBA]; field_simp
       _ ≤ 1 / (ε / 2 * μ ^ 2) := by gcongr
-      _ = 2 / (ε * μ ^ 2) := by field_simp; ring
+      _ = 2 / (ε * μ ^ 2) := by field_simp
       _ ≤ κ := by rw [hκ]; gcongr; norm_num
 
 /-- The quantity in the middle of (1.14.14). -/
@@ -425,7 +425,11 @@ theorem avalanche_principle_explicit (hε : 0 < ε) (hε1 : ε ≤ 1) (hμ : 8 /
       (1 - c') ^ (m - 1) ≤ apRatio T m ∧ apRatio T m ≤ (1 + c') ^ (m - 1) := by
     intro m h1
     induction m, h1 using Nat.le_induction with
-    | base => intro _; rw [hR2]; norm_num; constructor <;> positivity
+    | base =>
+      intro _
+      have : (0:ℝ) ≤ c' := by positivity
+      rw [hR2, show 2 - 1 = 1 from rfl, pow_one, pow_one]
+      constructor <;> linarith
     | succ k hk ih =>
       intro h2
       obtain ⟨ih1, ih2⟩ := ih (by omega)
