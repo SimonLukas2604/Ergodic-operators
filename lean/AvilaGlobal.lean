@@ -13,3 +13,4 @@ import AvilaGlobal.UHSmooth
 import AvilaGlobal.Cod1
 import AvilaGlobal.AlmostMathieu
 import AvilaGlobal.RationalExample
+import AvilaGlobal.AMOProfiles
