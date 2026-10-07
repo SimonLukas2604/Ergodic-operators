@@ -213,17 +213,17 @@ theorem cesaro_Pin_le {φ : L2 ℤ} {α : ℝ} (hα : 0 ≤ α)
   obtain ⟨C, hC0, hC⟩ := cesaro_inner_evol_le (A := A) (hA := hA) hα hU
   refine ⟨C, hC0, fun N T hT => ?_⟩
   have hsplit : (fun t => ‖Pin N (evol A hA t φ)‖ ^ 2) =
-      fun t => ∑ n ∈ Finset.Icc (-(N : ℤ)) N, ‖⟪dlt n, evol A hA t φ⟫_ℂ‖ ^ 2 := by
+      fun t => ∑ n ∈ Finset.Icc (-(N : ℤ)) N, ‖⟪dltLoc n, evol A hA t φ⟫_ℂ‖ ^ 2 := by
     funext t; rw [norm_Pin_sq]
     refine Finset.sum_congr rfl fun n _ => ?_
     rw [apply_eq_inner_single]
-  rw [hsplit, cesaro_sum (f := fun n t => ‖⟪dlt n, evol A hA t φ⟫_ℂ‖ ^ 2) _
+  rw [hsplit, cesaro_sum (f := fun n t => ‖⟪dltLoc n, evol A hA t φ⟫_ℂ‖ ^ 2) _
     fun n => (continuous_inner_evol _ _).norm.pow 2]
-  calc ∑ n ∈ Finset.Icc (-(N : ℤ)) N, cesaro (fun t => ‖⟪dlt n, evol A hA t φ⟫_ℂ‖ ^ 2) T
-      ≤ ∑ n ∈ Finset.Icc (-(N : ℤ)) N, C * ‖dlt n‖ ^ 2 * T ^ (-α) :=
+  calc ∑ n ∈ Finset.Icc (-(N : ℤ)) N, cesaro (fun t => ‖⟪dltLoc n, evol A hA t φ⟫_ℂ‖ ^ 2) T
+      ≤ ∑ n ∈ Finset.Icc (-(N : ℤ)) N, C * ‖dltLoc n‖ ^ 2 * T ^ (-α) :=
         Finset.sum_le_sum fun n _ => hC _ T hT
     _ = C * (2 * N + 1) * T ^ (-α) := by
-        simp only [dlt, lp.norm_single (by norm_num : (0 : ℝ≥0∞) < 2), norm_one, one_pow,
+        simp only [dltLoc, lp.norm_single (by norm_num : (0 : ℝ≥0∞) < 2), norm_one, one_pow,
           mul_one, Finset.sum_const, nsmul_eq_mul, card_Icc_neg]
         ring
 

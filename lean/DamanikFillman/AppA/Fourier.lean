@@ -222,7 +222,7 @@ theorem norm_hilbertT_sq (g : L2T) :
 
 /-- The Poisson kernel `P_r(x) = (1 - r²)/(1 - 2r cos 2πx + r²)` on `𝕋 = ℝ/ℤ`
 (here `cos 2πx = Re e^{2πix}`, with `e^{2πix} = fourier 1 x`). -/
-def poissonKernel (r : ℝ) (x : UnitAddCircle) : ℂ :=
+def circlePoissonKernel (r : ℝ) (x : UnitAddCircle) : ℂ :=
   (((1 - r ^ 2) / (1 - 2 * r * (fourier 1 x).re + r ^ 2) : ℝ) : ℂ)
 
 /-- The conjugate Poisson kernel `Q_r(x) = 2r sin 2πx/(1 - 2r cos 2πx + r²)` on `𝕋`
@@ -236,7 +236,7 @@ and the conjugate Poisson integral `g * Q_r` has Fourier coefficients `-i sgn(k)
 which identifies the book's definition `Hg = lim_{r↑1} g * Q_r` with `hilbertT`. -/
 def ConjugatePoissonStatement : Prop :=
   ∀ r : ℝ, 0 ≤ r → r < 1 → ∀ k : ℤ,
-    fourierCoeff (poissonKernel r) k = (r : ℂ) ^ k.natAbs ∧
+    fourierCoeff (circlePoissonKernel r) k = (r : ℂ) ^ k.natAbs ∧
     fourierCoeff (conjPoissonKernel r) k = hilbertSymbol k * (r : ℂ) ^ k.natAbs
 
 end HilbertCircle

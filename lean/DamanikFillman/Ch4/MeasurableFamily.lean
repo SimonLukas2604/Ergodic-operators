@@ -290,7 +290,7 @@ lemma specProj_eq_zero_iff {S : Set ℝ} (hS : MeasurableSet S) :
     exact h φ
 
 /-- If `σ(A)` misses `S`, then `P(S) = 0`. -/
-lemma specProj_eq_zero_of_disjoint {S : Set ℝ} (hS : MeasurableSet S)
+lemma specProj_eq_zero_of_disjoint_mf {S : Set ℝ} (hS : MeasurableSet S)
     (hd : Disjoint S (spectrum ℝ A)) : specProj A hA S = 0 :=
   (specProj_eq_zero_iff hS).2 fun φ =>
     measure_mono_null (fun x hx hx' => hd.ne_of_mem hx hx' rfl)
@@ -359,7 +359,7 @@ theorem exists_specProj_eq_zero_of_notMem {E : ℝ} (hE : E ∉ spectrum ℝ A) 
     ∃ ε > 0, specProj A hA (Ioo (E - ε) (E + ε)) = 0 := by
   have hopen : IsOpen (spectrum ℝ A)ᶜ := (isCompact_spectrum_real A).isClosed.isOpen_compl
   obtain ⟨ε, hε, hball⟩ := Metric.isOpen_iff.1 hopen E hE
-  refine ⟨ε, hε, specProj_eq_zero_of_disjoint measurableSet_Ioo ?_⟩
+  refine ⟨ε, hε, specProj_eq_zero_of_disjoint_mf measurableSet_Ioo ?_⟩
   rw [← Real.ball_eq_Ioo]
   exact Set.subset_compl_iff_disjoint_right.1 hball
 

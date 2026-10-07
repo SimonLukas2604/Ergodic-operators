@@ -82,7 +82,7 @@ theorem specProj_eq_zero_of_null (hV : BddPot V) {I : Set ℝ} (hI : MeasurableS
     from hsa.adjoint_eq, hδ m, inner_zero_left]
   rfl
 
-lemma mem_spectrum_real_iff (hV : BddPot V) (E : ℝ) :
+lemma mem_spectrum_real_iff_genEig (hV : BddPot V) (E : ℝ) :
     E ∈ spectrum ℝ (schr V) ↔ (E : ℂ) ∈ spectrum ℂ (schr V) :=
   (spectrum.algebraMap_mem_iff ℂ).symm
 
@@ -137,7 +137,7 @@ theorem not_mem_spectrum_of_null (hV : BddPot V) {E r : ℝ} (hr : 0 < r)
     refine borelCalc_congr_spectrum (hg.mul hf) (isBddBorel_indicator hI.compl) fun x hx => ?_
     have htr : truncId (schr V) x = x := by
       have h3 : |x| ≤ ‖schr V‖ := by
-        have hz : ((x : ℝ) : ℂ) ∈ spectrum ℂ (schr V) := (mem_spectrum_real_iff hV x).mp hx
+        have hz : ((x : ℝ) : ℂ) ∈ spectrum ℂ (schr V) := (mem_spectrum_real_iff_genEig hV x).mp hx
         have := spectrum.subset_closedBall_norm_mul (schr V) hz
         rw [Metric.mem_closedBall, dist_zero_right, Complex.norm_real, Real.norm_eq_abs] at this
         exact this.trans (mul_le_of_le_one_right (norm_nonneg _)
@@ -182,7 +182,7 @@ def GenEigSupportStatement (V : ℤ → ℝ) (hV : BddPot V) : Prop :=
 theorem closure_genEigReal_subset_spectrum (hV : BddPot V) :
     closure (genEigReal V) ⊆ spectrum ℝ (schr V) := by
   refine closure_minimal (fun E hE => ?_) (spectrum.isClosed _)
-  rw [mem_spectrum_real_iff hV]
+  rw [mem_spectrum_real_iff_genEig hV]
   exact genEigAll_subset_spectrum hV hE
 
 /-- **Theorem 2.4.2 (c)**: assuming Theorem 2.4.2 (b), `σ(H) = closure G`. -/

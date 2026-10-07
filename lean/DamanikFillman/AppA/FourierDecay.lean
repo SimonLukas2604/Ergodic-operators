@@ -601,7 +601,7 @@ theorem conjugatePoissonStatement_holds : ConjugatePoissonStatement := by
     intro m; simp only [poissonCoeff]; split_ifs <;> push_cast <;> ring
   constructor
   · rw [fourierCoeff_eq_intervalIntegral _ _ 0]
-    simp only [zero_add, div_one, one_smul, smul_eq_mul, poissonKernel, fourier_one_coe,
+    simp only [zero_add, div_one, one_smul, smul_eq_mul, circlePoissonKernel, fourier_one_coe,
       fourier_neg_coe]
     rw [integral_ex_mul_two_sided hhalf hhalf hRe]
     rcases lt_trichotomy k 0 with h | rfl | h

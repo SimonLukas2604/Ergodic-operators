@@ -7,7 +7,7 @@ Theorem 1.8.14, p. 71)
 We use Mathlib's Hausdorff measure `μH[α]` (Definition 1.8.1; Mathlib builds it from covers by
 arbitrary sets, which on `ℝ` is equivalent to covers by intervals).
 
-* `DF.upperDeriv μ α E` — the upper `α`-derivative (1.8.4), defined with closed balls
+* `DF.upperDerivAlpha μ α E` — the upper `α`-derivative (1.8.4), defined with closed balls
   `[E-ε, E+ε]` (the book uses open intervals; this changes `D^α_μ` by at most a factor `2^α` and
   does not change the sets `T^α_f`, `T^α_∞`);
 * `DF.Tinf`, `DF.Tfin` — the sets `T_∞`, `T_f`;
@@ -22,7 +22,7 @@ arbitrary sets, which on `ℝ` is equivalent to covers by intervals).
   (`DF.isClosed_alphaCSubspace`, `DF.apply_mem_alphaCSubspace`, …, `DF.exists_alpha_split`);
 * `DF.upperHausdorffDim` — `dim⁺_H(μ)` (Definition 1.8.15).
 
-Deviations: as noted above, closed balls are used in `upperDeriv`; the decomposition is stated
+Deviations: as noted above, closed balls are used in `upperDerivAlpha`; the decomposition is stated
 with an `h^α`-null Borel set `N ⊇ T_∞` (so that all pieces are restrictions to measurable
 sets) rather than with `T_f`, `T_∞` themselves; the two agree up to `μ`-null sets.
 
@@ -42,14 +42,14 @@ section MeasurePart
 variable (μ : Measure ℝ) (α : ℝ)
 
 /-- The upper `α`-derivative `D^α_μ(E) = limsup_{ε↓0} μ([E-ε, E+ε]) / (2ε)^α` (1.8.4). -/
-def upperDeriv (E : ℝ) : ℝ≥0∞ :=
+def upperDerivAlpha (E : ℝ) : ℝ≥0∞ :=
   limsup (fun ε : ℝ => μ (closedBall E ε) / ENNReal.ofReal ((2 * ε) ^ α)) (𝓝[>] 0)
 
 /-- `T_∞ = {E : D^α_μ(E) = ∞}`. -/
-def Tinf : Set ℝ := {E | upperDeriv μ α E = ⊤}
+def Tinf : Set ℝ := {E | upperDerivAlpha μ α E = ⊤}
 
 /-- `T_f = {E : D^α_μ(E) < ∞}`. -/
-def Tfin : Set ℝ := {E | upperDeriv μ α E < ⊤}
+def Tfin : Set ℝ := {E | upperDerivAlpha μ α E < ⊤}
 
 lemma Tfin_eq_compl : Tfin μ α = (Tinf μ α)ᶜ := by
   ext E; simp [Tfin, Tinf, lt_top_iff_ne_top]
@@ -134,7 +134,7 @@ lemma measure_singleton_of_mem_holderSet {r : ℝ} (hα : 0 < α) {E : ℝ}
 lemma Tfin_subset_iUnion [IsFiniteMeasure μ] (hα : 0 < α) :
     Tfin μ α ⊆ ⋃ n : ℕ, holderSet μ α n := by
   intro E hE
-  obtain ⟨R, hR, hRtop⟩ := exists_between (show upperDeriv μ α E < ⊤ from hE)
+  obtain ⟨R, hR, hRtop⟩ := exists_between (show upperDerivAlpha μ α E < ⊤ from hE)
   have hev : ∀ᶠ ε in 𝓝[>] (0 : ℝ), μ (closedBall E ε) / ENNReal.ofReal ((2 * ε) ^ α) < R :=
     eventually_lt_of_limsup_lt hR
   obtain ⟨u, hu, hsub⟩ := (mem_nhdsGT_iff_exists_Ioo_subset).1 hev
@@ -323,8 +323,8 @@ theorem hausdorffMeasure_Tinf [IsFiniteMeasure μ] (hα : 0 < α) : μH[α] (Tin
   have hsub : ∀ s : ℝ, 0 < s → Tinf μ α ⊆
       {E | ∃ᶠ ε in 𝓝[>] (0 : ℝ), ENNReal.ofReal (s * (2 * ε) ^ α) < μ (closedBall E ε)} := by
     intro s hs E hE
-    have h1 : ENNReal.ofReal s < upperDeriv μ α E := by
-      rw [show upperDeriv μ α E = ⊤ from hE]; exact ENNReal.ofReal_lt_top
+    have h1 : ENNReal.ofReal s < upperDerivAlpha μ α E := by
+      rw [show upperDerivAlpha μ α E = ⊤ from hE]; exact ENNReal.ofReal_lt_top
     have h2 := frequently_lt_of_lt_limsup (by isBoundedDefault) h1
     refine (h2.and_eventually self_mem_nhdsWithin).mono fun ε ⟨hε, hpos⟩ => ?_
     have hp : 0 < (2 * ε) ^ α := Real.rpow_pos_of_pos (by linarith [show (0 : ℝ) < ε from hpos]) _

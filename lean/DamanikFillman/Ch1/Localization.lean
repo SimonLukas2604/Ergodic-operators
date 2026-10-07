@@ -33,7 +33,7 @@ open Filter Real L2
 namespace DF
 
 /-- The standard basis vector `δ_n` of `ℓ²(ℤ)`. -/
-abbrev dlt (n : ℤ) : L2 ℤ := lp.single 2 n (1 : ℂ)
+abbrev dltLoc (n : ℤ) : L2 ℤ := lp.single 2 n (1 : ℂ)
 
 /-- **SULE** (Definition 1.7.1(a)). -/
 def SULE (A : L2 ℤ →L[ℂ] L2 ℤ) : Prop :=
@@ -49,12 +49,12 @@ def ULE (A : L2 ℤ →L[ℂ] L2 ℤ) : Prop :=
 /-- **SUDL** (Definition 1.7.1(b)). -/
 def SUDL (A : L2 ℤ →L[ℂ] L2 ℤ) (hA : IsSelfAdjoint A) : Prop :=
   ∃ γ > 0, ∀ δ > 0, ∃ C : ℝ, ∀ (m n : ℤ) (t : ℝ),
-    ‖⟪dlt m, evol A hA t (dlt n)⟫_ℂ‖ ≤ C * exp (δ * |(m : ℝ)|) * exp (-γ * |(m : ℝ) - n|)
+    ‖⟪dltLoc m, evol A hA t (dltLoc n)⟫_ℂ‖ ≤ C * exp (δ * |(m : ℝ)|) * exp (-γ * |(m : ℝ) - n|)
 
 /-- **UDL** (Definition 1.7.1(d)). -/
 def UDL (A : L2 ℤ →L[ℂ] L2 ℤ) (hA : IsSelfAdjoint A) : Prop :=
   ∃ C γ : ℝ, 0 < γ ∧ ∀ (m n : ℤ) (t : ℝ),
-    ‖⟪dlt m, evol A hA t (dlt n)⟫_ℂ‖ ≤ C * exp (-γ * |(m : ℝ) - n|)
+    ‖⟪dltLoc m, evol A hA t (dltLoc n)⟫_ℂ‖ ≤ C * exp (-γ * |(m : ℝ) - n|)
 
 /-! ### Geometric sums over `ℤ` -/
 
@@ -128,7 +128,7 @@ lemma head_add_tail (v : L2 ℤ) (j : ℤ) (R : ℕ) :
 /-- Parseval for the eigenbasis at a site: `∑_k |u_k(n)|² = 1`. -/
 lemma tsum_norm_sq_basis (u : HilbertBasis ℕ ℂ (L2 ℤ)) (n : ℤ) :
     ∑' k, ‖u k n‖ ^ 2 = 1 := by
-  have h := norm_sq_eq_tsum (u.repr (dlt n))
+  have h := norm_sq_eq_tsum (u.repr (dltLoc n))
   rw [LinearIsometryEquiv.norm_map, lp.norm_single (by norm_num), norm_one, one_pow] at h
   rw [h]
   congr 1; funext k
@@ -137,7 +137,7 @@ lemma tsum_norm_sq_basis (u : HilbertBasis ℕ ℂ (L2 ℤ)) (n : ℤ) :
 
 lemma summable_norm_sq_basis (u : HilbertBasis ℕ ℂ (L2 ℤ)) (n : ℤ) :
     Summable fun k => ‖u k n‖ ^ 2 := by
-  have h := summable_norm_sq (u.repr (dlt n))
+  have h := summable_norm_sq (u.repr (dltLoc n))
   refine h.congr fun k => ?_
   rw [HilbertBasis.repr_apply_apply, lp.inner_single_right]
   simp
@@ -258,10 +258,10 @@ section Dynamics
 
 variable {A : L2 ℤ →L[ℂ] L2 ℤ} {hA : IsSelfAdjoint A}
 
-lemma norm_inner_dlt_left (v : L2 ℤ) (m : ℤ) : ‖⟪dlt m, v⟫_ℂ‖ = ‖v m‖ := by
+lemma norm_inner_dlt_left (v : L2 ℤ) (m : ℤ) : ‖⟪dltLoc m, v⟫_ℂ‖ = ‖v m‖ := by
   rw [lp.inner_single_left]; simp
 
-lemma norm_inner_dlt_right (v : L2 ℤ) (n : ℤ) : ‖⟪v, dlt n⟫_ℂ‖ = ‖v n‖ := by
+lemma norm_inner_dlt_right (v : L2 ℤ) (n : ℤ) : ‖⟪v, dltLoc n⟫_ℂ‖ = ‖v n‖ := by
   rw [lp.inner_single_right]; simp
 
 /-- Expansion of `⟪δ_m, e^{-itA} δ_n⟫` in an eigenbasis and the resulting bound
@@ -269,14 +269,14 @@ lemma norm_inner_dlt_right (v : L2 ℤ) (n : ℤ) : ‖⟪v, dlt n⟫_ℂ‖ = �
 lemma norm_inner_evol_le (u : HilbertBasis ℕ ℂ (L2 ℤ)) (E : ℕ → ℝ)
     (heig : ∀ k, A (u k) = (E k : ℂ) • u k) (m n : ℤ) (t : ℝ) {g : ℕ → ℝ}
     (hg : ∀ k, ‖u k m‖ * ‖u k n‖ ≤ g k) (hgs : Summable g) :
-    ‖⟪dlt m, evol A hA t (dlt n)⟫_ℂ‖ ≤ ∑' k, g k := by
+    ‖⟪dltLoc m, evol A hA t (dltLoc n)⟫_ℂ‖ ≤ ∑' k, g k := by
   rw [← u.tsum_inner_mul_inner]
-  have hterm : ∀ k, ‖⟪dlt m, u k⟫_ℂ * ⟪u k, evol A hA t (dlt n)⟫_ℂ‖ = ‖u k m‖ * ‖u k n‖ := by
+  have hterm : ∀ k, ‖⟪dltLoc m, u k⟫_ℂ * ⟪u k, evol A hA t (dltLoc n)⟫_ℂ‖ = ‖u k m‖ * ‖u k n‖ := by
     intro k
     rw [norm_mul, norm_inner_dlt_left, ← ContinuousLinearMap.adjoint_inner_left, adjoint_evol,
       evol_eigenvector (heig k), inner_smul_left, norm_mul, RCLike.norm_conj, norm_expPhase,
       one_mul, norm_inner_dlt_right]
-  have hs : Summable fun k => ‖⟪dlt m, u k⟫_ℂ * ⟪u k, evol A hA t (dlt n)⟫_ℂ‖ :=
+  have hs : Summable fun k => ‖⟪dltLoc m, u k⟫_ℂ * ⟪u k, evol A hA t (dltLoc n)⟫_ℂ‖ :=
     hgs.of_nonneg_of_le (fun k => norm_nonneg _) (fun k => (hterm k).le.trans (hg k))
   refine (norm_tsum_le_tsum_norm hs).trans ?_
   exact Summable.tsum_le_tsum (fun k => (hterm k).le.trans (hg k)) hs hgs

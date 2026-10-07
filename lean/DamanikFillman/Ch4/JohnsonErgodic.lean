@@ -177,7 +177,7 @@ lemma continuous_Az (z : ℂ) : Continuous (E.Az z) := by
     first | exact continuous_const | exact continuous_const.sub hc
 
 include hT hf in
-lemma continuous_An (z : ℂ) (n : ℕ) : Continuous (E.An z n) := by
+lemma continuous_An' (z : ℂ) (n : ℕ) : Continuous (E.An z n) := by
   induction n with
   | zero => exact continuous_const
   | succ n ih =>
@@ -192,7 +192,7 @@ theorem limsup_le_lyap (hue : invMeasures (⇑E.T) = {E.μ}) (z : ℂ) :
     ∀ ε > 0, ∃ N, ∀ n ≥ N, ∀ ω, Real.log ‖E.An z n ω‖ / n < E.lyap z + ε := by
   set g : ℕ → C(Ω, ℝ) := fun n =>
     ⟨fun ω => Real.log ‖E.An z n ω‖,
-      ((E.continuous_An hT hf z n).norm).log fun ω => by
+      ((E.continuous_An' hT hf z n).norm).log fun ω => by
         linarith [E.one_le_norm_An z n ω]⟩
   have hsub : ∀ n m x, 1 ≤ n → 1 ≤ m → g (n + m) x ≤ g n x + g m ((⇑E.T)^[n] x) := by
     intro n m x _ _

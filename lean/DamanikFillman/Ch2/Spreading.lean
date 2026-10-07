@@ -12,9 +12,9 @@ The unitary group is `DF.propagator V t = e^{-itH}` (Mathlib's `NormedSpace.exp`
 * **Theorem 2.6.1**, (2.6.3): `DF.spreading_bound` — for `t ≥ 0` and `|n| ≥ ν₀ t`,
   `ν₀ = 2e‖H‖`: `|⟨δₙ, e^{-itH} δ₀⟩|² ≤ 4 e^{-(log 4)|n|}` (the book: `C = 16`).
 * **Theorem 2.6.1**, (2.6.4): `DF.spreading_bound_avg` (time-averaged version, `C = 5`,
-  `c = log 4`), with the time average `DF.timeAvg` of (2.6.2).
+  `c = log 4`), with the time average `DF.expTimeAvg` of (2.6.2).
 * **Theorem 2.6.2**, (2.6.8): `DF.ballistic_bound` — the ballistic upper bound
-  `|X|^p_{δ₀}(t) ≤ C (t^p + 1)` for the moments `DF.moment` (2.6.1), together with
+  `|X|^p_{δ₀}(t) ≤ C (t^p + 1)` for the moments `DF.schrMoment` (2.6.1), together with
   summability of the defining series; (2.6.9): `DF.ballistic_bound_avg`.
 * **Exercise 2.6.5**: `DF.norm_pow_sub_pow_le` — `‖Aᵏ - Bᵏ‖ ≤ k max(‖A‖,‖B‖)^{k-1} ‖A - B‖`.
 
@@ -196,7 +196,7 @@ theorem spreading_bound (hV : BddPot V) {t : ℝ} (ht : 0 ≤ t) {n : ℤ}
         rw [one_div, Real.log_inv]; ring
 
 /-- The moments (2.6.1): `|X|^p_{δ₀}(t) = ∑ₙ |n|^p |⟨δₙ, e^{-itH} δ₀⟩|²`. -/
-def moment (V : ℤ → ℝ) (p t : ℝ) : ℝ :=
+def schrMoment (V : ℤ → ℝ) (p t : ℝ) : ℝ :=
   ∑' n : ℤ, |(n : ℝ)| ^ p * ‖⟪dlt n, propagator V t (dlt 0)⟫_ℂ‖ ^ 2
 
 lemma summable_rpow_mul_exp_neg {p c : ℝ} (hp : 0 < p) (hc : 0 < c) :
@@ -221,7 +221,7 @@ that for all `t ≥ 0` the series defining `|X|^p_{δ₀}(t)` converges and
 theorem ballistic_bound (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
     ∃ C : ℝ, ∀ t : ℝ, 0 ≤ t →
       Summable (fun n : ℤ => |(n : ℝ)| ^ p * ‖⟪dlt n, propagator V t (dlt 0)⟫_ℂ‖ ^ 2) ∧
-        moment V p t ≤ C * (t ^ p + 1) := by
+        schrMoment V p t ≤ C * (t ^ p + 1) := by
   set ν₀ := 2 * Real.exp 1 * ‖schr V‖
   have hν₀ : 0 ≤ ν₀ := by positivity
   have hlog : 0 < Real.log 4 := Real.log_pos (by norm_num)
@@ -257,7 +257,7 @@ theorem ballistic_bound (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
   have hf : Summable fun n : ℤ => |(n : ℝ)| ^ p * a n :=
     hg.of_nonneg_of_le (fun n => by positivity) hbound
   refine ⟨hf, ?_⟩
-  calc moment V p t = ∑' n : ℤ, |(n : ℝ)| ^ p * a n := rfl
+  calc schrMoment V p t = ∑' n : ℤ, |(n : ℝ)| ^ p * a n := rfl
     _ ≤ ∑' n : ℤ, ((ν₀ * t) ^ p * a n + e n) := hf.tsum_le_tsum hbound hg
     _ = (ν₀ * t) ^ p * 1 + K := by
         rw [(ha.mul_left _).tsum_add he, tsum_mul_left, hasum]
@@ -268,15 +268,15 @@ theorem ballistic_bound (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
         nlinarith
 
 /-- The time average (2.6.2): `⟨f⟩(T) = (2/T) ∫₀^∞ e^{-2t/T} f(t) dt`. -/
-def timeAvg (f : ℝ → ℝ) (T : ℝ) : ℝ :=
+def expTimeAvg (f : ℝ → ℝ) (T : ℝ) : ℝ :=
   2 / T * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(2 / T * t)) * f t
 
 /-- **Theorem 2.6.2**, (2.6.9): the time-averaged ballistic bound
 `⟨|X|^p_{δ₀}⟩(T) ≤ C (T^p + 1)` for all `T > 0`. -/
 theorem ballistic_bound_avg (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
-    ∃ C : ℝ, ∀ T : ℝ, 0 < T → timeAvg (moment V p) T ≤ C * (T ^ p + 1) := by
+    ∃ C : ℝ, ∀ T : ℝ, 0 < T → expTimeAvg (schrMoment V p) T ≤ C * (T ^ p + 1) := by
   obtain ⟨C0, hC0⟩ := ballistic_bound hV hp
-  have hmom0 : ∀ t, 0 ≤ moment V p t := fun t =>
+  have hmom0 : ∀ t, 0 ≤ schrMoment V p t := fun t =>
     tsum_nonneg fun n => by positivity
   have hC0nn : 0 ≤ C0 := by
     have := (hC0 0 le_rfl).2
@@ -310,7 +310,7 @@ theorem ballistic_bound_avg (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
   set g : ℝ → ℝ := fun t => C0 * (t ^ p * Real.exp (-(r * t))) + C0 * Real.exp (-(r * t))
   have hg : MeasureTheory.IntegrableOn g (Set.Ioi 0) :=
     (hi1.const_mul C0).add (hi2.const_mul C0)
-  have hle : ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(r * t)) * moment V p t ≤
+  have hle : ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(r * t)) * schrMoment V p t ≤
       ∫ t in Set.Ioi (0 : ℝ), g t := by
     refine MeasureTheory.integral_mono_of_nonneg ?_ hg ?_
     · exact Filter.Eventually.of_forall fun t => mul_nonneg (Real.exp_pos _).le (hmom0 t)
@@ -326,8 +326,8 @@ theorem ballistic_bound_avg (hV : BddPot V) {p : ℝ} (hp : 0 < p) :
   have hTp : (T / 2) ^ p ≤ T ^ p := by
     apply Real.rpow_le_rpow (by positivity) (by linarith) hp.le
   have h1r : 1 / r = T / 2 := by simp [r]
-  unfold timeAvg
-  calc 2 / T * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(2 / T * t)) * moment V p t
+  unfold expTimeAvg
+  calc 2 / T * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(2 / T * t)) * schrMoment V p t
       ≤ 2 / T * (C0 * ((1 / r) ^ (p + 1) * Real.Gamma (p + 1)) + C0 * (1 / r)) := by
         rw [← hgint]; exact mul_le_mul_of_nonneg_left hle (by positivity)
     _ = C0 * (Real.Gamma (p + 1) * (T / 2) ^ p + 1) := by
@@ -353,7 +353,7 @@ lemma norm_schr_pos (hV : BddPot V) : 0 < ‖schr V‖ := by
 (the book: `C = 17`). -/
 theorem spreading_bound_avg (hV : BddPot V) {ε : ℝ} (hε : 0 < ε) {T : ℝ} (hT : 0 < T)
     {n : ℤ} (hn : (2 * Real.exp 1 * ‖schr V‖ * T) ^ (1 + ε) ≤ |(n : ℝ)|) :
-    timeAvg (fun t => ‖⟪dlt n, propagator V t (dlt 0)⟫_ℂ‖ ^ 2) T ≤
+    expTimeAvg (fun t => ‖⟪dlt n, propagator V t (dlt 0)⟫_ℂ‖ ^ 2) T ≤
       5 * Real.exp (-(Real.log 4) * |(n : ℝ)| ^ (ε / (1 + ε))) := by
   set ν₀ := 2 * Real.exp 1 * ‖schr V‖
   have hν : 0 < ν₀ := by have := norm_schr_pos hV; positivity
@@ -453,7 +453,7 @@ theorem spreading_bound_avg (hV : BddPot V) {ε : ℝ} (hε : 0 < ε) {T : ℝ} 
     simp only [r, t₀]
     rw [show 2 / T * (a / ν₀) = 2 * (a / (ν₀ * T)) by field_simp]
     linarith
-  unfold timeAvg
+  unfold expTimeAvg
   calc 2 / T * ∫ t in Set.Ioi (0 : ℝ), Real.exp (-(2 / T * t)) *
         ‖⟪dlt n, propagator V t (dlt 0)⟫_ℂ‖ ^ 2
       ≤ r * (4 * Real.exp (-c * a) * (1 / r) + Real.exp (-(r * t₀)) / r) := by
