@@ -152,6 +152,49 @@ lemma integral_mFourier_eq_zero {n : Fin d → ℤ} (hn : n ≠ 0) :
     linear_combination -h
   simpa using h2
 
+/-- **Fourier criterion for null or conull sets.** If all Fourier coefficients of the indicator of
+a measurable set `s ⊆ 𝕋^d` vanish except the zeroth, then `s` is null or conull. -/
+lemma ae_mem_or_ae_notMem_of_mFourierCoeff {s : Set (UnitAddTorus (Fin d))} (hs : MeasurableSet s)
+    (hcoef : ∀ n : Fin d → ℤ, n ≠ 0 →
+      mFourierCoeff (s.indicator (1 : UnitAddTorus (Fin d) → ℂ)) n = 0) :
+    (∀ᵐ x ∂(volume : Measure (UnitAddTorus (Fin d))), x ∈ s) ∨
+      (∀ᵐ x ∂(volume : Measure (UnitAddTorus (Fin d))), x ∉ s) := by
+  set g : UnitAddTorus (Fin d) → ℂ := s.indicator 1 with hg
+  -- `g` as an `L²` function
+  set G := indicatorConstLp 2 hs (measure_ne_top volume s) (1 : ℂ) with hG
+  have hGg : (G : UnitAddTorus (Fin d) → ℂ) =ᵐ[volume] g := by
+    rw [hG]
+    exact indicatorConstLp_coeFn
+  have hGcoef : ∀ n, mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n = mFourierCoeff g n :=
+    fun n => integral_congr_ae (by filter_upwards [hGg] with t ht; rw [ht])
+  have hsum := hasSum_mFourier_series_L2 G
+  have hsum' : HasSum (fun n => mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n • mFourierLp 2 n)
+      (mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) 0 • mFourierLp 2 (0 : Fin d → ℤ)) := by
+    apply hasSum_single
+    intro n hn
+    rw [hGcoef, hcoef n hn, zero_smul]
+  have hGeq := hsum.unique hsum'
+  -- hence `g = c` a.e.
+  set c := mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) 0
+  have hgc : ∀ᵐ t ∂(volume : Measure (UnitAddTorus (Fin d))), g t = c := by
+    have h1 := coeFn_mFourierLp (d := Fin d) 2 (0 : Fin d → ℤ)
+    have h2 := Lp.coeFn_smul c (mFourierLp (d := Fin d) 2 (0 : Fin d → ℤ))
+    rw [← hGeq] at h2
+    filter_upwards [hGg, h1, h2] with t ht1 ht2 ht3
+    rw [← ht1, ht3, Pi.smul_apply, ht2, mFourier_zero, ContinuousMap.one_apply, smul_eq_mul,
+      mul_one]
+  by_cases hμ : volume s = 0
+  · right
+    exact measure_eq_zero_iff_ae_notMem.1 hμ
+  · left
+    obtain ⟨x, hx, hgx⟩ := Measure.exists_mem_of_measure_ne_zero_of_ae hμ (ae_restrict_of_ae hgc)
+    have hc1 : c = 1 := by rw [← hgx, hg, indicator_of_mem hx, Pi.one_apply]
+    filter_upwards [hgc] with t ht
+    by_contra hts
+    rw [hg, indicator_of_notMem hts, hc1] at ht
+    exact zero_ne_one ht
+
+
 /-- **Theorem 3.2.14**: Lebesgue measure on `𝕋^d` is ergodic for the translation by `α` iff
 `1, α₁, …, α_d` are rationally independent. -/
 theorem torusTranslationErgodic_haar (d : ℕ) (α : Fin d → ℝ) :
@@ -212,39 +255,7 @@ theorem torusTranslationErgodic_haar (d : ℕ) (α : Fin d → ℝ) :
       rcases mul_eq_zero.1 this with h' | h'
       · exact absurd (sub_eq_zero.1 h').symm hne
       · exact h'
-    -- `g` as an `L²` function
-    set G := indicatorConstLp 2 hs (measure_ne_top volume s) (1 : ℂ) with hG
-    have hGg : (G : UnitAddTorus (Fin d) → ℂ) =ᵐ[volume] g := by
-      rw [hG]
-      exact indicatorConstLp_coeFn
-    have hGcoef : ∀ n, mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n = mFourierCoeff g n :=
-      fun n => integral_congr_ae (by filter_upwards [hGg] with t ht; rw [ht])
-    have hsum := hasSum_mFourier_series_L2 G
-    have hsum' : HasSum (fun n => mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n • mFourierLp 2 n)
-        (mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) 0 • mFourierLp 2 (0 : Fin d → ℤ)) := by
-      apply hasSum_single
-      intro n hn
-      rw [hGcoef, hcoef n hn, zero_smul]
-    have hGeq := hsum.unique hsum'
-    -- hence `g = c` a.e.
-    set c := mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) 0
-    have hgc : ∀ᵐ t ∂(volume : Measure (UnitAddTorus (Fin d))), g t = c := by
-      have h1 := coeFn_mFourierLp (d := Fin d) 2 (0 : Fin d → ℤ)
-      have h2 := Lp.coeFn_smul c (mFourierLp (d := Fin d) 2 (0 : Fin d → ℤ))
-      rw [← hGeq] at h2
-      filter_upwards [hGg, h1, h2] with t ht1 ht2 ht3
-      rw [← ht1, ht3, Pi.smul_apply, ht2, mFourier_zero, ContinuousMap.one_apply, smul_eq_mul,
-        mul_one]
-    by_cases hμ : volume s = 0
-    · right
-      exact measure_eq_zero_iff_ae_notMem.1 hμ
-    · left
-      obtain ⟨x, hx, hgx⟩ := Measure.exists_mem_of_measure_ne_zero_of_ae hμ (ae_restrict_of_ae hgc)
-      have hc1 : c = 1 := by rw [← hgx, hg, indicator_of_mem hx, Pi.one_apply]
-      filter_upwards [hgc] with t ht
-      by_contra hts
-      rw [hg, indicator_of_notMem hts, hc1] at ht
-      exact zero_ne_one ht
+    exact ae_mem_or_ae_notMem_of_mFourierCoeff hs hcoef
 
 end DF
 
