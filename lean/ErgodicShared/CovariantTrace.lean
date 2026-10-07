@@ -150,9 +150,11 @@ lemma hasSum_inner_mul (A B : Op ℤ) :
   rw [ContinuousLinearMap.adjoint_inner_left] at h
   convert h using 1
   funext n
-  rw [← inner_delta_left2 n (B (delta 0)), ← ContinuousLinearMap.adjoint_inner_right,
-    inner_delta_left2, mul_comm]
-  rfl
+  have h1 : ⟪delta n, B (delta 0)⟫_ℂ = (B (delta 0) : L2 ℤ) n := inner_delta_left2 n _
+  have h2 : ⟪delta 0, A (delta n)⟫_ℂ =
+      conj ((ContinuousLinearMap.adjoint A (delta 0) : L2 ℤ) n) := by
+    rw [← ContinuousLinearMap.adjoint_inner_left, ← inner_conj_symm, inner_delta_left2]
+  rw [h1, h2, RCLike.inner_apply']
 
 /-- Bessel: `∑_{n ∈ F} ‖v_n‖² ≤ ‖v‖²`. -/
 lemma sum_sq_le_norm_sq (v : L2 ℤ) (F : Finset ℤ) : ∑ n ∈ F, ‖v n‖ ^ 2 ≤ ‖v‖ ^ 2 := by
@@ -188,13 +190,13 @@ lemma norm_parTerm_le (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) :
 
 lemma continuous_adjoint_coord {α : ℝ} {A : ℝ → Op ℤ} (hA : IsCovFam α A) (n : ℤ) :
     Continuous fun x => ‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖ ^ 2 := by
-  refine (((hA.continuous_inner _ _).norm).pow 2).congr fun x => ?_
+  refine (((hA.continuous_inner (delta 0) (delta n)).norm).pow 2).congr fun x => ?_
   simp only
   rw [norm_inner_delta_left]
 
 lemma continuous_coord {α : ℝ} {B : ℝ → Op ℤ} (hB : IsCovFam α B) (n : ℤ) :
     Continuous fun x => ‖(B x (delta 0)) n‖ ^ 2 := by
-  refine (((hB.continuous_inner _ _).norm).pow 2).congr fun x => ?_
+  refine (((hB.continuous_inner (delta n) (delta 0)).norm).pow 2).congr fun x => ?_
   simp only
   rw [norm_inner_delta_right]
 
@@ -301,7 +303,8 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
   constructor
   · have hS : ‖(Q + Q - 1 : Op ℤ)‖ ≤ 1 := by
       refine norm_le_one_of_involution ?_ ?_
-      · exact (hQ.isSelfAdjoint.add hQ.isSelfAdjoint).sub (IsSelfAdjoint.one (Op ℤ))
+      · show star (Q + Q - 1) = Q + Q - 1
+        rw [star_sub, star_add, hQ.isSelfAdjoint.star_eq, star_one]
       · simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, hQQ]
         abel
     have ht : ‖(Q - P) * (Q + Q - 1)‖ < 1 := by
@@ -311,7 +314,7 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
     have := (Units.oneSub _ ht).isUnit
     rw [Units.val_oneSub] at this
     convert this using 1
-    rw [← neg_sub Q P, neg_mul, sub_neg_eq_add]
+    rw [← neg_sub Q P, neg_mul, ← sub_eq_add_neg]
   · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
         hPP', hQQ']
