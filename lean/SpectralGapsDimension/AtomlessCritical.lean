@@ -20,7 +20,7 @@ measure of the two-dimensional realization).  It is kept as a separate input her
 does not depend on a module of `ContinuumMagnetic` that is still under development; the Paper III
 bridge can discharge it.
 -/
-import SpectralGapsDimension.AtomlessDOS
+import ErgodicShared.AtomlessDOS
 import SpectralGapsDimension.MainTheorems
 
 noncomputable section

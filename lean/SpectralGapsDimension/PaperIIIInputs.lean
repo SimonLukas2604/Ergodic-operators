@@ -5,7 +5,7 @@ Copyright (c) 2026. Formalization of
 
 # Discharging inputs with results proved in Paper III's library
 
-Two results of `ContinuumMagnetic` (Paper III) prove inputs of `PaperIIInputsRefined`:
+Two results of Paper III's development (now in the shared library `ErgodicShared`) prove inputs of `PaperIIInputsRefined`:
 
 * `CMS.exists_isDOSMeasure` (existence of the DOS measure, via the spectral measure of the
   two-dimensional realization) proves `DOSExistsClaim` (`dosExists_holds`);
@@ -17,13 +17,13 @@ Two results of `ContinuumMagnetic` (Paper III) prove inputs of `PaperIIInputsRef
 `PaperIIInputsFinal` is the resulting input bundle; Theorems 1.1 and 1.2 hold under it
 (`thm_joint_final`, `thm_liouville_final`).
 
-This module imports `ContinuumMagnetic` modules, while `ContinuumMagnetic.PaperIIBridge` imports
-`SpectralGapsDimension.Reductions`; there is no import cycle because no `ContinuumMagnetic` module
-imports this one.
+The Paper III results live in the shared library `ErgodicShared` (namespace `CMS`), which depends only
+on `AnalyticPerturbationsAMO`.
 -/
 import SpectralGapsDimension.Reductions
-import ContinuumMagnetic.RegularRep.IDSAveraging
-import ContinuumMagnetic.RegularRep.JacobiKernel
+import SpectralGapsDimension.GapLabelling
+import ErgodicShared.IDSAveraging
+import ErgodicShared.JacobiKernel
 
 noncomputable section
 
@@ -89,13 +89,14 @@ theorem eigenspaceBound_of_jacobiPrep (h : JacobiPrepClaim) : EigenspaceBoundCla
     rw [hker]
     exact ⟨inferInstance, by simp⟩
 
-/-- The input bundle after discharging `DOSExistsClaim` and reducing `EigenspaceBoundClaim` to
-`JacobiPrepClaim` (Theorem 2.4) with Paper III's results. -/
+/-- The input bundle after discharging `DOSExistsClaim`, reducing `EigenspaceBoundClaim` to
+`JacobiPrepClaim` (Theorem 2.4) with Paper III's results, and reducing
+`ComparisonLabelStabilityClaim` to the classical gap-labelling theorem (`GapLabelling.lean`). -/
 structure PaperIIInputsFinal : Prop where
   comparison : ComparisonClaim
   normalization : NormalizationClaim
   inertiaTransfer : InertiaTransferClaim
-  comparisonLabelStability : ComparisonLabelStabilityClaim
+  gapLabelling : GapLabellingClaim
   infiniteExponent : InfiniteExponentClaim
   brjunoCover : BrjunoCoverClaim
   packetCover : PacketCoverClaim
@@ -105,7 +106,7 @@ theorem PaperIIInputsFinal.toRefined (P : PaperIIInputsFinal) : PaperIIInputsRef
   comparison := P.comparison
   normalization := P.normalization
   inertiaTransfer := P.inertiaTransfer
-  comparisonLabelStability := P.comparisonLabelStability
+  comparisonLabelStability := comparisonLabelStability_of_gapLabelling P.gapLabelling
   infiniteExponent := P.infiniteExponent
   brjunoCover := P.brjunoCover
   packetCover := P.packetCover

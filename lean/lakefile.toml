@@ -1,5 +1,5 @@
 name = "AnalyticPerturbationsAMO"
-defaultTargets = ["AnalyticPerturbationsAMO", "ContinuumMagnetic", "SpectralGapsDimension", "AvilaGlobal", "CriticalAMOHausdorff", "Reducibility"]
+defaultTargets = ["AnalyticPerturbationsAMO", "ContinuumMagnetic", "SpectralGapsDimension", "AvilaGlobal", "CriticalAMOHausdorff", "Reducibility", "ErgodicShared"]
 
 [leanOptions]
 autoImplicit = false
@@ -29,3 +29,6 @@ name = "Reducibility"
 
 [[lean_lib]]
 name = "DamanikFillman"
+
+[[lean_lib]]
+name = "ErgodicShared"
