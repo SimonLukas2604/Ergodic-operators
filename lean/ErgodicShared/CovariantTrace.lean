@@ -302,7 +302,8 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
     have := (Units.oneSub _ ht).isUnit
     rw [Units.val_oneSub] at this
     convert this using 1
-    have e : (P - Q) * (Q + Q - 1) = -((Q - P) * (Q + Q - 1)) := by rw [← neg_mul, neg_sub]
+    have e : (P - Q) * (Q + Q - 1) = -((Q - P) * (Q + Q - 1)) := by
+      rw [← neg_sub Q P]; exact neg_mul _ _
     rw [e, ← sub_eq_add_neg]
   · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,

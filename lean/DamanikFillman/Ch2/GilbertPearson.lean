@@ -340,7 +340,6 @@ lemma alg_mTheta (m c s : ℂ) (hm : m ≠ 0) (hc : c ≠ 0) (hd : 1 - s / c * m
     (hd2 : c - s * m ≠ 0) :
     m / (1 - s / c * m) * (1 + s / c * m⁻¹) = (c * m + s) / (c - s * m) := by
   field_simp
-  ring
 
 /-- **Theorem 2.7.10(a)**: for `θ ∈ (-π/2, π/2)`, the singular part of `μ⁺_θ` is supported by
 `Sp,θ = {E : u_{1,θ} is subordinate at +∞}`. -/
