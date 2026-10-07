@@ -13,3 +13,6 @@ import SpectralGapsDimension.AtomlessCritical
 import SpectralGapsDimension.Reductions
 import SpectralGapsDimension.GapLabelling
 import SpectralGapsDimension.PaperIIIInputs
+import SpectralGapsDimension.LargeWidth
+import SpectralGapsDimension.ComparisonSign
+import SpectralGapsDimension.Frontier

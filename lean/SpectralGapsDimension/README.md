@@ -25,24 +25,30 @@ admissible perturbations are `SGD.SelfDual R` (`R = R*`, `𝓕R = R`), "every la
 | `GapLabelling.lean` | `ComparisonLabelStabilityClaim` **reduced to the classical gap-labelling theorem** (`GapLabellingClaim`: IDS at resolvent points lies in ℤ + αℤ): the label is `g(b) = ∫₀¹⟨δ₀, f(H_{b,x})δ₀⟩dx` for a fixed continuous cutoff, `g` is continuous in `b`, and a continuous function on an interval with countable range is constant | proved |
 | `PaperIIIInputs.lean` | inputs discharged with Paper III's results: `DOSExistsClaim` **proved** (`CMS.exists_isDOSMeasure`); `EigenspaceBoundClaim` reduced to `JacobiPrepClaim` (Theorem 2.4: exact Jacobi preparations at spectral energies) via `CMS.JacobiPrep.finrank_ker_le_two`; final bundle `PaperIIInputsFinal`, `thm_joint_final`, `thm_liouville_final` | proved |
 | `Reductions.lean` | **Prop 3.9 (transfer) reduced** to the displayed identity (gap:eq:spectral-ids-transfer) and constancy of comparison labels: the level-set argument, the continuity contradiction and the persistence of comparison gaps (‖H_b − H_{b₀}‖ ≤ 4\|b − b₀\| plus spectral stability) are proved (`transfer_of_inertia`, `comparison_resolvent_persists`); refined input bundle `PaperIIInputsRefined` and Theorems 1.1, 1.2, 3.10 under it | proved |
+| `LargeWidth.lean` | Theorem 2.4's preparation **proved for widths S ≥ 7/2** from Paper I's `AMO.exists_jacobiPrep`; `JacobiPrepClaim` reduced to the small-width case `JacobiPrepSmallWidthClaim` | proved |
+| `ComparisonSign.lean` | sign symmetry `H_{−b,x} = Γ(−H_{b,x+1/2})Γ⁻¹`, `Σ_{−b} = −Σ_b`, DOS transforms by `t ↦ −t`; the comparison DOS is atomless (`dos_Hb_atomless`); `ComparisonClaim` reduced to `ComparisonNonnegClaim` (0 ≤ b < 1/2) | proved |
+| `Frontier.lean` | **current smallest input set** `PaperIIRemainingInputs` and **`thm_joint_main` (Thm 1.1), `thm_liouville_main` (Thm 1.2), `thm_finite_exponent_main` (Thm 3.10)** | proved |
 | `MainTheorems.lean` | **Theorem 1.1** (`thm_joint`), **Theorem 1.2** (`thm_liouville`), **Theorem 3.10** (`thm_finite_exponent`), proved from the hypothesis `P : PaperIIInputs`; ‖H‖ ≤ 4 + ∑\|R\|, Σ ⊂ [−5,5], compactness, Cantor assertions, weight monotonicity | proved (conditional on the 7 stated inputs) |
 
 The library contains **no `sorry` and no axioms**. The paper inputs whose proofs need theory absent from
 Mathlib are stated as propositions (`…Claim : Prop`, not asserted) and taken as explicit hypotheses.
-The finest form is `structure PaperIIInputsFinal` (`thm_joint_final`, `thm_liouville_final`), with
+The headline theorems are in `Frontier.lean`: `thm_joint_main`, `thm_liouville_main` and
+`thm_finite_exponent_main`, proved from `structure PaperIIRemainingInputs`, the current smallest set of
 eight inputs:
 
 | Lean | Paper | needs |
 |---|---|---|
-| `ComparisonClaim` | Thm 3.6 | Thouless formula, Jitomirskaya–Marx continuity, rooted resolvents |
+| `ComparisonNonnegClaim` | Thm 3.6 for 0 ≤ b < 1/2 | Thouless formula, Jitomirskaya–Marx continuity, rooted resolvents |
 | `NormalizationClaim` | Prop 3.5 | annular Riccati analysis, small divisors in the rotation algebra |
-| `InertiaTransferClaim` | eq. (gap:eq:spectral-ids-transfer) | trace inertia in finite von Neumann algebras (Paper I Lemma 2.9) |
-| `GapLabellingClaim` | gap-labelling theorem (Bellissard; Pimsner–Voiculescu, Rieffel), used via Lemma 2.2 | K-theory of the irrational rotation algebra — a classical theorem, not specific to the paper |
+| `InertiaTransferClaim` | eq. (gap:eq:spectral-ids-transfer) | trace inertia (being formalized on ℓ²(ℤ²)) |
+| `GapLabellingClaim` | gap-labelling theorem (Bellissard; Pimsner–Voiculescu) | classical; rotation-number proof for Jacobi operators in progress |
 | `InfiniteExponentClaim` | Prop 5.6 | matrix Weyl calculus, Helffer–Sjöstrand corner quantization, K-theory labels |
 | `BrjunoCoverClaim` | Thm 4.1 | singular Jacobi preparation, return-block covers of BJK2026 §§7–8 |
 | `PacketCoverClaim` | Prop 4.12 | semiclassical finite compressions |
-| `JacobiPrepClaim` | Thm 2.4 | analytic Jacobi reduction (exact preparation at spectral energies) |
+| `JacobiPrepSmallWidthClaim` | Thm 2.4 for widths 0 < S < 7/2 | analytic Jacobi reduction at small width (Avila global theory, growth-based preparation) |
 
+Earlier stages of the reduction remain valid: `PaperIIRemainingInputs.toFinal` produces
+`structure PaperIIInputsFinal` (`thm_joint_final`, `thm_liouville_final`), and
 `PaperIIInputsFinal.toRefined` produces the intermediate bundle `structure PaperIIInputsRefined`
 (used by `thm_joint_refined`, `thm_liouville_refined`, `thm_finite_exponent_refined`):
 
