@@ -170,7 +170,7 @@ lemma fourier_coe_ne_one {α : ℝ} (hα : Irrational α) {k : ℤ} (hk : k ≠ 
   have : ((k : ℝ) * α : ℝ) = (m : ℝ) := by
     have : ((k * α : ℝ) : ℂ) = (m : ℂ) := by
       apply mul_left_cancel₀ h2
-      rw [div_one] at hm
+      simp only [Complex.ofReal_one, div_one] at hm
       push_cast
       linear_combination hm
     exact_mod_cast this
