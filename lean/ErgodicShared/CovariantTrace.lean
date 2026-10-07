@@ -143,25 +143,25 @@ end IsCovFam
 /-! ### Parseval and the interchange of sum and integral -/
 
 /-- The standard Hilbert basis `(δₙ)` of `ℓ²(ℤ)`. -/
-def stdBasis : HilbertBasis ℤ ℂ (L2 ℤ) := HilbertBasis.ofRepr (LinearIsometryEquiv.refl ℂ _)
+def deltaBasis : HilbertBasis ℤ ℂ (L2 ℤ) := HilbertBasis.ofRepr (LinearIsometryEquiv.refl ℂ _)
 
-lemma stdBasis_apply (n : ℤ) : stdBasis n = delta n := by
+lemma deltaBasis_apply (n : ℤ) : deltaBasis n = delta n := by
   rw [← HilbertBasis.repr_symm_single]; rfl
 
 /-- Parseval: `⟪δ₀, A B δ₀⟫ = ∑ₙ ⟪δ₀, A δₙ⟫ ⟪δₙ, B δ₀⟫`. -/
 lemma hasSum_inner_mul (A B : Op ℤ) :
     HasSum (fun n : ℤ => ⟪delta 0, A (delta n)⟫_ℂ * ⟪delta n, B (delta 0)⟫_ℂ)
       ⟪delta 0, (A * B) (delta 0)⟫_ℂ := by
-  have h := stdBasis.hasSum_inner_mul_inner (ContinuousLinearMap.adjoint A (delta 0))
+  have h := deltaBasis.hasSum_inner_mul_inner (ContinuousLinearMap.adjoint A (delta 0))
     (B (delta 0))
-  simp only [stdBasis_apply, ContinuousLinearMap.adjoint_inner_left] at h
+  simp only [deltaBasis_apply, ContinuousLinearMap.adjoint_inner_left] at h
   exact h
 
 /-- Bessel: `∑_{n ∈ F} ‖⟪δₙ, v⟫‖² ≤ ‖v‖²`. -/
 lemma sum_sq_le_norm_sq (v : L2 ℤ) (F : Finset ℤ) :
     ∑ n ∈ F, ‖⟪delta n, v⟫_ℂ‖ ^ 2 ≤ ‖v‖ ^ 2 := by
-  have h := stdBasis.orthonormal.sum_inner_products_le (s := F) v
-  simpa only [stdBasis_apply] using h
+  have h := deltaBasis.orthonormal.sum_inner_products_le (s := F) v
+  simpa only [deltaBasis_apply] using h
 
 /-- The `n`-th Parseval term `x ↦ ⟪δ₀, A_x δₙ⟫ ⟪δₙ, B_x δ₀⟫`. -/
 def parTerm (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) : ℂ :=
@@ -302,7 +302,8 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
     have := (Units.oneSub _ ht).isUnit
     rw [Units.val_oneSub] at this
     convert this using 1
-    noncomm_ring
+    have e : (P - Q) * (Q + Q - 1) = -((Q - P) * (Q + Q - 1)) := by rw [← neg_mul, neg_sub]
+    rw [e, ← sub_eq_add_neg]
   · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
         hPP', hQQ']
