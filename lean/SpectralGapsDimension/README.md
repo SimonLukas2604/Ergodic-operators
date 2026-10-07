@@ -20,6 +20,8 @@ admissible perturbations are `SGD.SelfDual R` (`R = R*`, `𝓕R = R`), "every la
 | `RationalBloch.lean` | clock–shift matrices and the trace filter, twisted commutation ŨṼ = e^{2πi(p/q+δ)}ṼŨ, **Chambers' cycle formula** det M(z) = A⁰ + (−1)^{q−1}(z∏c + z⁻¹∏c^♯) and its transfer-matrix form, spectral containment \|𝒟\| ≤ 4+ε | proved |
 | `MatrixLemmas.lean` | Sylvester inertia for complex Hermitian matrices (trace inertia, matrix version), duality transfer Γ = F(Q)Q⁻¹, transported flow identity, normalization-ODE invariance, projection sandwich, root-Gram identities, Woodbury boundary inclusion | proved |
 | `IDSFacts.lean` | the IDS as a distribution function (monotone, continuous if atomless, ν(a,b] = N(b)−N(a)); level-set dichotomy; uniqueness of the DOS measure; perfectness of Σ from an atomless IDS (via full support, Paper I); the paper's open-gap notion `GapOpenWeak` and its upgrade to `AMO.GapOpen` for atomless IDS | proved |
+| `AtomlessDOS.lean` | **Paper I, Lemma 2.8 (atomless half)**: for a norm-continuous, periodic, covariant self-adjoint family with `dim ker(H_x − E) ≤ d`, the DOS measure has no atom at `E` (continuous functional calculus only: shrinking bumps, a Cauchy limit vector in the kernel, Bessel, covariance averaging over N sites) | proved |
+| `AtomlessCritical.lean` | the lemma applied to `H_{α,η}(R)` (`dos_H_atomless`); `AtomlessIDSClaim` derived from `EigenspaceBoundClaim` + `DOSExistsClaim` | proved |
 | `Reductions.lean` | **Prop 3.9 (transfer) reduced** to the displayed identity (gap:eq:spectral-ids-transfer) and constancy of comparison labels: the level-set argument, the continuity contradiction and the persistence of comparison gaps (‖H_b − H_{b₀}‖ ≤ 4\|b − b₀\| plus spectral stability) are proved (`transfer_of_inertia`, `comparison_resolvent_persists`); refined input bundle `PaperIIInputsRefined` and Theorems 1.1, 1.2, 3.10 under it | proved |
 | `MainTheorems.lean` | **Theorem 1.1** (`thm_joint`), **Theorem 1.2** (`thm_liouville`), **Theorem 3.10** (`thm_finite_exponent`), proved from the hypothesis `P : PaperIIInputs`; ‖H‖ ≤ 4 + ∑\|R\|, Σ ⊂ [−5,5], compactness, Cantor assertions, weight monotonicity | proved (conditional on the 7 stated inputs) |
 
@@ -37,11 +39,12 @@ The finest form is `structure PaperIIInputsRefined` (used by `thm_joint_refined`
 | `InfiniteExponentClaim` | Prop 5.6 | matrix Weyl calculus, Helffer–Sjöstrand corner quantization, K-theory labels |
 | `BrjunoCoverClaim` | Thm 4.1 | singular Jacobi preparation, return-block covers of BJK2026 §§7–8 |
 | `PacketCoverClaim` | Prop 4.12 | semiclassical finite compressions |
-| `AtomlessIDSClaim` | Thm 2.4 + Paper I Lemma 2.8 | analytic Jacobi reduction, atomless IDS |
+| `EigenspaceBoundClaim` | Thm 2.4 (`dim:thm:center`) | analytic Jacobi reduction with nonvanishing hopping ⇒ `dim ker(H_x − E) ≤ 2` |
+| `DOSExistsClaim` | §1 (definition of `N_R`) | existence of the DOS measure; **proved** in Paper III's library (`CMS.exists_isDOSMeasure`), kept separate to avoid depending on a module under development |
 
 The coarser bundle `PaperIIInputs` (used by `thm_joint`, `thm_liouville`, `thm_finite_exponent`) has
-`TransferClaim` (Prop 3.9) in place of the two transfer inputs; `PaperIIInputsRefined.toInputs` proves it
-from them.
+`TransferClaim` (Prop 3.9) in place of the two transfer inputs and `AtomlessIDSClaim` (Thm 2.4 + Paper I
+Lemma 2.8) in place of the last two; `PaperIIInputsRefined.toInputs` proves both from the refined inputs.
 
 **Faithfulness audit.** Each claim was checked against the paper's statement (quantifier order,
 constants, conventions, the case `R = 0`). Every claim is the paper's statement or weaker (extra

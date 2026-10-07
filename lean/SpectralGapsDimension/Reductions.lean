@@ -27,6 +27,7 @@ the continuity of `g` — is proved here (`transfer_of_inertia`).
 (`thm_joint_refined`, `thm_liouville_refined`, `thm_finite_exponent_refined`).
 -/
 import SpectralGapsDimension.MainTheorems
+import SpectralGapsDimension.AtomlessCritical
 
 noncomputable section
 
@@ -306,7 +307,8 @@ theorem comparisonStability_of_label (h : ComparisonLabelStabilityClaim) :
 /-! ### Refined inputs and the main theorems -/
 
 /-- The refined inputs: `TransferClaim` is replaced by `InertiaTransferClaim` and
-`ComparisonLabelStabilityClaim`. -/
+`ComparisonLabelStabilityClaim`, and `AtomlessIDSClaim` by `EigenspaceBoundClaim` and
+`DOSExistsClaim` (Paper I Lemma 2.8, atomless half, is proved in `AtomlessDOS.lean`). -/
 structure PaperIIInputsRefined : Prop where
   comparison : ComparisonClaim
   normalization : NormalizationClaim
@@ -315,7 +317,8 @@ structure PaperIIInputsRefined : Prop where
   infiniteExponent : InfiniteExponentClaim
   brjunoCover : BrjunoCoverClaim
   packetCover : PacketCoverClaim
-  atomlessIDS : AtomlessIDSClaim
+  eigenspaceBound : EigenspaceBoundClaim
+  dosExists : DOSExistsClaim
 
 theorem PaperIIInputsRefined.toInputs (P : PaperIIInputsRefined) : PaperIIInputs where
   comparison := P.comparison
@@ -325,7 +328,7 @@ theorem PaperIIInputsRefined.toInputs (P : PaperIIInputsRefined) : PaperIIInputs
   infiniteExponent := P.infiniteExponent
   brjunoCover := P.brjunoCover
   packetCover := P.packetCover
-  atomlessIDS := P.atomlessIDS
+  atomlessIDS := atomlessIDS_of_eigenspaceBound P.dosExists P.eigenspaceBound
 
 /-- **Theorem 1.1** under the refined inputs. -/
 theorem thm_joint_refined (P : PaperIIInputsRefined) {α : ℝ} (hα : Irrational α) :

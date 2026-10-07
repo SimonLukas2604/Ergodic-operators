@@ -9,4 +9,6 @@ import SpectralGapsDimension.CornerGeometry
 import SpectralGapsDimension.RationalBloch
 import SpectralGapsDimension.MatrixLemmas
 import SpectralGapsDimension.MainTheorems
+import SpectralGapsDimension.AtomlessDOS
+import SpectralGapsDimension.AtomlessCritical
 import SpectralGapsDimension.Reductions
