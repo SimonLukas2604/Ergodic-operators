@@ -12,3 +12,4 @@ import SpectralGapsDimension.MainTheorems
 import SpectralGapsDimension.AtomlessDOS
 import SpectralGapsDimension.AtomlessCritical
 import SpectralGapsDimension.Reductions
+import SpectralGapsDimension.PaperIIIInputs

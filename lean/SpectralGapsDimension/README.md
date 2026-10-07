@@ -22,13 +22,28 @@ admissible perturbations are `SGD.SelfDual R` (`R = R*`, `𝓕R = R`), "every la
 | `IDSFacts.lean` | the IDS as a distribution function (monotone, continuous if atomless, ν(a,b] = N(b)−N(a)); level-set dichotomy; uniqueness of the DOS measure; perfectness of Σ from an atomless IDS (via full support, Paper I); the paper's open-gap notion `GapOpenWeak` and its upgrade to `AMO.GapOpen` for atomless IDS | proved |
 | `AtomlessDOS.lean` | **Paper I, Lemma 2.8 (atomless half)**: for a norm-continuous, periodic, covariant self-adjoint family with `dim ker(H_x − E) ≤ d`, the DOS measure has no atom at `E` (continuous functional calculus only: shrinking bumps, a Cauchy limit vector in the kernel, Bessel, covariance averaging over N sites) | proved |
 | `AtomlessCritical.lean` | the lemma applied to `H_{α,η}(R)` (`dos_H_atomless`); `AtomlessIDSClaim` derived from `EigenspaceBoundClaim` + `DOSExistsClaim` | proved |
+| `PaperIIIInputs.lean` | inputs discharged with Paper III's results: `DOSExistsClaim` **proved** (`CMS.exists_isDOSMeasure`); `EigenspaceBoundClaim` reduced to `JacobiPrepClaim` (Theorem 2.4: exact Jacobi preparations at spectral energies) via `CMS.JacobiPrep.finrank_ker_le_two`; final bundle `PaperIIInputsFinal`, `thm_joint_final`, `thm_liouville_final` | proved |
 | `Reductions.lean` | **Prop 3.9 (transfer) reduced** to the displayed identity (gap:eq:spectral-ids-transfer) and constancy of comparison labels: the level-set argument, the continuity contradiction and the persistence of comparison gaps (‖H_b − H_{b₀}‖ ≤ 4\|b − b₀\| plus spectral stability) are proved (`transfer_of_inertia`, `comparison_resolvent_persists`); refined input bundle `PaperIIInputsRefined` and Theorems 1.1, 1.2, 3.10 under it | proved |
 | `MainTheorems.lean` | **Theorem 1.1** (`thm_joint`), **Theorem 1.2** (`thm_liouville`), **Theorem 3.10** (`thm_finite_exponent`), proved from the hypothesis `P : PaperIIInputs`; ‖H‖ ≤ 4 + ∑\|R\|, Σ ⊂ [−5,5], compactness, Cantor assertions, weight monotonicity | proved (conditional on the 7 stated inputs) |
 
 The library contains **no `sorry` and no axioms**. The paper inputs whose proofs need theory absent from
 Mathlib are stated as propositions (`…Claim : Prop`, not asserted) and taken as explicit hypotheses.
-The finest form is `structure PaperIIInputsRefined` (used by `thm_joint_refined`,
-`thm_liouville_refined`, `thm_finite_exponent_refined`):
+The finest form is `structure PaperIIInputsFinal` (`thm_joint_final`, `thm_liouville_final`), with
+eight inputs:
+
+| Lean | Paper | needs |
+|---|---|---|
+| `ComparisonClaim` | Thm 3.6 | Thouless formula, Jitomirskaya–Marx continuity, rooted resolvents |
+| `NormalizationClaim` | Prop 3.5 | annular Riccati analysis, small divisors in the rotation algebra |
+| `InertiaTransferClaim` | eq. (gap:eq:spectral-ids-transfer) | trace inertia in finite von Neumann algebras (Paper I Lemma 2.9) |
+| `ComparisonLabelStabilityClaim` | proof of Prop 3.9 | equivalence of nearby spectral projections (K-theory) |
+| `InfiniteExponentClaim` | Prop 5.6 | matrix Weyl calculus, Helffer–Sjöstrand corner quantization, K-theory labels |
+| `BrjunoCoverClaim` | Thm 4.1 | singular Jacobi preparation, return-block covers of BJK2026 §§7–8 |
+| `PacketCoverClaim` | Prop 4.12 | semiclassical finite compressions |
+| `JacobiPrepClaim` | Thm 2.4 | analytic Jacobi reduction (exact preparation at spectral energies) |
+
+`PaperIIInputsFinal.toRefined` produces the intermediate bundle `structure PaperIIInputsRefined`
+(used by `thm_joint_refined`, `thm_liouville_refined`, `thm_finite_exponent_refined`):
 
 | Lean | Paper | needs |
 |---|---|---|
@@ -60,4 +75,5 @@ of the DOS measure.
 
 **Downstream users — keep these names stable.**
 - `ContinuumMagnetic/PaperIIBridge.lean` imports `SpectralGapsDimension.Reductions`. It uses `SGD.PaperIIInputsRefined`, `thm_joint_refined`, `thm_liouville_refined`, `IsDOSMeasure.unique`, `Liouville`, `muIrr` and `muSeq`.
+- `SpectralGapsDimension/PaperIIIInputs.lean` imports `ContinuumMagnetic.RegularRep.IDSAveraging` and `.JacobiKernel` (no cycle: no `ContinuumMagnetic` module imports it).
 - `CriticalAMOHausdorff` imports the helper lemmas in `Arithmetic`, `Hausdorff`, `MatrixLemmas` and `SmallDivisors`.
