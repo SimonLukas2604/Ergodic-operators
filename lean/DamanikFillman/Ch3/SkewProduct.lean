@@ -224,16 +224,16 @@ theorem skewProductUniquelyErgodic : SkewProductUniquelyErgodicStatement := by
   have hshift : ∀ (c : G) (p : X × G), p ∈ Gen → fibreShift c p ∈ Gen := by
     intro c p hp f
     have hfc := hp (f.comp ⟨fibreShift c, continuous_fibreShift c⟩)
-    have hint : ∫ y, (f.comp ⟨fibreShift c, continuous_fibreShift c⟩) y ∂μ = ∫ y, f y ∂μ := by
-      simp only [ContinuousMap.comp_apply, ContinuousMap.coe_mk, fibreShift, hμdef]
-      rw [integral_prod _ (integrable_continuousMap _ (f.comp
-        ⟨fibreShift c, continuous_fibreShift c⟩))]
-      rw [integral_prod _ (integrable_continuousMap _ f)]
-      congr 1
-      funext x
-      exact integral_add_right_eq_self (μ := μ₂) (fun g => f (x, g)) c
+    have hmp : MeasurePreserving (fibreShift (X := X) c) μ μ :=
+      (MeasurePreserving.id μ₁).prod (measurePreserving_add_right μ₂ c)
+    have hemb : MeasurableEmbedding (fibreShift (X := X) c) :=
+      ((Homeomorph.refl X).prodCongr (Homeomorph.addRight c)).measurableEmbedding
+    have hint : ∫ y, (f.comp ⟨fibreShift c, continuous_fibreShift c⟩) y ∂μ = ∫ y, f y ∂μ :=
+      hmp.integral_comp hemb f
     rw [hint] at hfc
-    simpa only [birkhoffAverage_fibreShift] using hfc
+    show Tendsto (fun n => birkhoffAverage ℝ (skewProd T₁ φ) f n (fibreShift c p)) atTop _
+    simp only [birkhoffAverage_fibreShift]
+    exact hfc
   -- `ν` gives full mass to `Gen`
   have hfst : MeasurePreserving Prod.fst ν μ₁ := by
     have hm : Measure.map Prod.fst ν ∈ invMeasures T₁ := by
@@ -241,7 +241,8 @@ theorem skewProductUniquelyErgodic : SkewProductUniquelyErgodicStatement := by
       · rw [Measure.map_map hT₁.measurable measurable_fst]
         have : T₁ ∘ Prod.fst = Prod.fst ∘ S := rfl
         rw [this, ← Measure.map_map measurable_fst hS.measurable, hν.1.toMeasurePreserving.map_eq]
-      · exact isProbabilityMeasure_map measurable_fst.aemeasurable
+      · exact ⟨by rw [Measure.map_apply measurable_fst MeasurableSet.univ, preimage_univ,
+          measure_univ]⟩
     rw [hμ₁] at hm
     exact ⟨measurable_fst, hm⟩
   -- `Gen` is measurable
@@ -258,6 +259,7 @@ theorem skewProductUniquelyErgodic : SkewProductUniquelyErgodicStatement := by
         exact tendsto_birkhoffAverage_of_dense hDd μ (fun g hg => h g hg) f
     rw [hGD]
     refine MeasurableSet.biInter hDc fun f _ => measurableSet_tendsto _ fun n => ?_
+    change Measurable (((n : ℝ)⁻¹) • birkhoffSum S f n)
     exact (Birkhoff.measurable_birkhoffSum hS.measurable f.continuous.measurable n).const_smul _
   set A : Set X := {x | (x, (0 : G)) ∈ Gen} with hA
   have hGA : Gen = Prod.fst ⁻¹' A := by
@@ -280,9 +282,11 @@ theorem skewProductUniquelyErgodic : SkewProductUniquelyErgodicStatement := by
       mul_one] at h1
     exact h1
   have hνGen : ∀ᵐ p ∂ν, p ∈ Gen := by
-    rw [ae_iff, hGA, ← preimage_compl, ← Measure.map_apply measurable_fst hAm.compl,
-      hfst.map_eq]
-    exact hμA
+    rw [hGA]
+    have h0 : ν (Prod.fst ⁻¹' Aᶜ) = 0 := by
+      rw [← Measure.map_apply measurable_fst hAm.compl, hfst.map_eq]
+      exact hμA
+    exact (measure_eq_zero_iff_ae_notMem.1 h0).mono fun p hp => by simpa using hp
   -- a point generic for both measures
   have hboth := (ae_isGeneric hν.1).and hνGen
   obtain ⟨p, hpν, hpμ⟩ := hboth.exists
