@@ -142,26 +142,26 @@ end IsCovFam
 
 /-! ### Parseval and the interchange of sum and integral -/
 
+/-- The standard Hilbert basis `(δₙ)` of `ℓ²(ℤ)`. -/
+def stdBasis : HilbertBasis ℤ ℂ (L2 ℤ) := HilbertBasis.ofRepr (LinearIsometryEquiv.refl ℂ _)
+
+lemma stdBasis_apply (n : ℤ) : stdBasis n = delta n := by
+  rw [← HilbertBasis.repr_symm_single]; rfl
+
 /-- Parseval: `⟪δ₀, A B δ₀⟫ = ∑ₙ ⟪δ₀, A δₙ⟫ ⟪δₙ, B δ₀⟫`. -/
 lemma hasSum_inner_mul (A B : Op ℤ) :
     HasSum (fun n : ℤ => ⟪delta 0, A (delta n)⟫_ℂ * ⟪delta n, B (delta 0)⟫_ℂ)
       ⟪delta 0, (A * B) (delta 0)⟫_ℂ := by
-  have h := lp.hasSum_inner (𝕜 := ℂ) (ContinuousLinearMap.adjoint A (delta 0)) (B (delta 0))
-  rw [ContinuousLinearMap.adjoint_inner_left] at h
-  convert h using 1
-  funext n
-  have h1 : ⟪delta n, B (delta 0)⟫_ℂ = (B (delta 0) : L2 ℤ) n := inner_delta_left2 n _
-  have h2 : ⟪delta 0, A (delta n)⟫_ℂ =
-      conj ((ContinuousLinearMap.adjoint A (delta 0) : L2 ℤ) n) := by
-    rw [← ContinuousLinearMap.adjoint_inner_left, ← inner_conj_symm, inner_delta_left2]
-  rw [h1, h2, RCLike.inner_apply']
-
-/-- Bessel: `∑_{n ∈ F} ‖v_n‖² ≤ ‖v‖²`. -/
-lemma sum_sq_le_norm_sq (v : L2 ℤ) (F : Finset ℤ) : ∑ n ∈ F, ‖v n‖ ^ 2 ≤ ‖v‖ ^ 2 := by
-  have h := lp.sum_rpow_le_norm_rpow (p := 2) (by norm_num) v F
-  have e : (2 : ENNReal).toReal = ((2 : ℕ) : ℝ) := by norm_num
-  simp only [e, Real.rpow_natCast] at h
+  have h := stdBasis.hasSum_inner_mul_inner (ContinuousLinearMap.adjoint A (delta 0))
+    (B (delta 0))
+  simp only [stdBasis_apply, ContinuousLinearMap.adjoint_inner_left] at h
   exact h
+
+/-- Bessel: `∑_{n ∈ F} ‖⟪δₙ, v⟫‖² ≤ ‖v‖²`. -/
+lemma sum_sq_le_norm_sq (v : L2 ℤ) (F : Finset ℤ) :
+    ∑ n ∈ F, ‖⟪delta n, v⟫_ℂ‖ ^ 2 ≤ ‖v‖ ^ 2 := by
+  have h := stdBasis.orthonormal.sum_inner_products_le (s := F) v
+  simpa only [stdBasis_apply] using h
 
 /-- The `n`-th Parseval term `x ↦ ⟪δ₀, A_x δₙ⟫ ⟪δₙ, B_x δ₀⟫`. -/
 def parTerm (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) : ℂ :=
@@ -171,34 +171,17 @@ lemma continuous_parTerm {α : ℝ} {A B : ℝ → Op ℤ} (hA : IsCovFam α A) 
     (n : ℤ) : Continuous (parTerm A B n) :=
   (hA.continuous_inner _ _).mul (hB.continuous_inner _ _)
 
-/-- `‖⟪δ₀, A δₙ⟫‖ = ‖(A* δ₀)ₙ‖`. -/
+/-- `‖⟪δ₀, A δₙ⟫‖ = ‖⟪δₙ, A* δ₀⟫‖`. -/
 lemma norm_inner_delta_left (A : Op ℤ) (n : ℤ) :
-    ‖⟪delta 0, A (delta n)⟫_ℂ‖ = ‖(ContinuousLinearMap.adjoint A (delta 0)) n‖ := by
-  rw [← ContinuousLinearMap.adjoint_inner_left, ← inner_delta_left2 n, ← norm_inner_symm]
-
-lemma norm_inner_delta_right (B : Op ℤ) (n : ℤ) :
-    ‖⟪delta n, B (delta 0)⟫_ℂ‖ = ‖(B (delta 0)) n‖ := by
-  rw [inner_delta_left2]
+    ‖⟪delta 0, A (delta n)⟫_ℂ‖ = ‖⟪delta n, ContinuousLinearMap.adjoint A (delta 0)⟫_ℂ‖ := by
+  rw [← ContinuousLinearMap.adjoint_inner_left, norm_inner_symm]
 
 /-- Pointwise bound `‖aₙbₙ‖ ≤ (‖aₙ‖² + ‖bₙ‖²)/2`. -/
 lemma norm_parTerm_le (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) :
     ‖parTerm A B n x‖ ≤
-      (‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖ ^ 2 + ‖(B x (delta 0)) n‖ ^ 2) / 2 := by
-  rw [parTerm, norm_mul, norm_inner_delta_left, norm_inner_delta_right]
-  nlinarith [sq_nonneg (‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖ -
-    ‖(B x (delta 0)) n‖)]
-
-lemma continuous_adjoint_coord {α : ℝ} {A : ℝ → Op ℤ} (hA : IsCovFam α A) (n : ℤ) :
-    Continuous fun x => ‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖ ^ 2 := by
-  refine (((hA.continuous_inner (delta 0) (delta n)).norm).pow 2).congr fun x => ?_
-  simp only
-  rw [norm_inner_delta_left]
-
-lemma continuous_coord {α : ℝ} {B : ℝ → Op ℤ} (hB : IsCovFam α B) (n : ℤ) :
-    Continuous fun x => ‖(B x (delta 0)) n‖ ^ 2 := by
-  refine (((hB.continuous_inner (delta n) (delta 0)).norm).pow 2).congr fun x => ?_
-  simp only
-  rw [norm_inner_delta_right]
+      (‖⟪delta 0, A x (delta n)⟫_ℂ‖ ^ 2 + ‖⟪delta n, B x (delta 0)⟫_ℂ‖ ^ 2) / 2 := by
+  rw [parTerm, norm_mul]
+  nlinarith [sq_nonneg (‖⟪delta 0, A x (delta n)⟫_ℂ‖ - ‖⟪delta n, B x (delta 0)⟫_ℂ‖)]
 
 /-- Summability of `n ↦ ∫₀¹ f_n` for nonnegative continuous `f_n` whose finite sums are bounded
 by `M` pointwise. -/
@@ -220,20 +203,25 @@ theorem tau_mul_eq_tsum {α : ℝ} {A B : ℝ → Op ℤ} (hA : IsCovFam α A) (
   obtain ⟨MB, hMB⟩ := hB.bdd
   have hpt : ∀ x, ⟪delta 0, (A x * B x) (delta 0)⟫_ℂ = ∑' n, parTerm A B n x := fun x =>
     (hasSum_inner_mul (A x) (B x)).tsum_eq.symm
+  have hcA : ∀ n, Continuous fun x => ‖⟪delta 0, A x (delta n)⟫_ℂ‖ ^ 2 := fun n =>
+    ((hA.continuous_inner _ _).norm).pow 2
+  have hcB : ∀ n, Continuous fun x => ‖⟪delta n, B x (delta 0)⟫_ℂ‖ ^ 2 := fun n =>
+    ((hB.continuous_inner _ _).norm).pow 2
   unfold tau
   simp only [intervalIntegral.integral_of_le zero_le_one, hpt]
   refine (integral_tsum_of_summable_integral_norm
     (fun n => (continuous_parTerm hA hB n).integrableOn_Ioc) ?_).symm
   -- summability of the integrated norms
-  have hsA := summable_integral_of_sum_le (continuous_adjoint_coord hA) (fun _ _ => by positivity)
+  have hsA := summable_integral_of_sum_le hcA (fun _ _ => by positivity)
     (M := MA ^ 2) fun F x => by
+      simp only [norm_inner_delta_left]
       refine (sum_sq_le_norm_sq _ F).trans ?_
       have h1 : ‖ContinuousLinearMap.adjoint (A x) (delta 0)‖ ≤ MA := by
         refine (ContinuousLinearMap.le_opNorm _ _).trans ?_
         rw [norm_delta, mul_one, LinearIsometryEquiv.norm_map]
         exact hMA x
       exact pow_le_pow_left₀ (norm_nonneg _) h1 2
-  have hsB := summable_integral_of_sum_le (continuous_coord hB) (fun _ _ => by positivity)
+  have hsB := summable_integral_of_sum_le hcB (fun _ _ => by positivity)
     (M := MB ^ 2) fun F x => by
       refine (sum_sq_le_norm_sq _ F).trans ?_
       have h1 : ‖B x (delta 0)‖ ≤ MB := by
@@ -243,10 +231,9 @@ theorem tau_mul_eq_tsum {α : ℝ} {A B : ℝ → Op ℤ} (hA : IsCovFam α A) (
       exact pow_le_pow_left₀ (norm_nonneg _) h1 2
   refine Summable.of_nonneg_of_le (fun n => setIntegral_nonneg measurableSet_Ioc
     fun x _ => norm_nonneg _) (fun n => ?_) ((hsA.add hsB).div_const 2)
-  rw [← integral_add (continuous_adjoint_coord hA n).integrableOn_Ioc
-    (continuous_coord hB n).integrableOn_Ioc, ← integral_div]
+  rw [← integral_add (hcA n).integrableOn_Ioc (hcB n).integrableOn_Ioc, ← integral_div]
   exact setIntegral_mono_on (continuous_parTerm hA hB n).norm.integrableOn_Ioc
-    (((continuous_adjoint_coord hA n).add (continuous_coord hB n)).div_const 2).integrableOn_Ioc
+    (((hcA n).add (hcB n)).div_const 2).integrableOn_Ioc
     measurableSet_Ioc fun x _ => norm_parTerm_le A B n x
 
 /-- Covariance moves the `n`-th term of `AB` to the `(-n)`-th term of `BA`. -/
@@ -303,8 +290,9 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
   constructor
   · have hS : ‖(Q + Q - 1 : Op ℤ)‖ ≤ 1 := by
       refine norm_le_one_of_involution ?_ ?_
-      · show star (Q + Q - 1) = Q + Q - 1
-        rw [star_sub, star_add, hQ.isSelfAdjoint.star_eq, star_one]
+      · have hQs : star Q = Q := hQ.isSelfAdjoint.star_eq
+        show star (Q + Q - 1) = Q + Q - 1
+        simp [hQs]
       · simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, hQQ]
         abel
     have ht : ‖(Q - P) * (Q + Q - 1)‖ < 1 := by
@@ -314,7 +302,7 @@ theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
     have := (Units.oneSub _ ht).isUnit
     rw [Units.val_oneSub] at this
     convert this using 1
-    rw [← neg_sub Q P, neg_mul, ← sub_eq_add_neg]
+    noncomm_ring
   · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
         hPP', hQQ']
