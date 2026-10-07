@@ -1,0 +1,58 @@
+name: Lean build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    defaults:
+      run:
+        shell: bash
+        working-directory: lean
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+            | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Restore project build cache
+        uses: actions/cache@v4
+        with:
+          path: lean/.lake/build
+          key: lake-build-${{ hashFiles('lean/lean-toolchain', 'lean/lake-manifest.json') }}-${{ github.sha }}
+          restore-keys: |
+            lake-build-${{ hashFiles('lean/lean-toolchain', 'lean/lake-manifest.json') }}-
+
+      - name: Download Mathlib cache
+        run: lake exe cache get
+
+      - name: Build default targets
+        run: lake build 2>&1 | tee build.log
+
+      - name: Fail on sorry
+        run: |
+          status=0
+          # warnings from modules compiled in this run
+          if grep -nE "declaration uses .sorry." build.log; then status=1; fi
+          # source scan of the default targets (also covers modules restored from cache)
+          libs=$(sed -n 's/^defaultTargets = \[\(.*\)\]/\1/p' lakefile.toml | tr -d '"' | tr ',' ' ')
+          for lib in $libs; do
+            if grep -rnE "^\s*(sorry|admit)\b|\bby (sorry|admit)\b|:= (sorry|admit)\b|^\s*axiom\s" \
+                "$lib" "$lib.lean" --include='*.lean' 2>/dev/null; then status=1; fi
+          done
+          if [ "$status" -ne 0 ]; then
+            echo "::error::sorry/admit/axiom found in a default target"
+            exit 1
+          fi
+          echo "No sorry found in: $libs"
