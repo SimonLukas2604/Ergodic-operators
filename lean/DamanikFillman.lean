@@ -60,6 +60,7 @@ import DamanikFillman.Ch3.Minimal
 import DamanikFillman.Ch3.Ruelle
 import DamanikFillman.Ch3.Schwartzman
 import DamanikFillman.Ch3.Suspension
+import DamanikFillman.Ch3.TorusErgodic
 import DamanikFillman.Ch3.TopErgodic
 import DamanikFillman.Ch3.UH
 import DamanikFillman.Ch3.UH2

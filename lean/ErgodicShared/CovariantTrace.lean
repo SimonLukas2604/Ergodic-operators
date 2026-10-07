@@ -15,9 +15,9 @@ it is norm continuous, `1`-periodic, and covariant under the shift `(Su)_n = u_{
   `n`-th term into the `(-n)`-th term of `BA`, evaluated at `x + nα`, and periodicity removes the
   shift.
 * `CMS.tau_conj`: `τ(V Q V⁻¹) = τ(Q)` for covariant `V, V⁻¹, Q`.
-* `CMS.exists_conj_of_norm_sub_lt_one`: two projections at distance `< 1` are similar,
-  `P = V Q V⁻¹` with `V = 1 + (P - Q)(2Q - 1)`.
-* `CMS.tau_eq_of_norm_sub_lt_one`: **covariant projection families at uniform distance `< 1` have
+* `CMS.exists_conj_of_norm_sub_lt`: two projections at distance `< 1/3` are similar,
+  `P = V Q V⁻¹` with `V = 1 - (Q - P)(2Q - 1)`.
+* `CMS.tau_eq_of_norm_sub_lt`: **covariant projection families at uniform distance `< 1/3` have
   the same trace.** This is the elementary replacement for the K-theoretic statement "nearby
   spectral projections are equivalent, hence have the same trace".
 -/
@@ -270,63 +270,51 @@ theorem tau_conj {α : ℝ} {V W Q : ℝ → Op ℤ} (hV : IsCovFam α V) (hW : 
 
 /-! ### Nearby projections -/
 
-/-- A self-adjoint involution has norm `≤ 1`. -/
-lemma norm_le_one_of_involution {S : Op ℤ} (hS : IsSelfAdjoint S) (h2 : S * S = 1) : ‖S‖ ≤ 1 := by
-  have h := CStarRing.norm_star_mul_self (x := S)
-  rw [hS.star_eq, h2] at h
-  have h1 : ‖(1 : Op ℤ)‖ ≤ 1 := ContinuousLinearMap.norm_id_le
-  nlinarith [norm_nonneg S]
-
-/-- **Nearby projections are similar.** If `P, Q` are projections with `‖P - Q‖ < 1`, then
-`V = 1 + (P - Q)(2Q - 1)` is invertible and `P V = V Q` (both equal `P Q`). -/
-theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
-    (hQ : IsStarProjection Q) (h : ‖P - Q‖ < 1) :
-    IsUnit (1 + (P - Q) * (Q + Q - 1)) ∧
-      P * (1 + (P - Q) * (Q + Q - 1)) = (1 + (P - Q) * (Q + Q - 1)) * Q := by
+/-- **Nearby projections are similar.** If `P, Q` are projections with `‖P - Q‖ < 1/3`, then
+`V = 1 - (Q - P)(2Q - 1)` is invertible and `P V = V Q` (both equal `P Q`). -/
+theorem exists_conj_of_norm_sub_lt {P Q : Op ℤ} (hP : IsStarProjection P)
+    (hQ : IsStarProjection Q) (h : ‖P - Q‖ < 1 / 3) :
+    IsUnit (1 - (Q - P) * (Q + Q - 1)) ∧
+      P * (1 - (Q - P) * (Q + Q - 1)) = (1 - (Q - P) * (Q + Q - 1)) * Q := by
   have hPP : P * P = P := hP.isIdempotentElem.eq
   have hQQ : Q * Q = Q := hQ.isIdempotentElem.eq
   have hPP' : ∀ X : Op ℤ, P * (P * X) = P * X := fun X => by rw [← mul_assoc, hPP]
   have hQQ' : ∀ X : Op ℤ, Q * (Q * X) = Q * X := fun X => by rw [← mul_assoc, hQQ]
   constructor
-  · have hS : ‖(Q + Q - 1 : Op ℤ)‖ ≤ 1 := by
-      refine norm_le_one_of_involution ?_ ?_
-      · have hQs : star Q = Q := hQ.isSelfAdjoint.star_eq
-        show star (Q + Q - 1) = Q + Q - 1
-        simp [hQs]
-      · simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, hQQ]
-        abel
+  · have hQ1 : ‖Q‖ ≤ 1 := IsStarProjection.norm_le Q hQ
+    have h1 : ‖(1 : Op ℤ)‖ ≤ 1 := ContinuousLinearMap.norm_id_le
+    have hS : ‖(Q + Q - 1 : Op ℤ)‖ ≤ 3 :=
+      calc ‖(Q + Q - 1 : Op ℤ)‖ ≤ ‖Q + Q‖ + ‖(1 : Op ℤ)‖ := norm_sub_le _ _
+        _ ≤ ‖Q‖ + ‖Q‖ + ‖(1 : Op ℤ)‖ := by gcongr; exact norm_add_le _ _
+        _ ≤ 3 := by linarith
     have ht : ‖(Q - P) * (Q + Q - 1)‖ < 1 := by
       calc ‖(Q - P) * (Q + Q - 1)‖ ≤ ‖Q - P‖ * ‖(Q + Q - 1 : Op ℤ)‖ := norm_mul_le _ _
-        _ ≤ ‖Q - P‖ * 1 := by gcongr
-        _ < 1 := by rw [mul_one, norm_sub_rev]; exact h
+        _ ≤ ‖Q - P‖ * 3 := by gcongr
+        _ < 1 := by rw [norm_sub_rev]; linarith
     have := (Units.oneSub _ ht).isUnit
-    rw [Units.val_oneSub] at this
-    convert this using 1
-    have e : (P - Q) * (Q + Q - 1) = -((Q - P) * (Q + Q - 1)) := by
-      rw [← neg_sub Q P]; exact neg_mul _ _
-    rw [e, ← sub_eq_add_neg]
-  · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
+    rwa [Units.val_oneSub] at this
+  · have e1 : P * (1 - (Q - P) * (Q + Q - 1)) = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
         hPP', hQQ']
       abel
-    have e2 : (1 + (P - Q) * (Q + Q - 1)) * Q = P * Q := by
+    have e2 : (1 - (Q - P) * (Q + Q - 1)) * Q = P * Q := by
       simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
         hPP', hQQ']
       abel
     rw [e1, e2]
 
-/-- **Covariant projection families at uniform distance `< 1` have the same trace.** -/
-theorem tau_eq_of_norm_sub_lt_one {α : ℝ} {P Q : ℝ → Op ℤ} (hPc : IsCovFam α P)
+/-- **Covariant projection families at uniform distance `< 1/3` have the same trace.** -/
+theorem tau_eq_of_norm_sub_lt {α : ℝ} {P Q : ℝ → Op ℤ} (hPc : IsCovFam α P)
     (hQc : IsCovFam α Q) (hP : ∀ x, IsStarProjection (P x)) (hQ : ∀ x, IsStarProjection (Q x))
-    (h : ∀ x, ‖P x - Q x‖ < 1) : tau P = tau Q := by
-  set V : ℝ → Op ℤ := fun x => 1 + (P x - Q x) * (Q x + Q x - 1) with hVdef
+    (h : ∀ x, ‖P x - Q x‖ < 1 / 3) : tau P = tau Q := by
+  set V : ℝ → Op ℤ := fun x => 1 - (Q x - P x) * (Q x + Q x - 1) with hVdef
   have hV : IsCovFam α V :=
-    IsCovFam.const_one.add ((hPc.sub hQc).mul ((hQc.add hQc).sub IsCovFam.const_one))
-  have hu : ∀ x, IsUnit (V x) := fun x => (exists_conj_of_norm_sub_lt_one (hP x) (hQ x) (h x)).1
+    IsCovFam.const_one.sub ((hQc.sub hPc).mul ((hQc.add hQc).sub IsCovFam.const_one))
+  have hu : ∀ x, IsUnit (V x) := fun x => (exists_conj_of_norm_sub_lt (hP x) (hQ x) (h x)).1
   have hW := hV.inverse hu
   have hconj : ∀ x, P x = V x * Q x * Ring.inverse (V x) := by
     intro x
-    have h1 := (exists_conj_of_norm_sub_lt_one (hP x) (hQ x) (h x)).2
+    have h1 := (exists_conj_of_norm_sub_lt (hP x) (hQ x) (h x)).2
     rw [← h1, mul_assoc, Ring.mul_inverse_cancel _ (hu x), mul_one]
   have : P = fun x => V x * Q x * Ring.inverse (V x) := funext hconj
   rw [this]

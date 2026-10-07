@@ -15,9 +15,9 @@ gap-labelling theorem is no longer an input of Paper II:
    `1` on `(-∞, c]` and `0` on `[d, ∞)`) is a projection, and `N_b(c) = τ(P_b) = ∫₀¹⟪δ₀, P_b(x) δ₀⟫dx`
    (`IDS_eq_labelFun`);
 2. `x ↦ P_b(x)` is a covariant family, and `(b, x) ↦ P_b(x)` is continuous and `1`-periodic in `x`,
-   so `‖P_b(x) - P_{b₀}(x)‖ < 1` for all `x` once `b` is close to `b₀` (tube lemma);
-3. covariant projection families at uniform distance `< 1` have the same trace
-   (`CMS.tau_eq_of_norm_sub_lt_one`: they are similar, `P = V Q V⁻¹`, and `τ(AB) = τ(BA)`).
+   so `‖P_b(x) - P_{b₀}(x)‖ < 1/3` for all `x` once `b` is close to `b₀` (tube lemma);
+3. covariant projection families at uniform distance `< 1/3` have the same trace
+   (`CMS.tau_eq_of_norm_sub_lt`: they are similar, `P = V Q V⁻¹`, and `τ(AB) = τ(BA)`).
 -/
 import SpectralGapsDimension.GapLabelling
 import ErgodicShared.CovariantTrace
@@ -104,13 +104,13 @@ lemma isStarProjection_gapProj {α : ℝ} (hα : Irrational α) {b c d : ℝ} (h
 
 /-- Uniform closeness of `P_b` to `P_{b₀}` for `b` near `b₀` (tube lemma and periodicity). -/
 lemma exists_gapProj_near (α c d b₀ : ℝ) :
-    ∃ δ > 0, ∀ b, |b - b₀| < δ → ∀ x, ‖gapProj α c d b x - gapProj α c d b₀ x‖ < 1 := by
+    ∃ δ > 0, ∀ b, |b - b₀| < δ → ∀ x, ‖gapProj α c d b x - gapProj α c d b₀ x‖ < 1 / 3 := by
   set F : ℝ × ℝ → ℝ := fun p => ‖gapProj α c d p.1 p.2 - gapProj α c d b₀ p.2‖ with hF
   have hFc : Continuous F :=
     ((continuous_gapProj α c d).sub
       ((continuous_gapProj α c d).comp (continuous_const.prodMk continuous_snd))).norm
-  have hN : IsOpen (F ⁻¹' Iio 1) := isOpen_Iio.preimage hFc
-  have hsub : ({b₀} : Set ℝ) ×ˢ Icc (0 : ℝ) 1 ⊆ F ⁻¹' Iio 1 := by
+  have hN : IsOpen (F ⁻¹' Iio (1 / 3)) := isOpen_Iio.preimage hFc
+  have hsub : ({b₀} : Set ℝ) ×ˢ Icc (0 : ℝ) 1 ⊆ F ⁻¹' Iio (1 / 3) := by
     rintro ⟨b, x⟩ ⟨hb, -⟩
     rw [mem_singleton_iff] at hb
     subst hb
@@ -124,7 +124,7 @@ lemma exists_gapProj_near (α c d b₀ : ℝ) :
   have hx : x - ⌊x⌋ * 1 ∈ Icc (0 : ℝ) 1 := by
     rw [mul_one]
     exact ⟨Int.fract_nonneg x, (Int.fract_lt_one x).le⟩
-  have hmem : (b, x - ⌊x⌋ * 1) ∈ F ⁻¹' Iio 1 :=
+  have hmem : (b, x - ⌊x⌋ * 1) ∈ F ⁻¹' Iio (1 / 3) :=
     huv ⟨hball (by rwa [Metric.mem_ball, Real.dist_eq]), hv hx⟩
   simpa [F, (hper b).sub_int_mul_eq, (hper b₀).sub_int_mul_eq] using hmem
 
@@ -142,7 +142,7 @@ theorem comparisonLabelStability : ComparisonLabelStabilityClaim := by
   obtain ⟨δ, hδ, hnear⟩ := exists_gapProj_near α c d b₀
   refine ⟨δ, hδ, fun b hb _ hresb ν ν₀ hν hν₀ => ?_⟩
   rw [IDS_eq_labelFun hα hcd hresb hν, IDS_eq_labelFun hα hcd hgap hν₀, labelFun_eq_re_tau,
-    labelFun_eq_re_tau, tau_eq_of_norm_sub_lt_one (isCovFam_gapProj α c d b)
+    labelFun_eq_re_tau, tau_eq_of_norm_sub_lt (isCovFam_gapProj α c d b)
       (isCovFam_gapProj α c d b₀) (isStarProjection_gapProj hα hcd hresb)
       (isStarProjection_gapProj hα hcd hgap) (hnear b hb)]
 
