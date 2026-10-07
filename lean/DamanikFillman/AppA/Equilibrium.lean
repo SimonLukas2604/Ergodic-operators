@@ -17,11 +17,17 @@ I. General Theory*, GSM 221, AMS 2022.
   `DF.IsEquilibriumMeasure.unique` (which uses `EnergyStrictConvexityStatement`, Prop. A.2.5)
   this gives Theorem A.2.6.
 * `DF.equilibriumExistenceStatement_holds` — the statement recorded in `Potential.lean` holds.
+* **Proposition A.2.2(e)**: `tendsto_capCompact_antitone`, `tendsto_capacity_antitone`,
+  `tendsto_capacity_monotone`, and `capacity_eq_capCompact` (the capacities (A.2.1) and
+  (A.2.2)–(A.2.3) agree on compact sets); hence `capacityRegularityStatement_holds`.
 -/
 import DamanikFillman.AppA.Potential
 import Mathlib.MeasureTheory.Measure.Prokhorov
 import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 import Mathlib.Topology.UniformSpace.UniformApproximation
+import Mathlib.Analysis.SpecialFunctions.Log.ENNRealLogExp
+import Mathlib.MeasureTheory.Measure.Portmanteau
+import Mathlib.MeasureTheory.Measure.LevyProkhorovMetric
 
 noncomputable section
 
@@ -253,5 +259,144 @@ theorem equilibriumExistenceStatement_holds : EquilibriumExistenceStatement :=
   fun _ hK hcap => exists_isEquilibriumMeasure hK hcap
 
 end Energy
+
+/-! ### Proposition A.2.2(e): regularity of the capacity -/
+
+section Regularity
+
+lemma expNeg_eq_exp_neg (x : EReal) : expNeg x = EReal.exp (-x) := by
+  induction x using EReal.rec with
+  | bot => simp
+  | top => simp
+  | coe x => rw [expNeg_coe, ← EReal.coe_neg, EReal.exp_coe]
+
+/-- `x ↦ e^{-x}` turns suprema into infima. -/
+lemma expNeg_iSup {ι : Sort*} (e : ι → EReal) : expNeg (⨆ i, e i) = ⨅ i, expNeg (e i) := by
+  simp_rw [expNeg_eq_exp_neg, ereal_neg_iSup]
+  exact EReal.expOrderIso.map_iInf _
+
+/-- Capacity is continuous along decreasing sequences of compact sets (Prop. A.2.2(e), for the
+capacity (A.2.1) of compact sets).  The proof extracts a weak-* limit of the equilibrium
+measures and uses Lemma A.2.4. -/
+theorem tendsto_capCompact_antitone {K : ℕ → Set ℂ} (hK : ∀ n, IsCompact (K n))
+    (hanti : Antitone K) :
+    Tendsto (fun n => capCompact (K n)) atTop (𝓝 (capCompact (⋂ n, K n))) := by
+  have hmono : Antitone (fun n => capCompact (K n)) := fun m n h => capCompact_mono (hanti h)
+  have hlim := tendsto_atTop_iInf hmono
+  suffices h : ⨅ n, capCompact (K n) = capCompact (⋂ n, K n) by rwa [h] at hlim
+  refine le_antisymm ?_ (le_iInf fun n => capCompact_mono (iInter_subset _ n))
+  by_cases hzero : ∃ n, capCompact (K n) = 0
+  · obtain ⟨n, hn⟩ := hzero
+    exact (iInf_le _ n).trans (hn.symm ▸ zero_le)
+  push Not at hzero
+  choose ρ hρ using fun n => exists_isEquilibriumMeasure (hK n) (hzero n)
+  have : CompactSpace (K 0) := isCompact_iff_compactSpace.1 (hK 0)
+  have hρ0 : ∀ n, ρ n ∈ M1 (K 0) := fun n => M1_mono (hanti (Nat.zero_le n)) (hρ n).1
+  choose ν hν using fun n => exists_map_val_eq (hK 0) (hρ0 n)
+  obtain ⟨νlim, -, φ, hφ, hlimν⟩ :=
+    (isCompact_univ (X := ProbabilityMeasure (K 0))).tendsto_subseq (x := ν) (fun _ => mem_univ _)
+  set ρlim := (νlim : Measure (K 0)).map ((↑) : K 0 → ℂ) with hρlim
+  -- the limit is carried by `⋂ Kₙ`
+  have hsupp : ρlim ∈ M1 (⋂ n, K n) := by
+    refine ⟨inferInstance, ?_⟩
+    rw [compl_iInter]
+    refine measure_iUnion_null fun m => ?_
+    rw [hρlim, Measure.map_apply measurable_subtype_coe (hK m).isClosed.measurableSet.compl]
+    have hopen : IsOpen (((↑) : K 0 → ℂ) ⁻¹' (K m)ᶜ) :=
+      (hK m).isClosed.isOpen_compl.preimage continuous_subtype_val
+    have h1 := ProbabilityMeasure.le_liminf_measure_open_of_tendsto hlimν hopen
+    have h2 : ∀ᶠ n in atTop,
+        ((ν ∘ φ) n : Measure (K 0)) (((↑) : K 0 → ℂ) ⁻¹' (K m)ᶜ) = 0 := by
+      filter_upwards [eventually_ge_atTop m] with n hn
+      have h3 := (hρ (φ n)).1.2
+      rw [← hν (φ n), Measure.map_apply measurable_subtype_coe
+        (hK _).isClosed.measurableSet.compl] at h3
+      exact measure_mono_null (preimage_mono (compl_subset_compl.2
+        (hanti (hn.trans (hφ.id_le n))))) h3
+    have h4 : liminf (fun n => ((ν ∘ φ) n : Measure (K 0)) (((↑) : K 0 → ℂ) ⁻¹' (K m)ᶜ))
+        atTop = 0 := by
+      rw [liminf_congr h2, liminf_const]
+    exact le_antisymm (h1.trans h4.le) zero_le
+  -- lower semicontinuity of the energy
+  have hEle : energy ρlim ≤ ⨆ n, energy (ρ n) := by
+    refine le_of_forall_lt fun y hy => ?_
+    have hev := hlimν.eventually ((lowerSemicontinuous_energy (hK 0)) νlim y hy)
+    obtain ⟨n, hn⟩ := hev.exists
+    simp only [Function.comp, hν] at hn
+    exact hn.trans_le (le_iSup (fun n => energy (ρ n)) (φ n))
+  calc ⨅ n, capCompact (K n) = ⨅ n, expNeg (energy (ρ n)) := by
+        congr 1; funext n; exact (hρ n).capCompact_eq
+    _ = expNeg (⨆ n, energy (ρ n)) := (expNeg_iSup _).symm
+    _ ≤ expNeg (energy ρlim) := expNeg_antitone hEle
+    _ ≤ capCompact (⋂ n, K n) := expNeg_energy_le_capCompact hsupp
+
+/-- For compact sets the capacity defined via (A.2.2)–(A.2.3) agrees with (A.2.1). -/
+theorem capacity_eq_capCompact {K : Set ℂ} (hK : IsCompact K) : capacity K = capCompact K := by
+  refine le_antisymm ?_ (capCompact_le_capacity hK)
+  set Kn : ℕ → Set ℂ := fun n => cthickening (1 / ((n : ℝ) + 1)) K with hKn_def
+  have hKn : ∀ n, IsCompact (Kn n) := fun n => hK.cthickening
+  have hanti : Antitone Kn := fun m n h => cthickening_mono
+    (one_div_le_one_div_of_le (by positivity) (by exact_mod_cast Nat.add_le_add_right h 1)) K
+  have hinter : ⋂ n, Kn n = K := by
+    apply subset_antisymm
+    · intro x hx
+      rw [← hK.isClosed.closure_eq, closure_eq_iInter_cthickening]
+      simp only [mem_iInter]
+      intro δ hδ
+      obtain ⟨n, hn⟩ := exists_nat_one_div_lt hδ
+      exact cthickening_mono hn.le K (mem_iInter.1 hx n)
+    · exact subset_iInter fun n => self_subset_cthickening K
+  have hlim := tendsto_capCompact_antitone hKn hanti
+  rw [hinter] at hlim
+  have hle : ∀ n, capacity K ≤ capCompact (Kn n) := by
+    intro n
+    unfold capacity
+    refine iInf_le_of_le (thickening (1 / ((n : ℝ) + 1)) K) (iInf_le_of_le isOpen_thickening
+      (iInf_le_of_le hK.isBounded.thickening
+        (iInf_le_of_le (self_subset_thickening (by positivity) K) ?_)))
+    exact iSup₂_le fun K' _ => iSup_le fun hK'O =>
+      capCompact_mono (hK'O.trans (thickening_subset_cthickening _ _))
+  exact ge_of_tendsto hlim (Eventually.of_forall hle)
+
+/-- Prop. A.2.2(e), first half. -/
+theorem tendsto_capacity_antitone {K : ℕ → Set ℂ} (hK : ∀ n, IsCompact (K n))
+    (hanti : Antitone K) :
+    Tendsto (fun n => capacity (K n)) atTop (𝓝 (capacity (⋂ n, K n))) := by
+  have hI : IsCompact (⋂ n, K n) :=
+    (hK 0).of_isClosed_subset (isClosed_iInter fun n => (hK n).isClosed) (iInter_subset _ 0)
+  simp_rw [capacity_eq_capCompact (hK _), capacity_eq_capCompact hI]
+  exact tendsto_capCompact_antitone hK hanti
+
+lemma capacity_open_eq {O : Set ℂ} (hO : IsOpen O) (hb : Bornology.IsBounded O) :
+    capacity O = ⨆ (K : Set ℂ) (_ : IsCompact K) (_ : K ⊆ O), capCompact K := by
+  apply le_antisymm
+  · exact iInf_le_of_le O (iInf_le_of_le hO (iInf_le_of_le hb (iInf_le_of_le subset_rfl le_rfl)))
+  · exact le_iInf fun O' => le_iInf fun _ => le_iInf fun _ => le_iInf fun hOO' =>
+      iSup₂_le fun K hK => iSup_le fun hKO =>
+        le_iSup_of_le K (le_iSup_of_le hK (le_iSup_of_le (hKO.trans hOO') le_rfl))
+
+/-- Prop. A.2.2(e), second half: continuity along increasing sequences of bounded open sets. -/
+theorem tendsto_capacity_monotone {O : ℕ → Set ℂ} (hO : ∀ n, IsOpen (O n)) (hmono : Monotone O)
+    (hb : Bornology.IsBounded (⋃ n, O n)) :
+    Tendsto (fun n => capacity (O n)) atTop (𝓝 (capacity (⋃ n, O n))) := by
+  have hbn : ∀ n, Bornology.IsBounded (O n) := fun n => hb.subset (subset_iUnion _ n)
+  have hcm : Monotone (fun n => capacity (O n)) := fun m n h => capacity_mono (hmono h)
+  have hlim := tendsto_atTop_iSup hcm
+  suffices h : ⨆ n, capacity (O n) = capacity (⋃ n, O n) by rwa [h] at hlim
+  refine le_antisymm (iSup_le fun n => capacity_mono (subset_iUnion _ n)) ?_
+  rw [capacity_open_eq (isOpen_iUnion hO) hb]
+  refine iSup₂_le fun K hK => iSup_le fun hKO => ?_
+  obtain ⟨n, hn⟩ := hK.elim_directed_cover O hO hKO hmono.directed_le
+  refine le_iSup_of_le n ?_
+  rw [capacity_open_eq (hO n) (hbn n)]
+  exact le_iSup_of_le K (le_iSup_of_le hK (le_iSup_of_le hn le_rfl))
+
+/-- `CapacityRegularityStatement` (Prop. A.2.2(e) and the consistency of (A.2.1) with
+(A.2.2)–(A.2.3)) holds. -/
+theorem capacityRegularityStatement_holds : CapacityRegularityStatement :=
+  ⟨fun _ hK => capacity_eq_capCompact hK, fun _ hK hanti => tendsto_capacity_antitone hK hanti,
+    fun _ hO hmono hb => tendsto_capacity_monotone hO hmono hb⟩
+
+end Regularity
 
 end DF

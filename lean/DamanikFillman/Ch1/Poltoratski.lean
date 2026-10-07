@@ -18,6 +18,7 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 * `DF.tendsto_eps_mul_borelTransformDensity`, `DF.tendsto_ratio_of_atom` — Exercise 1.10.4:
   `ε F_{fμ}(E + iε) → i f(E) μ({E})` and `F_{fμ}/F_μ → f(E)` at every atom `E`;
 * `DF.poltoratski_of_pure_point` — Theorem 1.10.1 when `μ_s` is pure point (proved);
+* `DF.poltoratski_of_lipschitz` — Theorem 1.10.1 for Lipschitz `f` (proved);
 * `DF.poltoratski_corollary` — Theorem 1.10.4, derived from Theorem 1.10.1.
 
 # Statements recorded but not proved (`Prop`s)
@@ -513,6 +514,70 @@ theorem tendsto_ratio_of_atom (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ �
   have : (ε : ℂ) ≠ 0 := by exact_mod_cast hε.ne'
   simp only [Pi.div_apply]
   rw [mul_div_mul_left _ _ this]
+
+/-! ## Theorem 1.10.1 for Lipschitz densities -/
+
+/-- Theorem 1.10.1 for Lipschitz `f`: here the elementary estimate
+`|F_{fμ}(z) - f(E) F_μ(z)| ≤ L μ(ℝ)` combined with `Im F_μ(E + iε) → ∞` (`μ_s`-a.e., (1.9.24))
+suffices.  (The content of Poltoratski's theorem is the extension to all of `L¹(μ)`.) -/
+theorem poltoratski_of_lipschitz (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → ℝ} {L : NNReal}
+    (hf : LipschitzWith L f) (hfi : Integrable f μ) :
+    ∀ᵐ (E : ℝ) ∂(μ.singularPart volume),
+      Tendsto (fun ε : ℝ => borelTransformDensity μ f (E + ε * I) / borelTransform μ (E + ε * I))
+        (𝓝[>] 0) (𝓝 (f E : ℂ)) := by
+  have h := singularPart_not_tendsto_atTop μ
+  have h' : ∀ᵐ (E : ℝ) ∂(μ.singularPart volume),
+      Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) atTop := by
+    rw [ae_iff]; exact h
+  filter_upwards [h'] with E hE
+  set C : ℝ := L * μ.real univ
+  -- the key estimate
+  have hdiff : ∀ ε : ℝ, 0 < ε →
+      ‖borelTransformDensity μ f (E + ε * I) - f E * borelTransform μ (E + ε * I)‖ ≤ C := by
+    intro ε hε
+    have hz : (E + ε * I : ℂ).im ≠ 0 := by simpa using hε.ne'
+    have heq : borelTransformDensity μ f (E + ε * I) - f E * borelTransform μ (E + ε * I) =
+        ∫ x, ((f x - f E : ℝ) : ℂ) * ((x : ℂ) - (E + ε * I))⁻¹ ∂μ := by
+      unfold borelTransformDensity borelTransform
+      rw [← integral_const_mul, ← integral_sub (integrable_density_inv_sub μ hfi hz)
+        ((integrable_inv_sub μ hz).const_mul _)]
+      congr 1; ext x; push_cast; ring
+    rw [heq]
+    calc ‖∫ x, ((f x - f E : ℝ) : ℂ) * ((x : ℂ) - (E + ε * I))⁻¹ ∂μ‖
+        ≤ ∫ _x, (L : ℝ) ∂μ := by
+          refine norm_integral_le_of_norm_le (integrable_const _)
+            (Eventually.of_forall fun x => ?_)
+          rw [norm_mul, Complex.norm_real, norm_inv]
+          have hne : ((x : ℂ) - (E + ε * I)) ≠ 0 := by
+            intro h0; have := congrArg Complex.im h0; simp at this; linarith
+          have hpos : 0 < ‖(x : ℂ) - (E + ε * I)‖ := norm_pos_iff.2 hne
+          have h1 : ‖f x - f E‖ ≤ L * |x - E| := by
+            have := hf.dist_le_mul x E; rwa [Real.dist_eq, Real.dist_eq] at this
+          have h2 : |x - E| ≤ ‖(x : ℂ) - (E + ε * I)‖ := by
+            have := Complex.abs_re_le_norm ((x : ℂ) - (E + ε * I)); simpa using this
+          rw [← div_eq_mul_inv, div_le_iff₀ hpos]
+          calc ‖f x - f E‖ ≤ L * |x - E| := h1
+            _ ≤ L * ‖(x : ℂ) - (E + ε * I)‖ := by gcongr
+      _ = C := by rw [integral_const, smul_eq_mul, mul_comm]
+  -- conclude
+  rw [tendsto_iff_norm_sub_tendsto_zero]
+  have hinv : Tendsto (fun ε : ℝ => C / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) (𝓝 0) :=
+    hE.const_div_atTop C
+  refine squeeze_zero' (Eventually.of_forall fun _ => norm_nonneg _) ?_ hinv
+  filter_upwards [hE.eventually (eventually_gt_atTop 0), self_mem_nhdsWithin] with ε hpos hε
+  have hF0 : borelTransform μ (E + ε * I) ≠ 0 := by
+    intro h0; rw [h0] at hpos; simp at hpos
+  have : borelTransformDensity μ f (E + ε * I) / borelTransform μ (E + ε * I) - f E =
+      (borelTransformDensity μ f (E + ε * I) - f E * borelTransform μ (E + ε * I)) /
+        borelTransform μ (E + ε * I) := by
+    field_simp
+  rw [this, norm_div]
+  have hle : (borelTransform μ (E + ε * I)).im ≤ ‖borelTransform μ (E + ε * I)‖ :=
+    (le_abs_self _).trans (Complex.abs_im_le_norm _)
+  calc _ ≤ C / ‖borelTransform μ (E + ε * I)‖ := by
+        gcongr; exact hdiff ε hε
+    _ ≤ C / (borelTransform μ (E + ε * I)).im := by
+        apply div_le_div_of_nonneg_left (by positivity) hpos hle
 
 /-! ## Theorem 1.10.1 (statement), its pure point case, and Theorem 1.10.4 -/
 

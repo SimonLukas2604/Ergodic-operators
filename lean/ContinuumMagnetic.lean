@@ -17,3 +17,5 @@ import ContinuumMagnetic.MainTheorems
 import ContinuumMagnetic.PaperIIBridge
 import ContinuumMagnetic.HighLandauCorollaries
 import ContinuumMagnetic.PhysicalHall
+import ContinuumMagnetic.RegularRep
+import ContinuumMagnetic.IDSAtomless

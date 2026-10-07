@@ -24,7 +24,7 @@ import DamanikFillman.Ch1.SpectralMeasure
 noncomputable section
 
 open scoped InnerProductSpace ComplexConjugate
-open L2 Filter Topology
+open L2 Filter Topology Matrix
 
 namespace DF
 
@@ -160,39 +160,38 @@ theorem eigen_of_isSolution (hV : BddPot V) {u : ℤ → ℂ} {E : ℂ} (hu : Is
   show u (n + 1) + u (n - 1) + (V n : ℂ) * u n = E * u n
   linear_combination hu n
 
-lemma summable_sq_of_L2 (ψ : L2 ℤ) : Summable fun n : ℤ => ‖ψ n‖ ^ 2 := summable_norm_sq ψ
+lemma summable_shift {f : ℤ → ℝ} (hf : Summable f) (k : ℤ) : Summable fun n => f (n + k) :=
+  (Equiv.addRight k).summable_iff.mpr hf
 
 /-- **Corollary 2.2.3**: every eigenvalue of `H` is simple. -/
 theorem eigen_simple (hV : BddPot V) {E : ℂ} {ψ φ : L2 ℤ} (hψ : schr V ψ = E • ψ)
     (hφ : schr V φ = E • φ) : ∃ a b : ℂ, (a ≠ 0 ∨ b ≠ 0) ∧ a • ψ + b • φ = 0 := by
   have h1 := isSolution_of_eigen hV hψ
   have h2 := isSolution_of_eigen hV hφ
-  have hW : wronskian (fun n => ψ n) (fun n => φ n) 0 = 0 := by
-    set W := wronskian (fun n => ψ n) (fun n => φ n) 0
-    have hbound : ∀ n : ℤ, ‖W‖ ≤ (‖ψ n‖ ^ 2 + ‖φ (n + 1)‖ ^ 2 + ‖φ n‖ ^ 2 +
-        ‖ψ (n + 1)‖ ^ 2) / 2 := by
+  set f : ℤ → ℂ := fun n => ψ n with hf
+  set g : ℤ → ℂ := fun n => φ n with hg
+  have hfs : Summable fun n => ‖f n‖ ^ 2 := summable_norm_sq ψ
+  have hgs : Summable fun n => ‖g n‖ ^ 2 := summable_norm_sq φ
+  have hW : wronskian f g 0 = 0 := by
+    have hbound : ∀ n : ℤ, ‖wronskian f g 0‖ ≤ (‖f n‖ ^ 2 + ‖g (n + 1)‖ ^ 2 + ‖g n‖ ^ 2 +
+        ‖f (n + 1)‖ ^ 2) / 2 := by
       intro n
       rw [← wronskian_const h1 h2 n, wronskian]
       refine (norm_sub_le _ _).trans ?_
       rw [norm_mul, norm_mul]
-      nlinarith [sq_nonneg (‖ψ n‖ - ‖φ (n + 1)‖), sq_nonneg (‖φ n‖ - ‖ψ (n + 1)‖)]
-    have hs : Summable fun n : ℤ => (‖ψ n‖ ^ 2 + ‖φ (n + 1)‖ ^ 2 + ‖φ n‖ ^ 2 +
-        ‖ψ (n + 1)‖ ^ 2) / 2 := by
-      have hψs := summable_norm_sq ψ
-      have hφs := summable_norm_sq φ
-      have hψ1 : Summable fun n : ℤ => ‖ψ (n + 1)‖ ^ 2 :=
-        (Equiv.addRight (1 : ℤ)).summable_iff.mpr hψs
-      have hφ1 : Summable fun n : ℤ => ‖φ (n + 1)‖ ^ 2 :=
-        (Equiv.addRight (1 : ℤ)).summable_iff.mpr hφs
-      exact (((hψs.add hφ1).add hφs).add hψ1).div_const 2
-    have hconst : Summable fun _ : ℤ => ‖W‖ :=
+      nlinarith [sq_nonneg (‖f n‖ - ‖g (n + 1)‖), sq_nonneg (‖g n‖ - ‖f (n + 1)‖)]
+    have hs : Summable fun n : ℤ => (‖f n‖ ^ 2 + ‖g (n + 1)‖ ^ 2 + ‖g n‖ ^ 2 +
+        ‖f (n + 1)‖ ^ 2) / 2 :=
+      (((hfs.add (summable_shift hgs 1)).add hgs).add (summable_shift hfs 1)).div_const 2
+    have hconst : Summable fun _ : ℤ => ‖wronskian f g 0‖ :=
       Summable.of_nonneg_of_le (fun _ => norm_nonneg _) hbound hs
-    have := summable_const_iff (‖W‖) |>.mp hconst
-    exact norm_eq_zero.mp this
+    exact norm_eq_zero.mp ((summable_const_iff _).mp hconst)
   obtain ⟨a, b, hab, h⟩ := (wronskian_eq_zero_iff h1 h2).mp hW
   refine ⟨a, b, hab, ?_⟩
   ext n
-  simpa using h n
+  simp only [lp.coeFn_add, lp.coeFn_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+    lp.coeFn_zero, Pi.zero_apply]
+  exact h n
 
 end Eigen
 
@@ -301,14 +300,13 @@ lemma sqSumBot_iff_of_eventually {u v : ℤ → ℂ} {N : ℤ} (h : ∀ n, n ≤
   exact ⟨(-N).toNat, fun n hn => by rw [h (-n) (by omega)]⟩
 
 lemma sqSumTop_shift {u : ℤ → ℂ} (h : SqSumTop u) (k : ℕ) :
-    Summable fun n : ℕ => ‖u (n + k)‖ ^ 2 := by
-  have := (summable_nat_add_iff k).mpr h
-  simpa [Nat.cast_add] using this
+    Summable fun n : ℕ => ‖u (n + k)‖ ^ 2 :=
+  ((summable_nat_add_iff k).mpr h).congr fun n => by push_cast; rfl
 
 lemma sqSumBot_shift {u : ℤ → ℂ} (h : SqSumBot u) (k : ℕ) :
-    Summable fun n : ℕ => ‖u (-n - k)‖ ^ 2 := by
-  have := (summable_nat_add_iff k).mpr h
-  simpa [Nat.cast_add, neg_add, sub_eq_add_neg] using this
+    Summable fun n : ℕ => ‖u (-n - k)‖ ^ 2 :=
+  ((summable_nat_add_iff k).mpr h).congr fun n => by
+    congr 3; push_cast; ring
 
 lemma tendsto_zero_of_summable_sq {f : ℕ → ℂ} (h : Summable fun n => ‖f n‖ ^ 2) :
     Tendsto f atTop (𝓝 0) := by

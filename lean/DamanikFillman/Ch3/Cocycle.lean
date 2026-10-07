@@ -26,8 +26,12 @@ Main results:
 Statements (stated as `Prop`s, not asserted):
 * `DF.Cocycle.UniformHyperbolicityCharacterizationStatement` — Theorem 3.8.2 (equivalence of
   (a) uniform exponential growth, (b) invariant exponential splitting, (c) absence of bounded
-  orbits; item (d), projective conjugacy to a diagonal cocycle, is omitted);
-* `DF.Cocycle.RuelleStatement` — Theorem 3.8.7 (deterministic Oseledets/Ruelle theorem);
+  orbits; item (d), projective conjugacy to a diagonal cocycle, is omitted). The equivalence
+  (a) ⟺ (c) is **proved** in `DamanikFillman.Ch3.UH` and `DamanikFillman.Ch3.UH2`
+  (`DF.Cocycle.uniformExpGrowth_iff_not_boundedOrbit`); only the part involving (b) remains
+  unproved. Robustness (Corollary 3.8.5, fixed `T`) is in `DamanikFillman.Ch3.UHOpen`;
+* `DF.Cocycle.RuelleStatement` — Theorem 3.8.7 (deterministic Oseledets/Ruelle theorem,
+  complex case); **proved** in `DamanikFillman.Ch3.Ruelle` (`DF.Cocycle.ruelle`);
 * `DF.Cocycle.OseledetsStatement` — Corollary 3.8.8 (multiplicative ergodic theorem).
 -/
 import DamanikFillman.Ch3.Kingman

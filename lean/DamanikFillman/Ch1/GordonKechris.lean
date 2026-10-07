@@ -26,9 +26,10 @@ Measurability notions follow Definition 1.4.17 of the book: an operator family `
 * `DF.inner_eq_zero_of_eigen` — eigenvectors of a self-adjoint operator for distinct eigenvalues
   are orthogonal (used in Lemma 1.12.6(b)).
 
-# Statements recorded but not proved (`Prop`s)
+# Statements (`Prop`s)
 
-* `DF.GordonKechrisStatement` — Theorem 1.12.2 (Gordon–Kechris).
+* `DF.GordonKechrisStatement` — Theorem 1.12.2 (Gordon–Kechris); proved in
+  `DamanikFillman.Ch1.GordonKechrisProof` as `DF.gordonKechrisStatement_holds`.
 
 # Deviations
 
@@ -78,6 +79,7 @@ section Separable
 
 variable [TopologicalSpace.SeparableSpace H]
 
+omit [TopologicalSpace.SeparableSpace H] in
 /-- The norm is the supremum of `|⟨d, v⟩|` over a dense sequence `d` of the closed unit ball. -/
 lemma enorm_eq_iSup_inner {d : ℕ → H} (hd1 : ∀ n, ‖d n‖ ≤ 1)
     (hd : ∀ u : H, ‖u‖ ≤ 1 → ∀ δ > 0, ∃ n, ‖d n - u‖ < δ) (v : H) :
@@ -93,8 +95,10 @@ lemma enorm_eq_iSup_inner {d : ℕ → H} (hd1 : ∀ n, ‖d n‖ ≤ 1)
       rw [inv_mul_cancel₀ hvpos.ne']
     obtain ⟨n, hn⟩ := hd u hu (δ / (‖v‖ + 1)) (by positivity)
     have hinner : inner ℂ u v = ‖v‖ := by
+      have hv' : (‖v‖ : ℂ) ≠ 0 := by exact_mod_cast hvpos.ne'
       simp only [u, inner_smul_left, inner_self_eq_norm_sq_to_K, map_inv₀, Complex.conj_ofReal]
       field_simp
+      rfl
     have h1 : ‖v‖ ≤ ‖inner ℂ (d n) v‖ + δ := by
       have h2 : ‖inner ℂ u v‖ ≤ ‖inner ℂ (d n) v‖ + ‖inner ℂ (u - d n) v‖ := by
         rw [inner_sub_left]
@@ -121,12 +125,14 @@ lemma enorm_eq_iSup_inner {d : ℕ → H} (hd1 : ∀ n, ‖d n‖ ≤ 1)
           gcongr; rw [← ofReal_norm, ← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal (hd1 n)
       _ = ‖v‖ₑ := one_mul _
 
+omit [InnerProductSpace ℂ H] in
 /-- A dense sequence in the closed unit ball. -/
 lemma exists_dense_seq_closedBall :
     ∃ d : ℕ → H, (∀ n, ‖d n‖ ≤ 1) ∧ ∀ u : H, ‖u‖ ≤ 1 → ∀ δ > 0, ∃ n, ‖d n - u‖ < δ := by
-  haveI : Nonempty (closedBall (0 : H) 1) := ⟨⟨0, by simp⟩⟩
+  have : Nonempty (closedBall (0 : H) 1) := ⟨⟨0, by simp⟩⟩
   obtain ⟨d, hd⟩ := TopologicalSpace.exists_dense_seq (closedBall (0 : H) 1)
-  refine ⟨fun n => d n, fun n => by simpa using (d n).2, fun u hu δ hδ => ?_⟩
+  refine ⟨fun n => d n, fun n => by
+    have := (d n).2; rw [mem_closedBall, dist_zero_right] at this; exact this, fun u hu δ hδ => ?_⟩
   obtain ⟨n, hn⟩ := hd.exists_dist_lt (⟨u, by simpa using hu⟩ : closedBall (0 : H) 1) hδ
   exact ⟨n, by rw [← dist_eq_norm, dist_comm]; exact hn⟩
 
@@ -173,7 +179,7 @@ theorem measurable_inner_apply {A : Ω → H →L[ℂ] H} (hA : WeaklyMeasurable
         ext ω
         rw [ContinuousLinearMap.adjoint_inner_right, inner_conj_symm]
       rw [this]
-      exact Complex.measurable_conj.comp (hA χ η)
+      exact Complex.continuous_conj.measurable.comp (hA χ η)
     have : (fun ω => inner ℂ χ (A ω (ψ ω))) =
         fun ω => inner ℂ (ContinuousLinearMap.adjoint (A ω) χ) (ψ ω) := by
       ext ω; rw [ContinuousLinearMap.adjoint_inner_left]
@@ -206,17 +212,18 @@ structure MeasurableEigenEnumeration (A : Ω → H →L[ℂ] H) where
   measurable_E : ∀ m, Measurable (E m)
   measurable_ϕ : ∀ m, VecMeasurable (ϕ m)
   /-- (a): `A_ω ϕ_m(ω) = E_m(ω) ϕ_m(ω)` on `Ω_m` -/
-  eigen : ∀ m, 1 ≤ m → ∀ ω, (m : ℕ∞) ≤ eigenCount (A ω) → A ω (ϕ m ω) = (E m ω : ℂ) • ϕ m ω
+  eigen : ∀ m : ℕ, 1 ≤ m → ∀ ω, (m : ℕ∞) ≤ eigenCount (A ω) → A ω (ϕ m ω) = (E m ω : ℂ) • ϕ m ω
   /-- (b): for each eigenvalue `E` of `A_ω`, `{ϕ_m(ω) : E_m(ω) = E}` is an orthonormal basis of
   the eigenspace. -/
-  basis : ∀ ω (E : ℝ), (∃ v, IsEigenvec (A ω) E v) →
-    Orthonormal ℂ (fun m : {m : ℕ // 1 ≤ m ∧ (m : ℕ∞) ≤ eigenCount (A ω) ∧ E = E m ω} =>
-      ϕ m ω) ∧
+  basis : ∀ ω (lam : ℝ), (∃ v, IsEigenvec (A ω) lam v) →
+    Orthonormal ℂ (fun m : {m : ℕ // 1 ≤ m ∧ (m : ℕ∞) ≤ eigenCount (A ω) ∧ lam = E m ω} =>
+      ϕ m.1 ω) ∧
     (Submodule.span ℂ (range fun m : {m : ℕ // 1 ≤ m ∧ (m : ℕ∞) ≤ eigenCount (A ω) ∧
-      E = E m ω} => ϕ m ω)).topologicalClosure =
-      LinearMap.ker (A ω - (E : ℂ) • (1 : H →L[ℂ] H))
+      lam = E m ω} => ϕ m.1 ω)).topologicalClosure =
+      LinearMap.ker ((A ω - (lam : ℂ) • (1 : H →L[ℂ] H) : H →L[ℂ] H) : H →ₗ[ℂ] H)
 
-/-- Theorem 1.12.2 (Gordon–Kechris), recorded as a statement for given `Ω` and `H`: every weakly
+/-- Theorem 1.12.2 (Gordon–Kechris), as a statement for given `Ω` and `H` (proved in
+`DamanikFillman.Ch1.GordonKechrisProof`): every weakly
 measurable family of bounded self-adjoint operators on a separable Hilbert space admits a
 measurable enumeration of eigenelements. -/
 def GordonKechrisStatement (Ω : Type*) [MeasurableSpace Ω] (H : Type*) [NormedAddCommGroup H]
@@ -289,9 +296,8 @@ theorem isAgreeable_closedBall {φ : H} (hφ : ‖φ‖ = 1) : IsAgreeable (clos
     rw [e₁, e₂]
     simp only [inner_add_left, inner_add_right, inner_smul_left, inner_smul_right,
       Complex.conj_ofReal, hφφ, Complex.add_re, Complex.mul_re, Complex.ofReal_re,
-      Complex.ofReal_im, zero_mul, sub_zero, mul_one, Complex.one_re, Complex.one_im,
-      mul_zero]
-    have : (inner ℂ w₁ φ).re = 0 := by rw [← inner_conj_symm]; simpa using o₁
+      Complex.ofReal_im, zero_mul, sub_zero, mul_one]
+    have : (inner ℂ w₁ φ).re = 0 := by rw [← inner_conj_symm, Complex.conj_re]; exact o₁
     rw [o₂, this]; ring
   have hcs : |(inner ℂ w₁ w₂).re| ≤ ‖w₁‖ * ‖w₂‖ :=
     (Complex.abs_re_le_norm _).trans (norm_inner_le_norm _ _)
@@ -300,7 +306,7 @@ theorem isAgreeable_closedBall {φ : H} (hφ : ‖φ‖ = 1) : IsAgreeable (clos
   nlinarith [mul_pos (by linarith : (0 : ℝ) < a₁) (by linarith : (0 : ℝ) < a₂)]
 
 /-- Eigenvectors of a self-adjoint operator for distinct eigenvalues are orthogonal. -/
-theorem inner_eq_zero_of_eigen {T : H →L[ℂ] H} (hT : IsSelfAdjoint T) {E₁ E₂ : ℝ} {v₁ v₂ : H}
+theorem inner_eq_zero_of_eigen [CompleteSpace H] {T : H →L[ℂ] H} (hT : IsSelfAdjoint T) {E₁ E₂ : ℝ} {v₁ v₂ : H}
     (h₁ : T v₁ = (E₁ : ℂ) • v₁) (h₂ : T v₂ = (E₂ : ℂ) • v₂) (hne : E₁ ≠ E₂) :
     inner ℂ v₁ v₂ = 0 := by
   have hsym : inner ℂ (T v₁) v₂ = inner ℂ v₁ (T v₂) := hT.isSymmetric v₁ v₂

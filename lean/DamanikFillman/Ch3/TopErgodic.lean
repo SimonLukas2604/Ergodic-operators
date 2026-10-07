@@ -28,11 +28,13 @@ Main results:
 Deviations: in the converse direction of Proposition 3.5.6 we use the Krylov–Bogolyubov theorem
 instead of the Riesz representation theorem to produce the invariant measure.
 
-Statements (stated, not proved):
-* `DF.ErgodicMeasureExistsStatement` — `E₁(Ω, T) ≠ ∅` (second half of Proposition 3.5.3(b),
-  which the book derives from the Krein–Milman theorem);
-* `DF.FurmanStatement` — Theorem 3.5.8 (Furman);
-* `DF.ErgodicDecompositionStatement` — Theorem 3.5.12 (ergodic decomposition).
+Statements:
+* `DF.ErgodicMeasureExistsStatement` — `E₁(Ω, T) ≠ ∅` (second half of Proposition 3.5.3(b));
+  **proved** in `DamanikFillman.Ch3.Generic` (`DF.ergodicMeasureExists`), by a nested-faces
+  argument replacing the Krein–Milman theorem;
+* `DF.FurmanStatement` — Theorem 3.5.8 (Furman) in full generality; the version with the bound
+  `|f_n| ≤ C n` is proved in `DamanikFillman.Ch3.Furman` (`DF.furman`);
+* `DF.ErgodicDecompositionStatement` — Theorem 3.5.12 (ergodic decomposition), stated only.
 -/
 import DamanikFillman.Ch3.Birkhoff
 

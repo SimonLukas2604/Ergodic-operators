@@ -20,6 +20,7 @@ import AvilaGlobal.UniformHyperbolicity
 import AvilaGlobal.UHOpen
 import AvilaGlobal.RegularUH
 import AvilaGlobal.UHAnalytic
+import AvilaGlobal.UHSmooth
 
 noncomputable section
 

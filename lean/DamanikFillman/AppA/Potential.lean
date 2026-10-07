@@ -45,6 +45,7 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
 * `capCompact_eq_zero_iff`, `expNeg_energy_le_capCompact` — `Cap(K) = 0` iff all `μ ∈ M1(K)`
   have infinite energy; `e^{-E(μ)} ≤ Cap(K)` (used in Lemma 4.6.6).
 * Theorem A.2.9, first half: `logPotential_le_liminf`.
+* `logPotential_le_of_real_support` — `Φ_μ(x + iy) ≤ Φ_μ(x)` for measures on `ℝ` (Notes to A.2).
 * Definition A.2.7 / Theorem A.2.6: `IsEquilibriumMeasure`, `IsEquilibriumMeasure.capCompact_eq`
   ((A.2.8)), `IsEquilibriumMeasure.unique` (uniqueness, from Prop. A.2.5).  Existence (via
   Lemma A.2.4) is proved in `DamanikFillman/AppA/Equilibrium.lean`.
@@ -54,7 +55,8 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
 * `EnergyStrictConvexityStatement` — Prop. A.2.5 (the book only sketches the proof);
 * `EquilibriumExistenceStatement` — Thm. A.2.6, existence (proved in `Equilibrium.lean`:
   `equilibriumExistenceStatement_holds`);
-* `CapacityRegularityStatement` — Prop. A.2.2(e) and consistency of (A.2.1) with (A.2.2)–(A.2.3);
+* `CapacityRegularityStatement` — Prop. A.2.2(e) and consistency of (A.2.1) with (A.2.2)–(A.2.3)
+  (proved in `Equilibrium.lean`: `capacityRegularityStatement_holds`);
 * `FrostmanStatement` — Thm. A.2.8;
 * `LowerEnvelopeStatement` — Thm. A.2.9, second half (equality q.e.);
 * `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature);
@@ -616,8 +618,8 @@ theorem capCompact_eq_zero_of_countable {K : Set ℂ} (hK : IsCompact K) (hKc : 
 
 /-! ### Proposition A.2.2(f) -/
 
-/-- Prop. A.2.2(f): a finite measure of finite logarithmic energy gives no weight to Borel sets
-of capacity zero. -/
+/-- Prop. A.2.2(f): Borel sets of zero capacity are null sets for every finite measure (with
+finite first moment) whose logarithmic energy is finite. -/
 theorem measure_eq_zero_of_capacity_eq_zero [IsFiniteMeasure μ]
     (hμ : Integrable (fun w => ‖w‖) μ) (hE : energy μ ≠ ⊤) {B : Set ℂ} (hB : MeasurableSet B)
     (hcap : capacity B = 0) : μ B = 0 := by
@@ -894,6 +896,30 @@ theorem harmonicOnNhd_logPotential [IsFiniteMeasure μ] {K : Set ℂ} (hK : IsCo
     exact integral_re (hintL z hz)
   rw [InnerProductSpace.harmonicAt_congr_nhds heq]
   exact (InnerProductSpace.harmonicAt_const C0).sub hre
+
+/-! ### Measures on the real line (Notes and Remarks to A.2) -/
+
+lemma logKer_antitone_norm (N : ℕ) {x y : ℂ} (h : ‖x‖ ≤ ‖y‖) : logKer N y ≤ logKer N x := by
+  unfold logKer
+  rw [neg_le_neg_iff]
+  exact Real.log_le_log (max_norm_exp_pos N x) (max_le_max h le_rfl)
+
+/-- For a measure carried by `ℝ`, `Φ_μ(x + iy) ≤ Φ_μ(x)` (book, Notes and Remarks to §A.2):
+moving off the real axis only increases the distance to the support. -/
+theorem logPotential_le_of_real_support [IsFiniteMeasure μ] (hμ : Integrable (fun w => ‖w‖) μ)
+    (hℝ : ∀ᵐ w ∂μ, w.im = 0) (z : ℂ) : logPotential μ z ≤ logPotential μ (z.re : ℂ) := by
+  refine iSup_le fun N => le_trans ?_ (le_iSup (fun N : ℕ =>
+    ((∫ w, logKer N ((z.re : ℂ) - w) ∂μ : ℝ) : EReal)) N)
+  rw [EReal.coe_le_coe_iff]
+  refine integral_mono_ae (integrable_logKer hμ N z) (integrable_logKer hμ N _) ?_
+  filter_upwards [hℝ] with w hw
+  apply logKer_antitone_norm
+  have e : (z.re : ℂ) - w = ((z.re - w.re : ℝ) : ℂ) := by
+    apply Complex.ext <;> simp [hw]
+  rw [e, Complex.norm_real, Real.norm_eq_abs]
+  have := Complex.abs_re_le_norm (z - w)
+  simpa using this
+
 
 /-! ### Further statements of Appendix A.2 (recorded, not proved) -/
 

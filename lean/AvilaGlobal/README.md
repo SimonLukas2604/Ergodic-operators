@@ -6,14 +6,13 @@ only `propext`, `Classical.choice`, `Quot.sound`.
 
 ## What is assumed
 
-Every result of the paper itself is proved.  The only inputs that are not proved are the three
-results the paper cites from the literature, which are *stated, not asserted*.  They appear as hypotheses in
+Every result of the paper itself is proved, and so are all the inputs it cites except one: the
+continuity theorem [JKS], which is *stated, not asserted*.  They appear as hypotheses in
 the statements that use them:
 
 | Hypothesis | Where | Content |
 |---|---|---|
 | `Hypotheses.jks` | `Background.lean` | [JKS]/[BJ1]: joint continuity of `L` at irrational frequencies |
-| `Hypotheses.uhAnalytic`, `.uhSmooth` | `Background.lean` | [HPS]: on `𝒰ℋ`, `L` is real-analytic in parameters and `C^∞` in frequency and parameters |
 
 A theorem that depends on the first group carries the instance argument `[Hypotheses]`.
 (Inside `Stratified`, `Codimension` and `AlmostMathieu` it is a section variable, so some
@@ -33,6 +32,8 @@ auxiliary lemmas carry it even though they don't use it.)
 | `UHOpen.lean` | **openness of `𝒰ℋ`** (`uh_open`), via cone fields and a graph transform |
 | `Johnson.lean` | **Johnson's theorem** (`johnson`): `E ∉ Σ ⇔ (α, A^{(E-v)}) ∈ 𝒰ℋ` for irrational `α`, via the Green's function and exponential dichotomy |
 | `RegularUH.lean` | **the hard direction of Theorem `uniformly hyperbolic`** (`regular_pos_imp_uh`: regular with `L > 0` ⇒ UH) and **Lemma `per`**, from [JKS] alone: the trace estimate for periodic approximants, spectral projections, a log-derivative bound in place of Lemma `gam`, then Arzelà–Ascoli and Weyl equidistribution in place of the normality argument |
+| `UHAnalytic.lean` | **real-analytic dependence of `L` on `𝒰ℋ`** at fixed frequency (`uh_analytic_family`, one half of [HPS]): the family as an analytic map into bounded continuous functions, the invariant graph by the analytic implicit function theorem, and an analytic log-integral |
+| `UHSmooth.lean` | **`C^∞` dependence of `L` on `𝒰ℋ` jointly in frequency and parameters** (`uh_smooth_family`, the other half of [HPS]), rationals included: projective approximants with exponential contraction, Cauchy estimates along complex lines, and a summable series of smooth functions |
 | `DerivFormula.lean` | **the derivative formula** for `L` on `𝒰ℋ` (§3.2), for every `α`, via graph transforms (no [HPS] needed) |
 | `Cod1.lean` | **Theorem `cod1`** and **Theorem `cod`**: joint analyticity of `(v, z) ↦ v(z)` on `C^ω_δ`, diagonalising frames, the extension of `q₃`, `q₂`, `q₁` across `ℝ`, and a holomorphic-logarithm argument in place of the paper's rotation/homotopy step |
 | `RationalExample.lean` | Remark `rational`: at `p/q` with `q ∣ q₀` the diagonal example has `L = (2/π)e^{-2πq₀ε}` and acceleration `-2q₀/π ∉ ℤ`; `L = 0` at irrational `α` |

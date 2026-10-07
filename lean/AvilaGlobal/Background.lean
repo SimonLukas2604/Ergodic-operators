@@ -12,13 +12,11 @@ depending on them carries `[Hypotheses]`.
   Schulteis [JKS]): `(α, A) ↦ L(α, A)` is continuous at every `(α, A)` with `α` irrational,
   for convergence `α_n → α` (arbitrary real, possibly rational, `α_n`) and `A_n → A`
   uniformly on a strip.
-* `uh_smooth_family` — the property of uniformly hyperbolic
-  cocycles quoted in §1.2 (normally hyperbolic theory [HPS]): `L` is
-  real-analytic in real-analytic families at fixed frequency and `C^∞` jointly in frequency
-  and parameters.
 
-Openness of `𝒰ℋ` and Johnson's theorem, also quoted in §1.2, are **proved** in `UHOpen.lean`
-and `Johnson.lean`.
+The other inputs quoted in §1.2 are **proved** elsewhere: openness of `𝒰ℋ` (`UHOpen.lean`),
+Johnson's theorem (`Johnson.lean`), and the [HPS] regularity of `L` on `𝒰ℋ` — real-analytic in
+parameters (`UHAnalytic.lean`) and `C^∞` jointly in frequency and parameters (`UHSmooth.lean`).
+So `Hypotheses` consists of [JKS] alone.
 -/
 import AvilaGlobal.Basic
 
@@ -479,9 +477,6 @@ paper that are not proved in this formalization:
 * `jks` — **Theorem [JKS]** (Bourgain–Jitomirskaya [BJ1], Jitomirskaya–Koslover–Schulteis
   [JKS]): continuity of `(α, A) ↦ L(α, A)` at irrational `α`, jointly, for `αₙ → α` (arbitrary
   reals) and `Aₙ → A` uniformly on a strip.  (The paper's Theorem `con` is the case `Aₙ = A`.)
-* `uhSmooth` — the property of uniformly hyperbolic cocycles quoted in §1.2 from normally
-  hyperbolic theory [HPS]: on `𝒰ℋ` the Lyapunov exponent is `C^∞` jointly in the frequency and
-  the parameters.  (Real-analytic dependence at fixed frequency is proved in `UHAnalytic.lean`.)
 
 Every theorem that depends on one of these carries the instance argument `[Hypotheses]` in its
 statement. -/
@@ -493,11 +488,6 @@ class Hypotheses : Prop where
     ∀ {αs : ℕ → ℝ} {As : ℕ → ℂ → M2}, (∀ n, IsAnalyticCocycle δ (As n)) →
       Tendsto αs atTop (𝓝 α) → TendstoUniformlyOn As A atTop (strip δ) →
         Tendsto (fun n => L (αs n) (As n) 0) atTop (𝓝 (L α A 0))
-  /-- `C^∞` dependence on `𝒰ℋ`, jointly in the frequency and the parameters [HPS]. -/
-  uhSmooth : ∀ {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P] {δ : ℝ} {U : Set P}
-    {A : P → ℂ → M2}, IsAnalyticCocycleFamily δ U A → ∀ {α₀ : ℝ} {p₀ : P}, p₀ ∈ U →
-      UH α₀ (A p₀) →
-        ∃ W ∈ 𝓝 (α₀, p₀), ContDiffOn ℝ ∞ (fun q : ℝ × P => L q.1 (A q.2) 0) W
 
 section Hypotheses
 
@@ -510,13 +500,6 @@ theorem jks_continuity {δ : ℝ} {A : ℂ → M2} (hA : IsAnalyticCocycle δ A)
     (hαs : Tendsto αs atTop (𝓝 α)) (hconv : TendstoUniformlyOn As A atTop (strip δ)) :
     Tendsto (fun n => L (αs n) (As n) 0) atTop (𝓝 (L α A 0)) :=
   H.jks hA hα hAs hαs hconv
-
-/-- `C^∞` dependence on `𝒰ℋ`, jointly in the frequency and the parameters. -/
-theorem uh_smooth_family {P : Type} [NormedAddCommGroup P] [NormedSpace ℝ P] {δ : ℝ}
-    {U : Set P} {A : P → ℂ → M2} (hA : IsAnalyticCocycleFamily δ U A) {α₀ : ℝ} {p₀ : P}
-    (hp₀ : p₀ ∈ U) (hUH : UH α₀ (A p₀)) :
-    ∃ W ∈ 𝓝 (α₀, p₀), ContDiffOn ℝ ∞ (fun q : ℝ × P => L q.1 (A q.2) 0) W :=
-  H.uhSmooth hA hp₀ hUH
 
 end Hypotheses
 

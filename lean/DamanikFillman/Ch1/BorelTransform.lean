@@ -21,10 +21,12 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 * `DF.im_div_one_add_mul` — the algebraic identity behind (1.9.34);
 * `DF.im_rankOne_borel` — (1.9.34).
 
-# Statements recorded but not proved (`Prop`s)
+# Statements (`Prop`s), proved in later files
 
-* `DF.HerglotzRepresentationStatement` — Theorem 1.9.2 (Herglotz representation);
-* `DF.CaratheodoryRepresentationStatement` — Theorem 1.9.3 (Carathéodory representation).
+* `DF.HerglotzRepresentationStatement` — Theorem 1.9.2 (Herglotz representation), proved in
+  `DamanikFillman.Ch1.BorelHerglotz`;
+* `DF.CaratheodoryRepresentationStatement` — Theorem 1.9.3 (Carathéodory representation), proved
+  in `DamanikFillman.Ch1.BorelCaratheodory`.
 
 # Deviations
 
@@ -333,17 +335,21 @@ end RankOne
 
 /-! ## Herglotz and Carathéodory representations (recorded as statements) -/
 
-/-- Theorem 1.9.2 (Herglotz representation), recorded as a statement: a function `F` is Herglotz
-iff `F(z) = a + b z + ∫ (1/(x - z) - x/(1 + x²)) dμ(x)` with `a ∈ ℝ`, `b ≥ 0`, and a nonzero
-measure `μ` with `∫ dμ/(1 + x²) < ∞`. -/
+/-- Theorem 1.9.2 (Herglotz representation), as a statement: a function `F` is Herglotz
+iff `F(z) = a + b z + ∫ (1/(x - z) - x/(1 + x²)) dμ(x)` with `a ∈ ℝ`, `b ≥ 0`, and a measure `μ`
+with `∫ dμ/(1 + x²) < ∞`, where `b > 0` or `μ ≠ 0`.  (The book asks for `μ ≠ 0`; this is not
+quite right, e.g. `F(z) = z` is Herglotz with `μ = 0`, `b = 1`.)  Proved in
+`DamanikFillman.Ch1.BorelHerglotz` as `DF.herglotzRepresentationStatement_holds`. -/
 def HerglotzRepresentationStatement : Prop :=
   ∀ F : ℂ → ℂ, IsHerglotz F ↔
-    ∃ (a b : ℝ) (μ : Measure ℝ), 0 ≤ b ∧ μ ≠ 0 ∧
+    ∃ (a b : ℝ) (μ : Measure ℝ), 0 ≤ b ∧ (b ≠ 0 ∨ μ ≠ 0) ∧
       Integrable (fun x : ℝ => 1 / (1 + x ^ 2)) μ ∧
       ∀ z : ℂ, 0 < z.im →
         F z = a + b * z + ∫ x, (((x : ℂ) - z)⁻¹ - (x : ℂ) / (1 + (x : ℂ) ^ 2)) ∂μ
 
-/-- Theorem 1.9.3 (Carathéodory representation), recorded as a statement: `G` is analytic on the
+/-- Theorem 1.9.3 (Carathéodory representation), as a statement (proved in
+`DamanikFillman.Ch1.BorelCaratheodory` as `DF.caratheodoryRepresentationStatement_holds`): `G` is
+analytic on the
 unit disk with positive real part iff `G(z) = i c + ∫_{∂𝔻} (w + z)/(w - z) dν(w)` for some
 `c ∈ ℝ` and a finite (nonzero) measure `ν` on the unit circle.  (We encode `ν` as a finite
 measure on `ℂ` concentrated on the unit circle.) -/

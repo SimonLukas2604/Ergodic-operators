@@ -11,6 +11,8 @@ I. General Theory*, GSM 221, AMS 2022.
 * `DF.integral_ex_int` — orthogonality of the exponentials on `[0, 1]`.
 * `DF.circleCoeff_log_one_sub` — the Fourier coefficients of `log |1 - w e^{2πix}|` for
   `|w| < 1` (computed from the Taylor series of `log (1 - z)`).
+* `DF.conjugatePoissonStatement_holds` — Fourier coefficients of the Poisson and conjugate
+  Poisson kernels (the claim `H P_r = Q_r` of Theorem A.1.2; see `Fourier.lean`).
 * `DF.norm_circleCoeff_log_le` — **Lemma A.3.5**: for every `ξ ∈ ℂ` and `k ≠ 0`,
   the Fourier coefficients of `u_ξ(x) = log |e^{2πix} - ξ|` satisfy `|û_ξ(k)| ≤ 1/(2|k|)`.
   (The book's proof goes through the Hilbert transform; we compute the coefficients
@@ -24,6 +26,7 @@ I. General Theory*, GSM 221, AMS 2022.
   Lemma A.3.5 and Cauchy estimates for harmonic functions).
 -/
 import DamanikFillman.AppA.Potential
+import DamanikFillman.AppA.Fourier
 import Mathlib.Analysis.SpecialFunctions.Complex.LogBounds
 import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 
@@ -193,6 +196,8 @@ lemma norm_integral_log_one_sub_le {w : ℂ} (hw : ‖w‖ < 1) {k : ℤ} (hk : 
     rfl
 
 /-! ### Lemma A.3.5 -/
+
+@[simp] lemma ex_zero : ex 0 = 1 := by simp [ex]
 
 lemma ex_mul_ex_neg (x : ℝ) : ex x * ex (-x) = 1 := by
   rw [← ex_add, add_neg_cancel]; simp [ex]
@@ -425,5 +430,202 @@ def SubharmonicFourierDecayStatement : Prop :=
   ∀ ρ : ℝ, 0 < ρ → ρ < 1 → ∃ C : ℝ, ∀ (u : ℂ → ℝ) (M : ℝ),
     SubharmonicOn (fun z => (u z : EReal)) (annulus ρ) → (∀ z ∈ annulus ρ, |u z| ≤ M) →
     ∀ k : ℤ, k ≠ 0 → ‖circleCoeff u k‖ ≤ C * M / |(k : ℝ)|
+
+/-! ### Fourier coefficients of the Poisson kernels (`ConjugatePoissonStatement`) -/
+
+/-- Termwise integration of a two-sided absolutely convergent trigonometric series. -/
+lemma integral_ex_mul_two_sided {a c : ℕ → ℂ} (ha : Summable (fun n => ‖a n‖))
+    (hc : Summable (fun n => ‖c n‖)) {G : ℝ → ℂ}
+    (hG : ∀ x, HasSum (fun n => a n * ex (n * x) + c n * ex (-(n * x))) (G x)) (k : ℤ) :
+    ∫ x in (0 : ℝ)..1, ex (-(k * x)) * G x =
+      (if 0 ≤ k then a k.toNat else 0) + (if k ≤ 0 then c (-k).toNat else 0) := by
+  set F : ℕ → ℝ → ℂ := fun n x => ex (-(k * x)) * (a n * ex (n * x) + c n * ex (-(n * x)))
+    with hF
+  have hint : HasSum (fun n => ∫ x in (0 : ℝ)..1, F n x) (∫ x in (0 : ℝ)..1, ex (-(k * x)) * G x) := by
+    refine intervalIntegral.hasSum_integral_of_dominated_convergence (fun n _ => ‖a n‖ + ‖c n‖)
+      (fun n => ?_) (fun n => ?_) ?_ ?_ ?_
+    · refine Continuous.aestronglyMeasurable ?_
+      simp only [hF]
+      have := continuous_ex
+      fun_prop
+    · refine Eventually.of_forall fun x _ => ?_
+      simp only [hF, norm_mul, norm_ex, one_mul]
+      refine (norm_add_le _ _).trans ?_
+      rw [norm_mul, norm_mul, norm_ex, norm_ex, mul_one, mul_one]
+    · exact Eventually.of_forall fun x _ => ha.add hc
+    · exact intervalIntegrable_const
+    · exact Eventually.of_forall fun x _ => (hG x).mul_left _
+  refine hint.unique ?_
+  have hterm : ∀ n : ℕ, ∫ x in (0 : ℝ)..1, F n x =
+      a n * (if (n : ℤ) - k = 0 then 1 else 0) + c n * (if -(n : ℤ) - k = 0 then 1 else 0) := by
+    intro n
+    have e : ∀ x : ℝ, F n x = a n * ex (((n : ℤ) - k : ℤ) * x) +
+        c n * ex ((-(n : ℤ) - k : ℤ) * x) := by
+      intro x
+      have e1 : ex (-(k * x)) * ex (n * x) = ex (((n : ℤ) - k : ℤ) * x) := by
+        rw [← ex_add]; congr 1; push_cast; ring
+      have e2 : ex (-(k * x)) * ex (-(n * x)) = ex ((-(n : ℤ) - k : ℤ) * x) := by
+        rw [← ex_add]; congr 1; push_cast; ring
+      simp only [hF]
+      rw [← e1, ← e2]; ring
+    simp_rw [e]
+    rw [intervalIntegral.integral_add, intervalIntegral.integral_const_mul,
+      intervalIntegral.integral_const_mul, integral_ex_int, integral_ex_int]
+    · exact (continuous_const.mul (continuous_ex.comp (continuous_const.mul
+        continuous_id))).intervalIntegrable _ _
+    · exact (continuous_const.mul (continuous_ex.comp (continuous_const.mul
+        continuous_id))).intervalIntegrable _ _
+  simp_rw [hterm]
+  refine HasSum.add ?_ ?_
+  · by_cases hk : 0 ≤ k
+    · rw [ite_eq_left hk]
+      convert hasSum_single k.toNat (fun n hn => ?_) using 1
+      · have : ((k.toNat : ℕ) : ℤ) - k = 0 := by omega
+        rw [ite_eq_left this, mul_one]
+      · have : (n : ℤ) - k ≠ 0 := by omega
+        simp [this]
+    · rw [ite_eq_right hk]
+      convert hasSum_zero with n
+      have : (n : ℤ) - k ≠ 0 := by omega
+      simp [this]
+  · by_cases hk : k ≤ 0
+    · rw [ite_eq_left hk]
+      convert hasSum_single (-k).toNat (fun n hn => ?_) using 1
+      · have : -(((-k).toNat : ℕ) : ℤ) - k = 0 := by omega
+        rw [ite_eq_left this, mul_one]
+      · have : -(n : ℤ) - k ≠ 0 := by omega
+        simp [this]
+    · rw [ite_eq_right hk]
+      convert hasSum_zero with n
+      have : -(n : ℤ) - k ≠ 0 := by omega
+      simp [this]
+
+/-- The coefficients `β_n = (2 - δ_{n0}) rⁿ` of `(1 + z)/(1 - z) = Σ β_n e(nx)`, `z = r e(x)`. -/
+def poissonCoeff (r : ℝ) (n : ℕ) : ℝ := (2 - if n = 0 then 1 else 0) * r ^ n
+
+lemma summable_poissonCoeff {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) :
+    Summable (fun n => ‖((poissonCoeff r n : ℝ) : ℂ)‖) := by
+  refine Summable.of_nonneg_of_le (fun n => norm_nonneg _) (fun n => ?_)
+    ((summable_geometric_of_lt_one hr0 hr1).mul_left 2)
+  rw [Complex.norm_real, Real.norm_eq_abs, poissonCoeff, abs_mul, abs_of_nonneg (pow_nonneg hr0 n)]
+  gcongr
+  split_ifs <;> norm_num
+
+lemma hasSum_poisson {r : ℝ} (hr0 : 0 ≤ r) (hr1 : r < 1) (x : ℝ) :
+    HasSum (fun n => ((poissonCoeff r n : ℝ) : ℂ) * ex (n * x))
+      ((1 + r * ex x) / (1 - r * ex x)) := by
+  set z := (r : ℂ) * ex x with hz
+  have hzn : ‖z‖ < 1 := by
+    rw [hz, norm_mul, norm_ex, mul_one, Complex.norm_real, Real.norm_of_nonneg hr0]; exact hr1
+  have hne : 1 - z ≠ 0 := by
+    intro h; rw [sub_eq_zero] at h; rw [← h, norm_one] at hzn; exact lt_irrefl _ hzn
+  have h1 := (hasSum_geometric_of_norm_lt_one hzn).mul_left 2
+  have h2 := h1.sub (hasSum_ite_eq 0 (1 : ℂ))
+  convert h2 using 1
+  · funext n
+    simp only [poissonCoeff, hz, mul_pow, ex_pow]
+    split_ifs with h <;> simp [h, ex_zero]
+    ring
+  · field_simp; ring
+
+lemma poisson_re {r : ℝ} (x : ℝ) :
+    ((1 + r * ex x) / (1 - r * ex x)).re =
+      (1 - r ^ 2) / (1 - 2 * r * (ex x).re + r ^ 2) := by
+  have hc : (ex x).re ^ 2 + (ex x).im ^ 2 = 1 := by
+    have := Complex.sq_norm (ex x); rw [norm_ex, Complex.normSq_apply] at this; nlinarith
+  rw [Complex.div_re, Complex.normSq_apply]
+  simp only [Complex.add_re, Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+    Complex.ofReal_im, zero_mul, sub_zero, Complex.add_im, Complex.sub_im, Complex.one_im,
+    Complex.mul_im, add_zero, zero_add, zero_sub]
+  have hden : (1 - r * (ex x).re) * (1 - r * (ex x).re) + -(r * (ex x).im) * -(r * (ex x).im) =
+      1 - 2 * r * (ex x).re + r ^ 2 := by nlinarith
+  rw [hden, ← add_div]
+  congr 1
+  nlinarith
+
+lemma poisson_im {r : ℝ} (x : ℝ) :
+    ((1 + r * ex x) / (1 - r * ex x)).im =
+      (2 * r * (ex x).im) / (1 - 2 * r * (ex x).re + r ^ 2) := by
+  have hc : (ex x).re ^ 2 + (ex x).im ^ 2 = 1 := by
+    have := Complex.sq_norm (ex x); rw [norm_ex, Complex.normSq_apply] at this; nlinarith
+  rw [Complex.div_im, Complex.normSq_apply]
+  simp only [Complex.add_re, Complex.sub_re, Complex.one_re, Complex.mul_re, Complex.ofReal_re,
+    Complex.ofReal_im, zero_mul, sub_zero, Complex.add_im, Complex.sub_im, Complex.one_im,
+    Complex.mul_im, add_zero, zero_add, zero_sub]
+  have hden : (1 - r * (ex x).re) * (1 - r * (ex x).re) + -(r * (ex x).im) * -(r * (ex x).im) =
+      1 - 2 * r * (ex x).re + r ^ 2 := by nlinarith
+  rw [hden, ← sub_div]
+  congr 1
+  ring
+
+lemma fourier_one_coe (x : ℝ) : fourier 1 (x : UnitAddCircle) = ex x := by
+  rw [fourier_coe_apply]; unfold ex; congr 1; push_cast; ring
+
+lemma fourier_neg_coe (k : ℤ) (x : ℝ) : fourier (-k) (x : UnitAddCircle) = ex (-(k * x)) := by
+  rw [fourier_coe_apply]; unfold ex; congr 1; push_cast; ring
+
+/-- `ConjugatePoissonStatement` holds: `P̂_r(k) = r^{|k|}` and `Q̂_r(k) = -i sgn(k) r^{|k|}`
+(Theorem A.1.2, `H P_r = Q_r`). -/
+theorem conjugatePoissonStatement_holds : ConjugatePoissonStatement := by
+  intro r hr0 hr1 k
+  have hsum := summable_poissonCoeff hr0 hr1
+  have hhalf : Summable (fun n => ‖((poissonCoeff r n : ℝ) : ℂ) / 2‖) := by
+    simpa [norm_div] using hsum.div_const 2
+  have hhalfI : Summable (fun n => ‖((poissonCoeff r n : ℝ) : ℂ) / (2 * I)‖) := by
+    simpa [norm_div] using hsum.div_const 2
+  have hhalfI' : Summable (fun n => ‖-(((poissonCoeff r n : ℝ) : ℂ) / (2 * I))‖) := by
+    simpa [norm_neg] using hhalfI
+  -- the real and imaginary parts as two-sided series
+  have hconj : ∀ n : ℕ, ∀ x : ℝ, conj (((poissonCoeff r n : ℝ) : ℂ) * ex (n * x)) =
+      ((poissonCoeff r n : ℝ) : ℂ) * ex (-(n * x)) := by
+    intro n x; rw [map_mul, Complex.conj_ofReal, ← ex_neg]
+  have hRe : ∀ x : ℝ, HasSum (fun n => ((poissonCoeff r n : ℝ) : ℂ) / 2 * ex (n * x) +
+      ((poissonCoeff r n : ℝ) : ℂ) / 2 * ex (-(n * x)))
+      (((1 - r ^ 2) / (1 - 2 * r * (ex x).re + r ^ 2) : ℝ) : ℂ) := by
+    intro x
+    have h := hasSum_poisson hr0 hr1 x
+    have h2 := (h.add (Complex.hasSum_conj'.2 h)).div_const 2
+    convert h2 using 1
+    · funext n; rw [hconj]; ring
+    · rw [Complex.add_conj, poisson_re]; push_cast; ring
+  have hIm : ∀ x : ℝ, HasSum (fun n => ((poissonCoeff r n : ℝ) : ℂ) / (2 * I) * ex (n * x) +
+      -(((poissonCoeff r n : ℝ) : ℂ) / (2 * I)) * ex (-(n * x)))
+      (((2 * r * (ex x).im) / (1 - 2 * r * (ex x).re + r ^ 2) : ℝ) : ℂ) := by
+    intro x
+    have h := hasSum_poisson hr0 hr1 x
+    have h2 := (h.sub (Complex.hasSum_conj'.2 h)).div_const (2 * I)
+    convert h2 using 1
+    · funext n; rw [hconj]; ring
+    · rw [Complex.sub_conj, poisson_im]; push_cast; field_simp
+  have hcoef : ∀ m : ℕ, ((poissonCoeff r m : ℝ) : ℂ) = (if m = 0 then 1 else 2) * (r : ℂ) ^ m := by
+    intro m; simp only [poissonCoeff]; split_ifs <;> push_cast <;> ring
+  constructor
+  · rw [fourierCoeff_eq_intervalIntegral _ _ 0]
+    simp only [zero_add, div_one, one_smul, smul_eq_mul, poissonKernel, fourier_one_coe,
+      fourier_neg_coe]
+    rw [integral_ex_mul_two_sided hhalf hhalf hRe]
+    rcases lt_trichotomy k 0 with h | rfl | h
+    · rw [ite_eq_right (by omega), ite_eq_left h.le, zero_add, hcoef, ite_eq_right (by omega)]
+      have : (((-k).toNat : ℕ) : ℕ) = k.natAbs := by omega
+      rw [this]; ring
+    · simp [hcoef]; norm_num
+    · rw [ite_eq_left h.le, ite_eq_right (by omega), add_zero, hcoef, ite_eq_right (by omega)]
+      have : k.toNat = k.natAbs := by omega
+      rw [this]; ring
+  · rw [fourierCoeff_eq_intervalIntegral _ _ 0]
+    simp only [zero_add, div_one, one_smul, smul_eq_mul, conjPoissonKernel, fourier_one_coe,
+      fourier_neg_coe]
+    rw [integral_ex_mul_two_sided hhalfI hhalfI' hIm]
+    unfold hilbertSymbol
+    rcases lt_trichotomy k 0 with h | rfl | h
+    · rw [ite_eq_right (by omega), ite_eq_left h.le, zero_add, hcoef, ite_eq_right (by omega),
+        Int.sign_eq_neg_one_of_neg h]
+      have : (((-k).toNat : ℕ) : ℕ) = k.natAbs := by omega
+      rw [this]; field_simp; push_cast; ring_nf; rw [Complex.I_sq]; ring
+    · simp [hcoef]
+    · rw [ite_eq_left h.le, ite_eq_right (by omega), add_zero, hcoef, ite_eq_right (by omega),
+        Int.sign_eq_one_of_pos h]
+      have : k.toNat = k.natAbs := by omega
+      rw [this]; field_simp; push_cast; ring_nf; rw [Complex.I_sq]; ring
 
 end DF

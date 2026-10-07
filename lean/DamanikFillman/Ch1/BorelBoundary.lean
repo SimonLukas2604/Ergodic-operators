@@ -17,7 +17,8 @@ the absolutely continuous / singular parts, and rank-one perturbations at the le
 * `DF.rankOne_singularParts_mutuallySingular` — Proposition 1.9.9, second bullet (proved
   unconditionally);
 * `DF.rankOne_acParts_equiv` — Proposition 1.9.9, first bullet, proved assuming the boundary
-  value statement for the real part (Theorem 1.9.4(d), see below).
+  value statement for the real part (Theorem 1.9.4(d), see below); the unconditional version is
+  `DF.rankOne_acParts_equiv'` in `DamanikFillman.Ch1.BorelHerglotz`.
 
 Proposition 1.9.9 is formulated purely for measures: `ν` is any finite measure whose Borel
 transform is `F_μ / (1 + λ F_μ)` on the upper half-plane (this is (1.9.33), proved for operators in
@@ -25,8 +26,9 @@ transform is `F_μ / (1 + λ F_μ)` on the upper half-plane (this is (1.9.33), p
 
 # Statements recorded but not proved (`Prop`s)
 
-* `DF.ReBoundaryValueStatement` — Theorem 1.9.4(d) (the book derives it from the Herglotz
-  representation applied to `√F_μ` and `i √F_μ`);
+* `DF.ReBoundaryValueStatement` — Theorem 1.9.4(d), Lebesgue part (proved later, in
+  `DamanikFillman.Ch1.BorelHerglotz`, via the Herglotz representation of `√F_μ` and `i √F_μ`);
+* `DF.ReBoundaryValueMeasureStatement` — Theorem 1.9.4(d), `μ`-a.e. part (not proved);
 * `DF.BoundaryUniquenessStatement` — Theorem 1.9.4(e) (the book relies on the factorization
   theory of `H^∞` functions).
 -/
@@ -121,16 +123,23 @@ theorem singularPart_not_tendsto_atTop (μ : Measure ℝ) [IsFiniteMeasure μ] :
   intro E hE hD
   exact hE (tendsto_im_atTop_of_hasMeasDeriv_top hD)
 
-/-- Theorem 1.9.4(d), recorded as a statement: `Re F_μ(E + i0)` exists and is finite for
-Lebesgue-a.e. `E`, and exists as an extended real number for `μ`-a.e. `E`. -/
+/-- Theorem 1.9.4(d), Lebesgue part, as a statement: `Re F_μ(E + i0)` exists and is finite for
+Lebesgue-a.e. `E`.  Proved in `DamanikFillman.Ch1.BorelHerglotz` as
+`DF.reBoundaryValueStatement_holds` (via the Herglotz representation of `√F_μ`, as in the
+book). -/
 def ReBoundaryValueStatement : Prop :=
   ∀ μ : Measure ℝ, IsFiniteMeasure μ →
-    (∀ᵐ (E : ℝ) ∂volume, ∃ y : ℝ,
-      Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) (𝓝 y)) ∧
-    (∀ᵐ (E : ℝ) ∂μ, (∃ y : ℝ,
+    ∀ᵐ (E : ℝ) ∂volume, ∃ y : ℝ,
+      Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) (𝓝 y)
+
+/-- Theorem 1.9.4(d), `μ` part, recorded as a statement: `Re F_μ(E + i0)` exists as an extended
+real number for `μ`-a.e. `E`. -/
+def ReBoundaryValueMeasureStatement : Prop :=
+  ∀ μ : Measure ℝ, IsFiniteMeasure μ →
+    ∀ᵐ (E : ℝ) ∂μ, (∃ y : ℝ,
       Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) (𝓝 y)) ∨
       Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) atTop ∨
-      Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) atBot)
+      Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) atBot
 
 /-- Theorem 1.9.4(e), recorded as a statement: two Stieltjes transforms whose boundary values
 agree on a set of positive Lebesgue measure coincide. -/
@@ -231,7 +240,7 @@ theorem rankOne_acPart_absolutelyContinuous (hRe : ReBoundaryValueStatement)
       borelTransform ν z = borelTransform μ z / (1 + lam * borelTransform μ z)) :
     volume.withDensity (μ.rnDeriv volume) ≪ volume.withDensity (ν.rnDeriv volume) := by
   have key : ∀ᵐ (E : ℝ) ∂volume, μ.rnDeriv volume E ≠ 0 → ν.rnDeriv volume E ≠ 0 := by
-    filter_upwards [ae_tendsto_im_volume μ, ae_tendsto_im_volume ν, (hRe μ inferInstance).1,
+    filter_upwards [ae_tendsto_im_volume μ, ae_tendsto_im_volume ν, hRe μ inferInstance,
       Measure.rnDeriv_lt_top μ volume] with E hμ hν ⟨y, hy⟩ hlt hne
     set w : ℂ := y + (Real.pi * (μ.rnDeriv volume E).toReal : ℝ) * I with hw
     have hwim : 0 < w.im := by

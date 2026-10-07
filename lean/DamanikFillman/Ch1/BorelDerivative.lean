@@ -351,7 +351,7 @@ theorem limsup_poisson_le_upperDeriv (μ : Measure ℝ) [IsFiniteMeasure μ] (E 
   · filter_upwards [self_mem_nhdsWithin] with ε hε using hbound ε hε
 
 /-- Inequality (1.9.20), lower half: `D^-_μ(E) ≤ liminf_{ε↓0} π⁻¹ Im F_μ(E + iε)`. -/
-theorem lowerDeriv_le_liminf_poisson (μ : Measure ℝ) [IsFiniteMeasure μ] (E : ℝ) :
+theorem lowerDeriv_le_liminf_poisson (μ : Measure ℝ) (E : ℝ) :
     lowerDeriv μ E ≤ liminf (poissonInt μ E) (𝓝[>] 0) := by
   apply le_of_forall_lt_imp_le_of_dense
   intro c hc

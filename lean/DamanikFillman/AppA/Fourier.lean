@@ -23,16 +23,19 @@ I. General Theory*, GSM 221, AMS 2022.
 
 * On the circle the book defines `Hg = lim_{r↑1} g * Q_r` and then derives (A.1.3).  We take the
   Fourier-multiplier formula (A.1.3) as the definition (on `L²(𝕋)`); the identification with
-  the conjugate Poisson integral is recorded as `ConjugatePoissonStatement` (it contains the
-  claim `H P_r = Q_r` of Theorem A.1.2).
+  the conjugate Poisson integral is `ConjugatePoissonStatement` (it contains the claim
+  `H P_r = Q_r` of Theorem A.1.2); it is *proved* in `DamanikFillman/AppA/FourierDecay.lean`
+  (`DF.conjugatePoissonStatement_holds`).
 * Functions on `ℝ` are complex valued.
 
 ## Statements (recorded, not proved)
 
 * `ConjugatePoissonStatement` — Fourier coefficients of the Poisson kernel `P_r` and the
-  conjugate kernel `Q_r` (contains `H P_r = Q_r` from Theorem A.1.2);
+  conjugate kernel `Q_r` (contains `H P_r = Q_r` from Theorem A.1.2); proved in
+  `FourierDecay.lean`;
 * `HilbertL2Statement` — Proposition A.1.5;
-* `HolderHilbertStatement` — Theorem A.1.6 (Plemelj–Privalov).
+* `HolderHilbertStatement` — Theorem A.1.6 (Plemelj–Privalov); its second sentence (Lipschitz
+  `g`) is derived as `holder_hilbertR_of_lipschitz`.
 -/
 import Mathlib.Analysis.Fourier.AddCircle
 import Mathlib.Analysis.Fourier.AddCircleMulti
@@ -217,14 +220,15 @@ theorem norm_hilbertT_sq (g : L2T) :
   · subst hk; simp [hilbertSymbol_zero]
   · simp [hk, norm_hilbertSymbol hk]
 
-/-- The Poisson kernel `P_r(x) = (1 - r²)/(1 - 2r cos 2πx + r²)` on `𝕋`. -/
+/-- The Poisson kernel `P_r(x) = (1 - r²)/(1 - 2r cos 2πx + r²)` on `𝕋 = ℝ/ℤ`
+(here `cos 2πx = Re e^{2πix}`, with `e^{2πix} = fourier 1 x`). -/
 def poissonKernel (r : ℝ) (x : UnitAddCircle) : ℂ :=
-  AddCircle.liftIco 1 0 (fun x : ℝ => ((1 - r ^ 2) / (1 - 2 * r * Real.cos (2 * π * x) + r ^ 2) : ℝ)) x
+  (((1 - r ^ 2) / (1 - 2 * r * (fourier 1 x).re + r ^ 2) : ℝ) : ℂ)
 
-/-- The conjugate Poisson kernel `Q_r(x) = 2r sin 2πx/(1 - 2r cos 2πx + r²)` on `𝕋`. -/
+/-- The conjugate Poisson kernel `Q_r(x) = 2r sin 2πx/(1 - 2r cos 2πx + r²)` on `𝕋`
+(here `sin 2πx = Im e^{2πix}`). -/
 def conjPoissonKernel (r : ℝ) (x : UnitAddCircle) : ℂ :=
-  AddCircle.liftIco 1 0
-    (fun x : ℝ => ((2 * r * Real.sin (2 * π * x)) / (1 - 2 * r * Real.cos (2 * π * x) + r ^ 2) : ℝ)) x
+  (((2 * r * (fourier 1 x).im) / (1 - 2 * r * (fourier 1 x).re + r ^ 2) : ℝ) : ℂ)
 
 /-- Fourier coefficients of the Poisson kernel and of the conjugate Poisson kernel:
 `P̂_r(k) = r^{|k|}`, `Q̂_r(k) = -i sgn(k) r^{|k|}`; in particular `H P_r = Q_r` (Theorem A.1.2),

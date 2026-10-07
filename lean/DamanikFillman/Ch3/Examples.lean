@@ -22,7 +22,9 @@ Main results:
 
 Statements (stated, not proved): `DF.TorusTranslationErgodicStatement` (Theorem 3.2.14 for
 general `d`), `DF.SkewShiftErgodicStatement` (Theorem 3.2.15), `DF.CatMapErgodicStatement`
-(Theorem 3.2.16), `DF.BernoulliShiftErgodicStatement` (Theorem 3.2.17), and
+(Theorem 3.2.16), `DF.BernoulliShiftErgodicStatement` (Theorem 3.2.17; **proved** in
+`DamanikFillman.Ch3.Bernoulli`, `DF.bernoulliShiftErgodic`), and
+`DF.SkewProductUniquelyErgodicStatement` (Lemma 3.5.10) and
 `DF.SkewShiftUniquelyErgodicStatement` (Theorem 3.5.11(b)).
 -/
 import DamanikFillman.Ch3.Minimal
@@ -145,7 +147,8 @@ lemma rotation_iterate (α t : ℝ) (k : ℕ) :
   induction k with
   | zero => simp
   | succ k ih =>
-    rw [iterate_succ_apply', ih, rotation]
+    rw [iterate_succ_apply', ih, rotation, ← AddCircle.coe_add]
+    congr 1
     push_cast
     ring
 
@@ -153,7 +156,7 @@ lemma rotation_iterate (α t : ℝ) (k : ℕ) :
 (normalized) Lebesgue measure is its unique invariant Borel probability measure. -/
 theorem rotation_invMeasures {α : ℝ} (hα : Irrational α) :
     invMeasures (rotation α) = {(volume : Measure UnitAddCircle)} := by
-  have hT : Continuous (rotation α) := continuous_add_right _
+  have hT : Continuous (rotation α) := continuous_id.add continuous_const
   have hc : ∀ (f : C(UnitAddCircle, ℝ)) (x : UnitAddCircle),
       Tendsto (fun n => birkhoffAverage ℝ (rotation α) f n x) atTop (𝓝 (∫ y, f y)) := by
     intro f x
@@ -195,6 +198,18 @@ theorem rotation_minimal {α : ℝ} (hα : Irrational α) :
   rw [minimal_iff_fullSupport _ h]
   intro U hU hne
   exact hU.measure_pos volume hne
+
+/-- **Lemma 3.5.10**: if `T₁` is uniquely ergodic on the compact metric space `Ω₁` with invariant
+measure `μ₁`, `Ω₂` is a compact metrizable abelian group with Haar probability measure `μ₂`, and
+`φ : Ω₁ → Ω₂` is continuous, then ergodicity of `μ₁ × μ₂` for the skew-product
+`(ω₁, ω₂) ↦ (T₁ω₁, φ(ω₁) + ω₂)` (3.5.15) implies its unique ergodicity. Stated, not proved. -/
+def SkewProductUniquelyErgodicStatement : Prop :=
+  ∀ (X G : Type) [MetricSpace X] [CompactSpace X] [MeasurableSpace X] [BorelSpace X]
+    [AddCommGroup G] [MetricSpace G] [CompactSpace G] [IsTopologicalAddGroup G] [MeasurableSpace G]
+    [BorelSpace G] (T₁ : X → X) (μ₁ : Measure X) (φ : C(X, G)) (μ₂ : Measure G)
+    [μ₂.IsAddHaarMeasure] [IsProbabilityMeasure μ₂], Continuous T₁ → invMeasures T₁ = {μ₁} →
+    Ergodic (fun p : X × G => (T₁ p.1, φ p.1 + p.2)) (μ₁.prod μ₂) →
+    invMeasures (fun p : X × G => (T₁ p.1, φ p.1 + p.2)) = {μ₁.prod μ₂}
 
 /-- **Theorem 3.5.11(b)**: for irrational `α` the skew-shift on `𝕋²` is uniquely ergodic with
 Lebesgue measure as unique invariant measure. Stated, not proved. -/
