@@ -29,6 +29,9 @@ namespace DF
 
 variable {d : ℕ}
 
+local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
+  ⟨UnitAddCircle.measure_univ⟩
+
 /-- The translation vector as a point of `𝕋^d`. -/
 def torusVec (α : Fin d → ℝ) : UnitAddTorus (Fin d) := fun i => (α i : UnitAddCircle)
 
@@ -90,6 +93,7 @@ lemma mFourierCoeff_comp_add (g : UnitAddTorus (Fin d) → ℂ) (a : UnitAddToru
     (n : Fin d → ℤ) :
     mFourierCoeff (fun t => g (t + a)) n = mFourier n a * mFourierCoeff g n := by
   unfold mFourierCoeff
+  show ∫ t, mFourier (-n) t • g (t + a) = mFourier n a * ∫ t, mFourier (-n) t • g t
   have h := integral_add_right_eq_self (μ := (volume : Measure (UnitAddTorus (Fin d))))
     (fun s => mFourier (-n) (s - a) • g s) a
   simp only [add_sub_cancel_right] at h
@@ -153,7 +157,12 @@ theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
       simp
     have h2 : ∫ t, mFourier (-k) t * mFourier k t ∂(volume : Measure (UnitAddTorus (Fin d))) =
         0 := by
-      rw [integral_congr_ae (hc.mono fun t ht => by rw [ht]), integral_mul_const,
+      have hae : (fun t => mFourier (-k) t * mFourier k t) =ᵐ[volume]
+          fun t => mFourier (-k) t * c := by
+        filter_upwards [hc] with t ht
+        simp only [Function.const_apply] at ht
+        rw [ht]
+      rw [integral_congr_ae hae, integral_mul_const,
         integral_mFourier_eq_zero (neg_ne_zero.2 hk0), zero_mul]
     rw [h1] at h2
     exact one_ne_zero h2
@@ -166,7 +175,9 @@ theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
       funext t
       have : (t + torusVec α ∈ s) ↔ t ∈ s := by
         rw [← torusTranslation_eq, ← mem_preimage, hinv]
-      simp only [hg, indicator_apply, this]
+      by_cases ht : t ∈ s
+      · rw [hg, indicator_of_mem ht, indicator_of_mem (this.2 ht)]
+      · rw [hg, indicator_of_notMem ht, indicator_of_notMem (fun h => ht (this.1 h))]
     -- `ĝ(n) = 0` for `n ≠ 0`
     have hcoef : ∀ n : Fin d → ℤ, n ≠ 0 → mFourierCoeff g n = 0 := by
       intro n hn
@@ -187,7 +198,7 @@ theorem torusTranslationErgodic : TorusTranslationErgodicStatement := by
       rw [hG]
       exact indicatorConstLp_coeFn
     have hGcoef : ∀ n, mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n = mFourierCoeff g n :=
-      fun n => integral_congr_ae (hGg.mono fun t ht => by simp only [ht])
+      fun n => integral_congr_ae (by filter_upwards [hGg] with t ht; rw [ht])
     have hsum := hasSum_mFourier_series_L2 G
     have hsum' : HasSum (fun n => mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) n • mFourierLp 2 n)
         (mFourierCoeff (G : UnitAddTorus (Fin d) → ℂ) 0 • mFourierLp 2 (0 : Fin d → ℤ)) := by

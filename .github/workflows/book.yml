@@ -45,7 +45,7 @@ jobs:
         run: |
           set -o pipefail
           lake build DamanikFillman 2>&1 | tee book.log || true
-          grep -E "^(error|✖)" book.log | head -200 || true
+          grep -E -A30 "^error: DamanikFillman" book.log | head -600 || true
           if grep -q "^error" book.log; then exit 1; fi
 
       - name: Count sorry
