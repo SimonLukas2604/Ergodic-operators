@@ -102,7 +102,7 @@ def shiftZ {A : Type*} (ω : ℤ → A) : ℤ → A := fun n => ω (n + 1)
 def shiftN {A : Type*} (ω : ℕ → A) : ℕ → A := fun n => ω (n + 1)
 
 /-- **Theorem 3.2.17**: the shifts on `A^ℤ` and `A^ℕ` are ergodic with respect to the product
-measures `ν^ℤ`, `ν^ℕ`. Stated, not proved. -/
+measures `ν^ℤ`, `ν^ℕ`. Proved in `DF.bernoulliShiftErgodic`. -/
 def BernoulliShiftErgodicStatement : Prop :=
   ∀ (A : Type) [MeasurableSpace A] (ν : Measure A) [IsProbabilityMeasure ν],
     Ergodic (shiftZ (A := A)) (Measure.infinitePi fun _ : ℤ => ν) ∧
