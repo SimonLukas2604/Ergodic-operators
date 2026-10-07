@@ -89,30 +89,27 @@ theorem const_one : IsCovFam α (fun _ => (1 : Op ℤ)) where
   periodic _ := rfl
   cov _ _ := rfl
 
-theorem smul (c : ℂ) (hA : IsCovFam α A) : IsCovFam α (fun x => c • A x) where
-  cont := continuous_const.smul hA.cont
-  periodic x := by simp only [hA.periodic x]
-  cov x v := by
-    simp only [ContinuousLinearMap.smul_apply]
-    rw [hA.cov x v, map_smul]
-
 /-- Pointwise inverses of a covariant family of units form a covariant family. -/
 theorem inverse (hA : IsCovFam α A) (hu : ∀ x, IsUnit (A x)) :
     IsCovFam α (fun x => Ring.inverse (A x)) where
-  cont := continuous_iff_continuousAt.2 fun x =>
-    (NormedRing.inverse_continuousAt (hu x).unit).comp hA.cont.continuousAt
+  cont := continuous_iff_continuousAt.2 fun x => by
+    have h1 : ContinuousAt Ring.inverse (A x) := by
+      have := NormedRing.inverse_continuousAt (hu x).unit
+      rwa [IsUnit.unit_spec] at this
+    exact h1.comp (f := A) hA.cont.continuousAt
   periodic x := by simp only [hA.periodic x]
   cov x v := by
-    have h1 : A (x + α) (Ring.inverse (A (x + α)) (shiftU α v)) = shiftU α v := by
-      rw [← ContinuousLinearMap.mul_apply, Ring.mul_inverse_cancel _ (hu _)]; rfl
-    have h2 : A x (Ring.inverse (A x) v) = v := by
-      rw [← ContinuousLinearMap.mul_apply, Ring.mul_inverse_cancel _ (hu _)]; rfl
-    have hinj : Function.Injective (A (x + α)) := by
-      intro a b hab
-      have := congrArg (Ring.inverse (A (x + α))) hab
-      simpa [← ContinuousLinearMap.mul_apply, Ring.inverse_mul_cancel _ (hu _)] using this
-    apply hinj
-    rw [h1, hA.cov x, h2]
+    have hl : ∀ y w, Ring.inverse (A y) (A y w) = w := fun y w => by
+      change (Ring.inverse (A y) * A y) w = w
+      rw [Ring.inverse_mul_cancel _ (hu y)]; rfl
+    have hr : ∀ y w, A y (Ring.inverse (A y) w) = w := fun y w => by
+      change (A y * Ring.inverse (A y)) w = w
+      rw [Ring.mul_inverse_cancel _ (hu y)]; rfl
+    calc Ring.inverse (A (x + α)) (shiftU α v)
+        = Ring.inverse (A (x + α)) (shiftU α (A x (Ring.inverse (A x) v))) := by rw [hr]
+      _ = Ring.inverse (A (x + α)) (A (x + α) (shiftU α (Ring.inverse (A x) v))) := by
+          rw [hA.cov x]
+      _ = shiftU α (Ring.inverse (A x) v) := hl _ _
 
 /-! ### Matrix elements -/
 
@@ -149,7 +146,7 @@ end IsCovFam
 lemma hasSum_inner_mul (A B : Op ℤ) :
     HasSum (fun n : ℤ => ⟪delta 0, A (delta n)⟫_ℂ * ⟪delta n, B (delta 0)⟫_ℂ)
       ⟪delta 0, (A * B) (delta 0)⟫_ℂ := by
-  have h := lp.hasSum_inner (ContinuousLinearMap.adjoint A (delta 0)) (B (delta 0))
+  have h := lp.hasSum_inner (𝕜 := ℂ) (ContinuousLinearMap.adjoint A (delta 0)) (B (delta 0))
   rw [ContinuousLinearMap.adjoint_inner_left] at h
   convert h using 1
   funext n
@@ -160,7 +157,9 @@ lemma hasSum_inner_mul (A B : Op ℤ) :
 /-- Bessel: `∑_{n ∈ F} ‖v_n‖² ≤ ‖v‖²`. -/
 lemma sum_sq_le_norm_sq (v : L2 ℤ) (F : Finset ℤ) : ∑ n ∈ F, ‖v n‖ ^ 2 ≤ ‖v‖ ^ 2 := by
   have h := lp.sum_rpow_le_norm_rpow (p := 2) (by norm_num) v F
-  simpa [← Real.rpow_natCast] using h
+  have e : (2 : ENNReal).toReal = ((2 : ℕ) : ℝ) := by norm_num
+  simp only [e, Real.rpow_natCast] at h
+  exact h
 
 /-- The `n`-th Parseval term `x ↦ ⟪δ₀, A_x δₙ⟫ ⟪δₙ, B_x δ₀⟫`. -/
 def parTerm (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) : ℂ :=
@@ -189,18 +188,15 @@ lemma norm_parTerm_le (A B : ℝ → Op ℤ) (n : ℤ) (x : ℝ) :
 
 lemma continuous_adjoint_coord {α : ℝ} {A : ℝ → Op ℤ} (hA : IsCovFam α A) (n : ℤ) :
     Continuous fun x => ‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖ ^ 2 := by
-  have : (fun x => ‖(ContinuousLinearMap.adjoint (A x) (delta 0)) n‖) =
-      fun x => ‖⟪delta 0, A x (delta n)⟫_ℂ‖ := by
-    funext x; rw [norm_inner_delta_left]
-  rw [this]
-  exact ((hA.continuous_inner _ _).norm).pow 2
+  refine (((hA.continuous_inner _ _).norm).pow 2).congr fun x => ?_
+  simp only
+  rw [norm_inner_delta_left]
 
 lemma continuous_coord {α : ℝ} {B : ℝ → Op ℤ} (hB : IsCovFam α B) (n : ℤ) :
     Continuous fun x => ‖(B x (delta 0)) n‖ ^ 2 := by
-  have : (fun x => ‖(B x (delta 0)) n‖) = fun x => ‖⟪delta n, B x (delta 0)⟫_ℂ‖ := by
-    funext x; rw [norm_inner_delta_right]
-  rw [this]
-  exact ((hB.continuous_inner _ _).norm).pow 2
+  refine (((hB.continuous_inner _ _).norm).pow 2).congr fun x => ?_
+  simp only
+  rw [norm_inner_delta_right]
 
 /-- Summability of `n ↦ ∫₀¹ f_n` for nonnegative continuous `f_n` whose finite sums are bounded
 by `M` pointwise. -/
@@ -211,7 +207,7 @@ lemma summable_integral_of_sum_le {f : ℤ → ℝ → ℝ} (hc : ∀ n, Continu
     fun x _ => h0 n x) fun F => ?_
   rw [← integral_finsetSum F fun n _ => (hc n).integrableOn_Ioc]
   calc ∫ x in Ioc (0 : ℝ) 1, ∑ n ∈ F, f n x ≤ ∫ _ in Ioc (0 : ℝ) 1, M :=
-        setIntegral_mono_on (continuous_finset_sum F fun n _ => hc n).integrableOn_Ioc
+        setIntegral_mono_on (continuous_finsetSum F fun n _ => hc n).integrableOn_Ioc
           (continuous_const.integrableOn_Ioc) measurableSet_Ioc fun x _ => hM F x
     _ = M := by simp
 
@@ -296,44 +292,43 @@ lemma norm_le_one_of_involution {S : Op ℤ} (hS : IsSelfAdjoint S) (h2 : S * S 
 `V = 1 + (P - Q)(2Q - 1)` is invertible and `P V = V Q` (both equal `P Q`). -/
 theorem exists_conj_of_norm_sub_lt_one {P Q : Op ℤ} (hP : IsStarProjection P)
     (hQ : IsStarProjection Q) (h : ‖P - Q‖ < 1) :
-    IsUnit (1 + (P - Q) * (2 * Q - 1)) ∧
-      P * (1 + (P - Q) * (2 * Q - 1)) = (1 + (P - Q) * (2 * Q - 1)) * Q := by
+    IsUnit (1 + (P - Q) * (Q + Q - 1)) ∧
+      P * (1 + (P - Q) * (Q + Q - 1)) = (1 + (P - Q) * (Q + Q - 1)) * Q := by
   have hPP : P * P = P := hP.isIdempotentElem.eq
   have hQQ : Q * Q = Q := hQ.isIdempotentElem.eq
+  have hPP' : ∀ X : Op ℤ, P * (P * X) = P * X := fun X => by rw [← mul_assoc, hPP]
+  have hQQ' : ∀ X : Op ℤ, Q * (Q * X) = Q * X := fun X => by rw [← mul_assoc, hQQ]
   constructor
-  · have hS : ‖(2 * Q - 1 : Op ℤ)‖ ≤ 1 := by
+  · have hS : ‖(Q + Q - 1 : Op ℤ)‖ ≤ 1 := by
       refine norm_le_one_of_involution ?_ ?_
-      · have hQs : IsSelfAdjoint Q := hQ.isSelfAdjoint
-        exact ((IsSelfAdjoint.ofNat 2).mul hQs |>.sub IsSelfAdjoint.one) |> fun h' => by
-          simpa using h'
-      · calc (2 * Q - 1) * (2 * Q - 1) = 4 * (Q * Q) - 4 * Q + 1 := by noncomm_ring
-          _ = 1 := by rw [hQQ]; ring
-    have ht : ‖(Q - P) * (2 * Q - 1)‖ < 1 := by
-      calc ‖(Q - P) * (2 * Q - 1)‖ ≤ ‖Q - P‖ * ‖(2 * Q - 1 : Op ℤ)‖ := norm_mul_le _ _
+      · exact (hQ.isSelfAdjoint.add hQ.isSelfAdjoint).sub (IsSelfAdjoint.one (Op ℤ))
+      · simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, hQQ]
+        abel
+    have ht : ‖(Q - P) * (Q + Q - 1)‖ < 1 := by
+      calc ‖(Q - P) * (Q + Q - 1)‖ ≤ ‖Q - P‖ * ‖(Q + Q - 1 : Op ℤ)‖ := norm_mul_le _ _
         _ ≤ ‖Q - P‖ * 1 := by gcongr
         _ < 1 := by rw [mul_one, norm_sub_rev]; exact h
     have := (Units.oneSub _ ht).isUnit
+    rw [Units.val_oneSub] at this
     convert this using 1
-    noncomm_ring
-  · calc P * (1 + (P - Q) * (2 * Q - 1))
-        = 2 * ((P * P) * Q) - P * P + P - 2 * (P * (Q * Q)) + P * Q := by noncomm_ring
-      _ = P * Q := by rw [hPP, hQQ]; noncomm_ring
-      _ = Q + 2 * (P * (Q * Q)) - P * Q - 2 * (Q * (Q * Q)) + Q * Q := by
-          rw [hQQ, hQQ]; noncomm_ring
-      _ = (1 + (P - Q) * (2 * Q - 1)) * Q := by noncomm_ring
+    rw [← neg_sub Q P, neg_mul, sub_neg_eq_add]
+  · have e1 : P * (1 + (P - Q) * (Q + Q - 1)) = P * Q := by
+      simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
+        hPP', hQQ']
+      abel
+    have e2 : (1 + (P - Q) * (Q + Q - 1)) * Q = P * Q := by
+      simp only [add_mul, mul_add, sub_mul, mul_sub, mul_one, one_mul, mul_assoc, hPP, hQQ,
+        hPP', hQQ']
+      abel
+    rw [e1, e2]
 
 /-- **Covariant projection families at uniform distance `< 1` have the same trace.** -/
 theorem tau_eq_of_norm_sub_lt_one {α : ℝ} {P Q : ℝ → Op ℤ} (hPc : IsCovFam α P)
     (hQc : IsCovFam α Q) (hP : ∀ x, IsStarProjection (P x)) (hQ : ∀ x, IsStarProjection (Q x))
     (h : ∀ x, ‖P x - Q x‖ < 1) : tau P = tau Q := by
-  set V : ℝ → Op ℤ := fun x => 1 + (P x - Q x) * (2 * Q x - 1) with hVdef
-  have hV : IsCovFam α V := by
-    refine IsCovFam.const_one.add ((hPc.sub hQc).mul ?_)
-    have h2 : IsCovFam α (fun x => (2 : Op ℤ) * Q x) := by
-      have := hQc.smul (2 : ℂ)
-      convert this using 2 with x
-      rw [two_mul, two_smul]
-    exact h2.sub IsCovFam.const_one
+  set V : ℝ → Op ℤ := fun x => 1 + (P x - Q x) * (Q x + Q x - 1) with hVdef
+  have hV : IsCovFam α V :=
+    IsCovFam.const_one.add ((hPc.sub hQc).mul ((hQc.add hQc).sub IsCovFam.const_one))
   have hu : ∀ x, IsUnit (V x) := fun x => (exists_conj_of_norm_sub_lt_one (hP x) (hQ x) (h x)).1
   have hW := hV.inverse hu
   have hconj : ∀ x, P x = V x * Q x * Ring.inverse (V x) := by
