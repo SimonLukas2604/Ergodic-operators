@@ -20,6 +20,7 @@ gap-labelling theorem is no longer an input of Paper II:
    (`CMS.tau_eq_of_norm_sub_lt`: they are similar, `P = V Q V⁻¹`, and `τ(AB) = τ(BA)`).
 -/
 import SpectralGapsDimension.GapLabelling
+import SpectralGapsDimension.ComparisonSign
 import ErgodicShared.CovariantTrace
 
 noncomputable section
@@ -126,14 +127,15 @@ lemma exists_gapProj_near (α c d b₀ : ℝ) :
     exact ⟨Int.fract_nonneg x, (Int.fract_lt_one x).le⟩
   have hmem : (b, x - ⌊x⌋ * 1) ∈ F ⁻¹' Iio (1 / 3) :=
     huv ⟨hball (by rwa [Metric.mem_ball, Real.dist_eq]), hv hx⟩
-  simpa [F, (hper b).sub_int_mul_eq, (hper b₀).sub_int_mul_eq] using hmem
+  change ‖gapProj α c d b (x - ⌊x⌋ * 1) - gapProj α c d b₀ (x - ⌊x⌋ * 1)‖ < 1 / 3 at hmem
+  rwa [(hper b).sub_int_mul_eq, (hper b₀).sub_int_mul_eq] at hmem
 
 lemma labelFun_eq_re_tau (α c d b : ℝ) :
     labelFun α c d b = RCLike.re (tau (gapProj α c d b)) := by
-  unfold labelFun tau
-  rw [intervalIntegral.intervalIntegral_re
-    (((isCovFam_gapProj α c d b).continuous_inner _ _).intervalIntegrable _ _)]
-  rfl
+  unfold tau
+  show ∫ x in (0 : ℝ)..1, RCLike.re ⟪delta 0, gapProj α c d b x (delta 0)⟫_ℂ = _
+  exact intervalIntegral.intervalIntegral_re
+    (((isCovFam_gapProj α c d b).continuous_inner _ _).intervalIntegrable _ _)
 
 /-- **Constancy of comparison labels** (proof of Prop 3.9), proved: nearby comparison operators
 with `[c, d]` in a common gap have the same IDS at `c`. -/
