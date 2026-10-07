@@ -104,9 +104,8 @@ lemma skewShift_preserving (α : ℝ) :
 lemma skewT_preserving (α : ℝ) :
     MeasurePreserving (skewT α) (volume : Measure (UnitAddTorus (Fin 2))) volume := by
   have : skewT α = e2.symm ∘ skewShift α ∘ e2 := by
-    rw [skewShift_eq_conj]
-    funext x
-    simp
+    funext x i
+    fin_cases i <;> rfl
   rw [this]
   exact (e2_preserving.symm e2).comp ((skewShift_preserving α).comp e2_preserving)
 
@@ -132,16 +131,15 @@ lemma fourier_mul_same (k l : ℤ) (a : UnitAddCircle) :
 lemma mFourier_neg_skewTinv (α : ℝ) (n : Fin 2 → ℤ) (z : UnitAddTorus (Fin 2)) :
     mFourier (-n) (skewTinv α z) =
       fourier (n 0 - n 1) (α : UnitAddCircle) * mFourier (-![n 0 - n 1, n 1]) z := by
-  simp only [mFourier_two, skewTinv, Pi.neg_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
-    Matrix.cons_val_fin_one, Matrix.head_cons]
-  rw [sub_eq_add_neg, fourier_add_pt, sub_eq_add_neg (z 1), add_assoc, fourier_add_pt,
-    fourier_add_pt, fourier_neg_pt, fourier_neg_pt, fourier_neg_pt]
   have h1 : fourier (-n 0) (z 0) * fourier (- -n 1) (z 0) = fourier (-(n 0 - n 1)) (z 0) := by
     rw [fourier_mul_same]; congr 1; ring
   have h2 : fourier (- -n 0) (α : UnitAddCircle) * fourier (-n 1) (α : UnitAddCircle) =
       fourier (n 0 - n 1) (α : UnitAddCircle) := by
     rw [fourier_mul_same]; congr 1; ring
+  simp only [mFourier_two, skewTinv, Pi.neg_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_fin_one]
   rw [← h1, ← h2]
+  simp only [sub_eq_add_neg, fourier_add_pt, fourier_neg_pt]
   ring
 
 /-- **Coefficient relation for invariant functions.** If `h ∘ S = h`, then
@@ -172,9 +170,9 @@ lemma fourier_coe_ne_one {α : ℝ} (hα : Irrational α) {k : ℤ} (hk : k ≠ 
   have : ((k : ℝ) * α : ℝ) = (m : ℝ) := by
     have : ((k * α : ℝ) : ℂ) = (m : ℂ) := by
       apply mul_left_cancel₀ h2
+      rw [div_one] at hm
       push_cast
-      rw [← hm]
-      ring
+      linear_combination hm
     exact_mod_cast this
   have hk' : (k : ℝ) ≠ 0 := by exact_mod_cast hk
   apply hα
@@ -245,7 +243,7 @@ theorem skewT_ergodic {α : ℝ} (hα : Irrational α) :
         exact_mod_cast mul_right_cancel₀ h1 this
       have hs2 := hsq.comp_injective hinj
       simp only [comp_def, hnorm] at hs2
-      have := summable_const_iff.1 hs2
+      have := (summable_const_iff _).1 hs2
       exact norm_eq_zero.1 (pow_eq_zero_iff (n := 2) (by norm_num) |>.1 this)
   exact ae_mem_or_ae_notMem_of_mFourierCoeff hs hcoef
 
@@ -261,6 +259,6 @@ theorem skewShiftErgodic : SkewShiftErgodicStatement := by
   have hp : MeasurePreserving e2 (Measure.pi fun _ : Fin 2 => AddCircle.haarAddCircle)
       ((AddCircle.haarAddCircle : Measure UnitAddCircle).prod AddCircle.haarAddCircle) :=
     measurePreserving_piFinTwo fun _ => (AddCircle.haarAddCircle : Measure UnitAddCircle)
-  exact (ergodic_conjugate_iff hp).2 (skewT_ergodic hα)
+  exact hp.ergodic_conjugate_iff.2 (skewT_ergodic hα)
 
 end DF
