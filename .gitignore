@@ -1,0 +1,11 @@
+# Lean build artifacts and dependencies
+lean/.lake/
+*.olean
+*.ilean
+# macOS
+.DS_Store
+# local installer script
+lean/elan-init.sh
+# paper sources and PDFs (not committed until decided)
+*.pdf
+*.tex

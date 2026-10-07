@@ -1,0 +1,46 @@
+# Lean 4 formalization of *Analytic perturbations of the almost Mathieu operator*
+
+Build: `lake exe cache get && lake build` (Lean `v4.35.0-rc3`, Mathlib master).
+
+| File | Content | Status |
+|---|---|---|
+| `Operators.lean` | weighted shifts on ℓ²(ι): boundedness, composition, adjoint | proved |
+| `Weyl.lean` | `U`, `V_x`, `W_{r,q}`; Weyl relations, `W* = W_{-r,-q}`, Weyl series `R_x`, norm bound, self-adjointness, covariance `U R_x = R_{x+α} U`, periodicity, norm continuity; Fourier duality on symbols (`𝓕⁴ = id`, weight exchange, `𝓕(AMO_η) = η·AMO_{1/η}`) | proved |
+| `Spectrum.lean` | spectral stability `d_H(spec A, spec B) ≤ ‖A−B‖` (normal A, B); phase independence of the spectrum for irrational α (§2.1) | proved |
+| `DirectIntegral.lean` | §2.1 direct integral: the fibrewise operator 𝓗 = ∫⊕ H_x dx on L²((0,1]; ℓ²(ℤ)) and **spec 𝓗 = Σ** for a norm-continuous self-adjoint family with common spectrum Σ; approximate eigenvectors of self-adjoint operators | proved |
+| `Cocycle.lean` | prepared Jacobi operator (self-adjoint), transfer matrix (`det = 1`, transfer identity), cocycle iterates, Lyapunov exponent exists (Fekete) and is ≥ 0 | proved |
+| `Equidistribution.lean` | Weyl's uniform equidistribution for irrational rotations: Birkhoff averages of continuous periodic functions converge uniformly to the mean | proved |
+| `UniformGrowth.lean` | **Lemma 2.5** (`lem:finite-block-growth`): L(α,A) < γ ⇒ sup_x ‖A_n(x)‖ ≤ Ce^{γn}; uniform over compact families and nearby (also rational) frequencies. Proved via Weyl's theorem, so Furman's theorem isn't needed | proved |
+| `Spectral.lean` | spectral measures and types, Anderson localization, DOS/IDS, Cantor sets, gaps, β(α), exact Jacobi preparations; complexified cocycle `C_E(·+iy)` is an SL(2,ℂ) cocycle; 2D Weyl relation; critical self-duality | definitions + proved lemmas |
+| `LyapunovNorm.lean` | the Lyapunov exponent is the same for any comparable norm, in particular the Euclidean operator norm used in the paper | proved |
+| `DensityOfStates.lean` | the DOS measure is carried by Σ; Thm 1.4(iii) "in particular": IDS a.c. ⇒ \|Σ\| > 0 and dim_H Σ = 1 | proved |
+| `WeylAlgebra.lean` | §2.2 weighted algebra 𝒲_{s,ℓ}: twisted product, ‖R⋆S‖ ≤ ‖R‖‖S‖, ‖R*‖ = ‖R‖, op(R⋆S) = op R·op S, op(R*) = op(R)*, 𝓕 multiplicative, exponential locality \|⟨δ_n, R_x δ_m⟩\| ≤ ‖R‖_{s,ℓ} e^{−s\|n−m\|} | proved |
+| `Neumann.lean` | Neumann series inside 𝒲_{s,ℓ}: ‖L‖ < 1 ⇒ (I−L)⁻¹ = Σ L^{⋆m} ∈ 𝒲_{s,ℓ}, with bound (1−‖L‖)⁻¹ and exponentially local inverse | proved |
+| `SymbolCalculus.lean` | twisted product: bilinearity, unit, associativity, (R⋆S)* = S*⋆R*; hopping supports; Π≥2; shifts U, U⁻¹; tail inverse S⁻¹ with the e^{−s} weight gains | proved |
+| `WeightedSpace.lean` | 𝒲_{s,ℓ} realised as ℓ¹(ℤ²) (a Banach space) with transported operations; an abstract Banach fixed-point lemma | proved |
+| `ScaledPreparation.lean` | **Lemma 2.1** (`d-lem:scaled`): (I+K)*(J₀+j)(I+K) = J₀+R with K on hopping ≥1, j self-adjoint on {−1,0,1}, ‖K‖ + e^{−s}a₀⁻¹‖j‖ ≤ C(c₀)σ; the operator form on every fibre; Q and Q⁻¹ exponentially local | proved |
+| `TailInverse.lean` | **Lemma 2.4** (`ext-lem:tail-inverse`), Green-series core, in any complete normed ring: if the transfer products satisfy ‖P_{j,m}‖ ≤ Ce^{γm} with γ < s, the Green series solves l_j = β_j l_{j+1} − l_{j+2} + d_j, satisfies Σe^{sj}‖l_j‖ ≤ C(1−e^{γ−s})⁻¹Σe^{sj}‖d_j‖, and is the unique solution of finite weighted norm. | proved |
+| `WeightedRing.lean` | 𝒲_{s,ℓ} with the twisted product as a genuine `NormedRing` (Banach algebra) `WAlg ω α` | proved |
+| `TailSymbol.lean` | **Lemma 2.4 for symbols** (`tail_inverse_symbol`): for J₀ = a(U+U⁻¹)+w (a ≠ 0, w a phase coefficient) and transfer products ‖P_{j,m}‖ ≤ Ce^{γm}, γ < s, every D ∈ 𝒲_{s,ℓ} supported in hopping ≥ 2 has a **unique** K ∈ 𝒲_{s,ℓ} supported in hopping ≥ 1 with Π≥2(J₀K) = D, and ‖K‖ ≤ Ce^{−s}/(\|a\|(1−e^{γ−s}))‖D‖. Via the row identity a·l_{r−1} + (τ_{−rα}w)∗l_r + a·l_{r+1} = δ_r in the gauge l_r(q) = K_{r,q}e(−αrq/2). The bound on the transfer products is a hypothesis (it is where the AMO input enters). | proved |
+| `EnergyDerivatives.lean` | The paper's mechanism for all **C²_E bounds** (`d-eq:C1` and the second preparation): Cauchy's estimate for iterated derivatives, real derivatives of the restriction = complex derivatives, and `‖∂_E^j f‖ ≤ j!4^jM` on [e₁,e₂] for f holomorphic with ‖f‖ ≤ M on the ½-neighbourhood (`deriv_bound_nbhd`, `cke_of_holo`) | proved |
+| `GreenHolomorphic.lean` | The Green series of Lemma 2.4 depends **holomorphically** on E (uniform transfer bound + dominated sources), with a uniform bound and the resulting n!4ⁿ derivative bounds (`green_holo`, `green0_deriv_bound`) | proved |
+| `TailSymbolEnergy.lean` | **Lemma 2.4, C²_E version** (`TailSym.tail_rows_deriv_bound`): for holomorphic families w_E, D_E in 𝒲_{s,ℓ}, each row L_j(E) of the tail-inverse solution satisfies ‖∂_E^n L_j‖ ≤ n!4ⁿ C e^{−sj} Σ_m e^{s(j+m)} \|a\|⁻¹Δ_{j+m}. Hypotheses: uniform transfer-product bound; row domination Δ of D_E | proved |
+| `PoissonBound.lean` | **Diagonal Poisson bound** (`t-lem:poisson`), quantitative core: (1) near-identity products X_{n+1}=(1+x_n)X_n, ‖x_n‖ ≤ t ≤ ½, have left inverses of norm ≤ e^{2tn} (`perturbed_inverse_bound`); (2) c(\|m\|²+1) ≤ Im m ⇒ \|m\| ≤ c⁻¹, Im m ≥ c (`weyl_bounds`); (3) the half-line Weyl estimate from bounded transfer vectors and Im m = s‖u‖² (`halfline_weyl`); (4) the gluing denominator bound \|(b−is−a²m₋−a'²m₊)⁻¹\| ≤ (2a₋²c)⁻¹ (`glue_bound`). The operator-theoretic inputs (half-line Dirichlet resolvents, Im m = s‖u‖², the Schur-complement gluing formula) enter as hypotheses | proved |
+| `FourierSeries.lean` | phase coefficients a_r(z) = Σ_q R_{r,q} e(αrq/2 + qz): analytic and 1-periodic on the strip \|Im z\| < ℓ/2π; a self-adjoint symbol on hopping indices {−1,0,1} *is* the prepared Jacobi operator on every fibre | proved |
+| `FirstPreparation.lean` | **exact Jacobi preparation** (`d-eq:firstprep`): for small self-adjoint R and e^{−s}(2\|η\|e^ℓ+\|E\|)+e^{−2s} ≤ 1/4, H_x − E = Q_x*J_xQ_x as a `JacobiPrep`, with a, b analytic on a strip, \|a−1\| ≤ 1/4, b real, c = (aa♯)^{1/2} analytic with c = \|a\| on ℝ, and Q, Q⁻¹ exponentially local | proved |
+| `IDSSupport.lean` | Lemma 2.8 (`lem:covariant-IDS`), support part: every open interval meeting Σ has positive IDS measure, so supp(dN) = Σ | proved |
+| `Gauge.lean` | gauge transform Γ*JΓ = J^r (hopping phases removed; Γ exists for any phases); for an exact preparation: ker(H_x−E) = Q_x⁻¹ ker J_x, and H_x−E invertible ⇔ J_x invertible | proved |
+| `Supercritical.lean` | scaling of spectra, Cantor sets, DOS measures and gap labels; the duality identity 𝓕(H_{λ⁻¹, λ⁻¹𝓕⁻¹T}) = λ⁻¹H_{λ,T} | proved |
+| `ResolventComparison.lean` | Lemma 3.2 (`t-lem:weight`): Im(J−isW)⁻¹ = s(JW⁻¹J + s²W)⁻¹ and C⁻¹ Im(J−is)⁻¹ ≤ Im(J−isW)⁻¹ ≤ C Im(J−is)⁻¹, in any unital C*-algebra | proved |
+| `MainTheorems.lean` | Thm 1.1, Cor 1.2, Thms 1.4–1.5, Thm 1.6, Cor 1.7 stated as named propositions (`DryTenMartiniClaim`, `DryTenMartiniUniformClaim`, `SpectralTransitionClaim`, `SpectralTransitionUniformClaim`, `CriticalClaim`, `TwoDimensionalClaim`, `TwoDimensionalCriticalClaim`), recorded but **not asserted**; **Cor 1.3 (both versions) proved as implications from the Thm 1.1 / Cor 1.2 claims**; "in particular" corollaries proved | statements only (no `sorry`) |
+
+Not formalized, because they need theory Mathlib lacks: the atomlessness half of Lemma 2.8 (Borel functional calculus), Lemma 2.9 (trace inertia in finite von Neumann algebras), the determinant formula (Deninger / Fuglede–Kadison), and the lemmas built on Avila's global theory, reducibility, Kotani theory, Gordon arguments or half-line Weyl m-functions.
+
+The library contains **no `sorry`**. The 7 main results are recorded as `…Claim : Prop` definitions, not as theorems, because their proofs need results that Mathlib doesn't have:
+Avila's global theory, almost reducibility, AYZ normal forms, Puig's argument, Kotani theory,
+the Deninger determinant formula, and GJLS duality.
+`#print axioms` shows that every other result uses only `propext`, `Classical.choice` and `Quot.sound`.
+
+Conventions: the Lyapunov exponent is defined with the ℓ^∞ operator norm on 2×2 matrices;
+`IsSLCocycle.tendsto_lyapunov_euclid` shows that the Euclidean norm gives the same limit. Spectral measures are
+characterised by `∫ f dμ_ψ = ⟪ψ, f(T)ψ⟫` for bounded continuous `f`.
