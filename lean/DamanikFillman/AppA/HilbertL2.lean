@@ -580,48 +580,55 @@ lemma pairing_hilbertL2 (g φ : 𝓢(ℝ, ℂ)) :
     rfl
   rw [← h1, h2, h3]
 
-set_option maxHeartbeats 1000000 in
-lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
-    ∀ᵐ t ∂(volume : Measure ℝ), hilbertL2 (g.toLp 2) t = fFun g t := by
-  have h1 := (Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two
-  have h2 : LocallyIntegrable (fFun g) := (continuous_fFun g).locallyIntegrable
-  have hloc : LocallyIntegrable (fun t => hilbertL2 (g.toLp 2) t - fFun g t) := h1.sub h2
+/-- Locally integrable functions with the same pairings against all Schwartz functions agree
+almost everywhere. -/
+lemma ae_eq_of_pairing {u F : ℝ → ℂ} (hu : LocallyIntegrable u) (hF : Continuous F)
+    (hint : ∀ φ : 𝓢(ℝ, ℂ), Integrable fun t => conj (φ t) * u t)
+    (h : ∀ φ : 𝓢(ℝ, ℂ), ∫ t, conj (u t) * φ t = ∫ t, conj (F t) * φ t) :
+    ∀ᵐ t ∂(volume : Measure ℝ), u t = F t := by
+  have hloc : LocallyIntegrable (fun t => u t - F t) := hu.sub hF.locallyIntegrable
   suffices H : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
-      ∫ x, ψ x • (hilbertL2 (g.toLp 2) x - fFun g x) = 0 by
+      ∫ x, ψ x • (u x - F x) = 0 by
     filter_upwards [ae_eq_zero_of_integral_contDiff_smul_eq_zero hloc H] with t ht
     exact sub_eq_zero.1 ht
   intro ψ hψ hψc
-  -- the test function as a Schwartz function
   have hcs : HasCompactSupport (fun x => ((ψ x : ℝ) : ℂ)) :=
     hψc.comp_left Complex.ofReal_zero
   have hsm : ContDiff ℝ ∞ (fun x => ((ψ x : ℝ) : ℂ)) :=
     Complex.ofRealCLM.contDiff.comp hψ
   set φ : 𝓢(ℝ, ℂ) := hcs.toSchwartzMap hsm with hφ
   have hφx : ∀ x, φ x = ((ψ x : ℝ) : ℂ) := fun x => rfl
-  have hp := (pairing_hilbertL2 g φ).trans (pairing_fFun g φ).symm
+  have hp := h φ
   simp_rw [hφx] at hp
   have e : ∀ (z : ℂ) (t : ℝ), ((ψ t : ℝ) : ℂ) * z = conj (conj z * ((ψ t : ℝ) : ℂ)) :=
     fun z t => by rw [map_mul, Complex.conj_conj, Complex.conj_ofReal, mul_comm]
-  have hp' : ∫ t, ((ψ t : ℝ) : ℂ) * hilbertL2 (g.toLp 2) t =
-      ∫ t, ((ψ t : ℝ) : ℂ) * fFun g t := by
-    calc ∫ t, ((ψ t : ℝ) : ℂ) * hilbertL2 (g.toLp 2) t
-        = ∫ t, conj (conj (hilbertL2 (g.toLp 2) t) * ((ψ t : ℝ) : ℂ)) :=
-          integral_congr_ae (Eventually.of_forall fun t => e (hilbertL2 (g.toLp 2) t) t)
-      _ = conj (∫ t, conj (hilbertL2 (g.toLp 2) t) * ((ψ t : ℝ) : ℂ)) := integral_conj
-      _ = conj (∫ t, conj (fFun g t) * ((ψ t : ℝ) : ℂ)) := by rw [hp]
-      _ = ∫ t, conj (conj (fFun g t) * ((ψ t : ℝ) : ℂ)) := integral_conj.symm
-      _ = ∫ t, ((ψ t : ℝ) : ℂ) * fFun g t :=
-          integral_congr_ae (Eventually.of_forall fun t => (e (fFun g t) t).symm)
-  have hi1 : Integrable fun t => ((ψ t : ℝ) : ℂ) * hilbertL2 (g.toLp 2) t := by
-    refine (MeasureTheory.L2.integrable_inner (𝕜 := ℂ) (φ.toLp 2)
-      (hilbertL2 (g.toLp 2))).congr ?_
-    filter_upwards [φ.coeFn_toLp 2] with t ht
-    rw [RCLike.inner_apply', ht, hφx, Complex.conj_ofReal]
-  have hi2 : Integrable fun t => ((ψ t : ℝ) : ℂ) * fFun g t :=
-    ((Complex.continuous_ofReal.comp hψ.continuous).mul
-      (continuous_fFun g)).integrable_of_hasCompactSupport hcs.mul_right
+  have hp' : ∫ t, ((ψ t : ℝ) : ℂ) * u t = ∫ t, ((ψ t : ℝ) : ℂ) * F t := by
+    calc ∫ t, ((ψ t : ℝ) : ℂ) * u t
+        = ∫ t, conj (conj (u t) * ((ψ t : ℝ) : ℂ)) :=
+          integral_congr_ae (Eventually.of_forall fun t => e (u t) t)
+      _ = conj (∫ t, conj (u t) * ((ψ t : ℝ) : ℂ)) := integral_conj
+      _ = conj (∫ t, conj (F t) * ((ψ t : ℝ) : ℂ)) := by rw [hp]
+      _ = ∫ t, conj (conj (F t) * ((ψ t : ℝ) : ℂ)) := integral_conj.symm
+      _ = ∫ t, ((ψ t : ℝ) : ℂ) * F t :=
+          integral_congr_ae (Eventually.of_forall fun t => (e (F t) t).symm)
+  have hi1 : Integrable fun t => ((ψ t : ℝ) : ℂ) * u t := by
+    refine (hint φ).congr (Eventually.of_forall fun t => ?_)
+    simp only [hφx, Complex.conj_ofReal]
+  have hi2 : Integrable fun t => ((ψ t : ℝ) : ℂ) * F t :=
+    ((Complex.continuous_ofReal.comp hψ.continuous).mul hF).integrable_of_hasCompactSupport
+      hcs.mul_right
   simp_rw [Complex.real_smul, mul_sub]
   rw [integral_sub hi1 hi2, hp', sub_self]
+
+lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
+    ∀ᵐ t ∂(volume : Measure ℝ), hilbertL2 (g.toLp 2) t = fFun g t := by
+  refine ae_eq_of_pairing ((Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two)
+    (continuous_fFun g) (fun φ => ?_) (fun φ => ?_)
+  · refine (MeasureTheory.L2.integrable_inner (𝕜 := ℂ) (φ.toLp 2)
+      (hilbertL2 (g.toLp 2))).congr ?_
+    filter_upwards [φ.coeFn_toLp 2] with t ht
+    rw [RCLike.inner_apply', ht]
+  · exact (pairing_hilbertL2 g φ).trans (pairing_fFun g φ).symm
 
 end HilbertL2
 
