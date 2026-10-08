@@ -69,6 +69,7 @@ import DamanikFillman.Ch3.TopErgodic
 import DamanikFillman.Ch3.UH
 import DamanikFillman.Ch3.UH2
 import DamanikFillman.Ch3.UHOpen
+import DamanikFillman.Ch3.UHSplit
 import DamanikFillman.Ch4.IDS
 import DamanikFillman.Ch4.IshiiPastur
 import DamanikFillman.Ch4.Johnson
