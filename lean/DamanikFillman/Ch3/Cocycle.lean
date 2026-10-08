@@ -28,8 +28,8 @@ Statements (stated as `Prop`s, not asserted):
   (a) uniform exponential growth, (b) invariant exponential splitting, (c) absence of bounded
   orbits; item (d), projective conjugacy to a diagonal cocycle, is omitted). The equivalence
   (a) ⟺ (c) is **proved** in `DamanikFillman.Ch3.UH` and `DamanikFillman.Ch3.UH2`
-  (`DF.Cocycle.uniformExpGrowth_iff_not_boundedOrbit`); only the part involving (b) remains
-  unproved. Robustness (Corollary 3.8.5, fixed `T`) is in `DamanikFillman.Ch3.UHOpen`;
+  (`DF.Cocycle.uniformExpGrowth_iff_not_boundedOrbit`); the whole statement is **proved** in
+  `DamanikFillman.Ch3.UHStable` (`DF.Cocycle.uniformHyperbolicityCharacterization`). Robustness (Corollary 3.8.5, fixed `T`) is in `DamanikFillman.Ch3.UHOpen`;
 * `DF.Cocycle.RuelleStatement` — Theorem 3.8.7 (deterministic Oseledets/Ruelle theorem,
   complex case); **proved** in `DamanikFillman.Ch3.Ruelle` (`DF.Cocycle.ruelle`);
 * `DF.Cocycle.OseledetsStatement` — Corollary 3.8.8 (multiplicative ergodic theorem).
@@ -279,7 +279,8 @@ def InvExpSplitting (T : X ≃ₜ X) (A : X → SL2R) : Prop :=
 /-- **Theorem 3.8.2** (characterizations of uniform hyperbolicity), items (a)–(c): for a
 topological dynamical system `(Ω, T)` and continuous `A : Ω → SL(2, ℝ)`, uniform exponential
 growth, the existence of an invariant exponential splitting, and the absence of bounded orbits
-are equivalent. (Item (d) is not included.) Stated, not proved. -/
+are equivalent. (Item (d) is not included.) Proved as
+`DF.Cocycle.uniformHyperbolicityCharacterization` (`Ch3/UHStable.lean`). -/
 def UniformHyperbolicityCharacterizationStatement : Prop :=
   ∀ (X : Type) [MetricSpace X] [CompactSpace X] (T : X ≃ₜ X) (A : X → SL2R),
     Continuous (fun ω => (A ω : M2R)) →

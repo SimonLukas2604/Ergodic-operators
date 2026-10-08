@@ -20,7 +20,9 @@ backward time with uniform constants, some `A_{-n}(ω) ∈ SL(2, ℝ)` would exp
 contradicting `‖A_{-n}(ω)⁻¹‖ ≥ 1`.
 
 The converse (a) ⇒ (c) is proved in `DamanikFillman.Ch3.UH2`; the implications involving the
-invariant splitting (b) are recorded in `DF.Cocycle.UniformHyperbolicityCharacterizationStatement`.
+invariant splitting (b) are proved in `DamanikFillman.Ch3.UHSplit` ((b) ⇒ (a)) and
+`DamanikFillman.Ch3.UHStable` ((a) ⇒ (b), and the full statement
+`DF.Cocycle.uniformHyperbolicityCharacterization`).
 -/
 import DamanikFillman.Ch3.Cocycle
 

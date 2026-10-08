@@ -156,7 +156,7 @@ lemma act_zero' (B : M2R) : act B 0 = 0 := by simp [act]
 
 lemma tpow_symm {Ω : Type*} (T : Ω ≃ Ω) (n : ℤ) (x : Ω) : tpow T.symm n x = tpow T (-n) x := by
   show ⇑(((T : Equiv.Perm Ω))⁻¹ ^ n) x = ⇑((T : Equiv.Perm Ω) ^ (-n)) x
-  rw [inv_zpow']
+  rw [_root_.inv_zpow']
 
 lemma tpow_one_apply {Ω : Type*} (T : Ω ≃ Ω) (x : Ω) : tpow T 1 x = T x := by
   have := tpow_add_one (T := T) 0 x
