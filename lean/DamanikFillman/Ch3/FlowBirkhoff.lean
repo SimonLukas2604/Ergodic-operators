@@ -120,13 +120,13 @@ lemma tendsto_term_div {α : Type*} (T : α → α) (u : α → ℝ) (x : α) {L
   have key : ∀ n : ℕ, u (T^[n] x) / ((n : ℝ) + 1) = birkhoffAverage ℝ T u (n + 1) x -
       ((n : ℝ) / ((n : ℝ) + 1)) * birkhoffAverage ℝ T u n x := by
     intro n
-    simp only [Birkhoff.birkhoffAverage_eq_div, birkhoffSum_succ_apply]
+    simp only [birkhoffAverage, birkhoffSum_succ_apply, smul_eq_mul]
     push_cast
     rcases Nat.eq_zero_or_pos n with rfl | hn
     · simp
     · have : (n : ℝ) ≠ 0 := by positivity
       field_simp
-      ring
+      try ring
   have := (h.comp (tendsto_add_atTop_nat 1)).sub
     ((tendsto_natCast_div_add_atTop (1 : ℝ)).mul h)
   rw [one_mul, sub_self] at this
@@ -162,7 +162,7 @@ lemma integral_comp_flow (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) (t : ℝ)
   rw [(hmp t).map_eq] at this
   exact this.symm
 
-lemma integrable_prod (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
+lemma integrable_prod [SFinite μ] (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
     (hgm : Measurable g) (a b : ℝ) :
     Integrable (fun p : X × ℝ => g (ϕ p.2 p.1)) (μ.prod (volume.restrict (Ioc a b))) := by
   have hm : AEStronglyMeasurable (fun p : X × ℝ => g (ϕ p.2 p.1))
@@ -178,7 +178,7 @@ lemma avgF_eq (g : X → ℝ) (x : X) :
     avgF ϕ g x = ∫ s, g (ϕ s x) ∂(volume.restrict (Ioc (0 : ℝ) 1)) :=
   intervalIntegral.integral_of_le zero_le_one
 
-lemma integrable_avgF (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
+lemma integrable_avgF [SFinite μ] (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
     (hgm : Measurable g) : Integrable (avgF ϕ g) μ := by
   have := (integrable_prod hmp hg hgm 0 1).integral_prod_left
   exact this.congr (Eventually.of_forall fun x => (avgF_eq g x).symm)
@@ -186,9 +186,12 @@ lemma integrable_avgF (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → �
 lemma measurable_avgF {g : X → ℝ} (hgm : Measurable g) : Measurable (avgF ϕ g) := by
   have := StronglyMeasurable.integral_prod_right (ν := volume.restrict (Ioc (0 : ℝ) 1))
     (f := fun x s => g (ϕ s x)) (hgm.comp (measurable_flow ϕ)).stronglyMeasurable
-  exact this.measurable.congr (funext fun x => (avgF_eq g x).symm)
+  have e : avgF ϕ g = fun x => ∫ s, g (ϕ s x) ∂(volume.restrict (Ioc (0 : ℝ) 1)) :=
+    funext fun x => avgF_eq g x
+  rw [e]
+  exact this.measurable
 
-lemma integral_avgF (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
+lemma integral_avgF [SFinite μ] (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
     (hgm : Measurable g) : ∫ x, avgF ϕ g x ∂μ = ∫ y, g y ∂μ := by
   simp_rw [avgF_eq]
   rw [integral_integral_swap (f := fun x s => g (ϕ s x)) (integrable_prod hmp hg hgm 0 1)]
@@ -197,14 +200,15 @@ lemma integral_avgF (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ
   rw [this, integral_const]
   simp
 
-lemma ae_locInt (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
+lemma ae_locInt [SFinite μ] (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (hg : Integrable g μ)
     (hgm : Measurable g) :
     ∀ᵐ x ∂μ, ∀ a b : ℝ, IntervalIntegrable (fun s => g (ϕ s x)) volume a b := by
   have h := ae_all_iff.2 fun N : ℕ => (integrable_prod hmp hg hgm (-N) N).prod_right_ae
   filter_upwards [h] with x hx a b
   obtain ⟨N, hN⟩ := exists_nat_gt (max |a| |b|)
   rw [intervalIntegrable_iff]
-  refine (hx N).mono_set fun s hs => ?_
+  refine (show IntegrableOn (fun s => g (ϕ s x)) (Ioc (-(N : ℝ)) N) volume from hx N).mono_set
+    fun s hs => ?_
   have hs' := Set.uIoc_subset_uIcc hs
   rw [Set.mem_uIcc] at hs'
   have ha := le_abs_self a
@@ -230,7 +234,7 @@ theorem ae_mem_or_ae_notMem [SFinite μ] (hE : FlowErgodic ϕ μ) {E : Set X} (h
       simp only [hE'def, mem_setOf_eq, mem_preimage, mem_singleton_iff]
       exact ae_iff
     rw [this]
-    exact Measure.measurable_measure_prodMk_left hS (measurableSet_singleton 0)
+    exact measurable_measure_prodMk_left hS (measurableSet_singleton 0)
   have hE'inv : ∀ t, ϕ t ⁻¹' E' = E' := by
     intro t
     ext x

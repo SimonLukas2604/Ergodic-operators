@@ -232,9 +232,9 @@ lemma stVec_spec {T : Ω → Ω} {A : Ω → M2} (hdet : ∀ ω, (A ω).det = 1)
         · simp [hw1]
       rw [this]
       exact V.smul_mem _ hw
-    set v := (w 0)⁻¹ • w with hvdef
-    have hvV : v ∈ V := V.smul_mem _ hw
-    have hv0 : v 0 = 1 := by simp [hvdef, hw00]
+    obtain ⟨v, hvdef⟩ : ∃ v : C2, v = (w 0)⁻¹ • w := ⟨_, rfl⟩
+    have hvV : v ∈ V := by rw [hvdef]; exact V.smul_mem _ hw
+    have hv0 : v 0 = 1 := by rw [hvdef]; simp [hw00]
     have hvne : v ≠ 0 := by
       intro h
       rw [h] at hv0
@@ -250,7 +250,11 @@ lemma stVec_spec {T : Ω → Ω} {A : Ω → M2} (hdet : ∀ ω, (A ω).det = 1)
       · simp [hv0]
       · simp
     -- convergence of `zₙ`
-    have hdetn : ∀ n, (iter T A n ω).det = 1 := fun n => det_iter hdet n ω
+    have hdetn : ∀ n, (iter T A n ω).det = 1 := by
+      intro n
+      induction n with
+      | zero => simp
+      | succ n ih => rw [iter_succ, det_mul, hdet, ih, one_mul]
     have ha : ∀ n, 0 < ‖actC (iter T A n ω) e1c‖ := fun n =>
       norm_pos_iff.2 (actC_ne_zero (hdetn n) e1c_ne_zero)
     have hb : ∀ n, 0 < ‖actC (iter T A n ω) v‖ := fun n =>
