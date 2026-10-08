@@ -266,10 +266,12 @@ lemma stVec_spec {T : Ω → Ω} {A : Ω → M2} (hdet : ∀ ω, (A ω).det = 1)
       have hne0 : (‖actC (iter T A n ω) e1c‖ : ℂ) ≠ 0 := by exact_mod_cast (ha n).ne'
       unfold zseq
       have hd : (‖actC (iter T A n ω) e1c‖ : ℂ) ^ 2 ≠ 0 := pow_ne_zero 2 hne0
-      rw [he0, actC_sub, actC_smul, inner_sub_right, inner_smul_right,
-        inner_self_eq_norm_sq_to_K]
-      field_simp
-      first | ring | simp | rw [add_sub_cancel_right]
+      have hself : ⟪actC (iter T A n ω) e1c, actC (iter T A n ω) e1c⟫_ℂ =
+          (‖actC (iter T A n ω) e1c‖ : ℂ) ^ 2 := by
+        rw [inner_self_eq_norm_sq_to_K]; rfl
+      rw [he0, actC_sub, actC_smul, inner_sub_right, inner_smul_right, hself, sub_div,
+        mul_div_assoc, div_self hd, mul_one]
+      ring
     have hbound : ∀ n, ‖zseq T A n ω - v 1‖ ≤
         ‖actC (iter T A n ω) v‖ / ‖actC (iter T A n ω) e1c‖ := by
       intro n
