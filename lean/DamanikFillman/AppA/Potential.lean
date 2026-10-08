@@ -52,7 +52,8 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
 
 ## Statements (recorded as `Prop`s, not proved here)
 
-* `EnergyStrictConvexityStatement` — Prop. A.2.5 (the book only sketches the proof);
+* `EnergyStrictConvexityStatement` — Prop. A.2.5 (the book only sketches the proof; proved in
+  `EnergyConvexity.lean`: `energyStrictConvexityStatement_holds`);
 * `EquilibriumExistenceStatement` — Thm. A.2.6, existence (proved in `Equilibrium.lean`:
   `equilibriumExistenceStatement_holds`);
 * `CapacityRegularityStatement` — Prop. A.2.2(e) and consistency of (A.2.1) with (A.2.2)–(A.2.3)

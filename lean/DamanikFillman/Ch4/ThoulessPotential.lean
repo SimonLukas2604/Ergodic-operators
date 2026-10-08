@@ -33,7 +33,8 @@ here in terms of `Φ_{dk} = DF.logPotential (DF.toC k)`.
   `Cap(Σ) = 1`.  Only the first half of Frostman's theorem (`Φ_ρ ≤ E(ρ)`) is used, taken from
   `DF.FrostmanStatement` (proved: `DF.isEquilibriumMeasure_of_logPotential_eq_zero'`); the book's appeal to uniqueness of equilibrium measures is replaced by
   the direct verification that `dk` minimizes the energy (uniqueness, from
-  `DF.EnergyStrictConvexityStatement`, then gives `dk = ρ_Σ`: `DF.eq_equilibrium_of_...`).
+  `DF.EnergyStrictConvexityStatement`, proved in `AppA/EnergyConvexity.lean`, then gives
+  `dk = ρ_Σ`: `DF.eq_of_isEquilibriumMeasure_of_logPotential_eq_zero'`).
 
 ## Deviations
 * The book states Theorem 4.6.3 for the IDS of an ergodic family; the application to the IDS
@@ -42,10 +43,12 @@ here in terms of `Φ_{dk} = DF.logPotential (DF.toC k)`.
 
 ## Statements
 None introduced here.  `DF.FrostmanStatement` and `DF.EnergyStrictConvexityStatement`
-(Appendix A.2) appear as hypotheses.
+(Appendix A.2) appear as hypotheses; both are proved (`DF.frostmanStatement_holds`,
+`DF.energyStrictConvexityStatement_holds`), giving the unconditional versions.
 -/
 import DamanikFillman.AppA.Equilibrium
 import DamanikFillman.AppA.FrostmanMain
+import DamanikFillman.AppA.EnergyConvexity
 import DamanikFillman.AppA.Subharmonic
 
 noncomputable section
@@ -481,5 +484,13 @@ theorem isEquilibriumMeasure_of_logPotential_eq_zero' {k : Measure ℝ} [IsProba
     IsEquilibriumMeasure ((fun x : ℝ => (x : ℂ)) '' S) (toC k) ∧
       capCompact ((fun x : ℝ => (x : ℂ)) '' S) = 1 :=
   isEquilibriumMeasure_of_logPotential_eq_zero frostmanStatement_holds hS hk hL
+
+/-- **Theorem 4.6.7**, unconditional: if `L = 0` on `Σ`, then `dk = dρ_Σ`. -/
+theorem eq_of_isEquilibriumMeasure_of_logPotential_eq_zero' {k : Measure ℝ}
+    [IsProbabilityMeasure k] {S : Set ℝ} (hS : IsCompact S) (hk : k Sᶜ = 0)
+    (hL : ∀ x ∈ S, logPotential (toC k) (x : ℂ) = 0) {ρ : Measure ℂ}
+    (hρ : IsEquilibriumMeasure ((fun x : ℝ => (x : ℂ)) '' S) ρ) : toC k = ρ :=
+  eq_of_isEquilibriumMeasure_of_logPotential_eq_zero frostmanStatement_holds
+    energyStrictConvexityStatement_holds hS hk hL hρ
 
 end DF

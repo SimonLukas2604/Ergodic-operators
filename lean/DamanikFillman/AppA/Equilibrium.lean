@@ -14,7 +14,7 @@ I. General Theory*, GSM 221, AMS 2022.
   `ProbabilityMeasure K`, with the weak-* topology) the energy is lower semicontinuous.
 * `DF.exists_isEquilibriumMeasure` — **Theorem A.2.6, existence**: a compact set of positive
   capacity carries an energy minimizing probability measure.  Together with
-  `DF.IsEquilibriumMeasure.unique` (which uses `EnergyStrictConvexityStatement`, Prop. A.2.5)
+  `DF.IsEquilibriumMeasure.unique'` (from Prop. A.2.5, proved in `EnergyConvexity.lean`)
   this gives Theorem A.2.6.
 * `DF.equilibriumExistenceStatement_holds` — the statement recorded in `Potential.lean` holds.
 * **Proposition A.2.2(e)**: `tendsto_capCompact_antitone`, `tendsto_capacity_antitone`,
