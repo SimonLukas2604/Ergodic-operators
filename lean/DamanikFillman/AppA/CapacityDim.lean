@@ -29,6 +29,8 @@ We use the dyadic squares `D k B = {z : (⌊2^k Re z⌋, ⌊2^k Im z⌋) = B}`.
 -/
 import DamanikFillman.AppA.Frostman
 import Mathlib.MeasureTheory.Integral.Layercake
+import Mathlib.MeasureTheory.Integral.ExpDecay
+import Mathlib.Analysis.SpecialFunctions.ImproperIntegrals
 import Mathlib.MeasureTheory.Function.Floor
 import Mathlib.MeasureTheory.Measure.LevyProkhorovMetric
 import Mathlib.Topology.MetricSpace.HausdorffDimension
@@ -278,7 +280,8 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
     simp only [hcs, Pi.zero_apply, ite_self, Finset.sum_const_zero]
     exact θ_nonneg s k
   obtain ⟨w, hwP, hmax⟩ := (Metric.isCompact_of_isClosed_isBounded hPc hPb).exists_isMaxOn
-    ⟨0, hP0⟩ (continuous_finset_sum _ fun a _ => continuous_apply a).continuousOn
+    (f := fun w : S → ℝ => ∑ a, w a) ⟨0, hP0⟩
+    (continuous_finset_sum Finset.univ fun a _ => continuous_apply a).continuousOn
   obtain ⟨hw0, hwc⟩ := (hmemP w).1 hwP
   -- saturation
   have hsat : ∀ a : S, ∃ k, k ≤ n ∧ cs w k (idx k (pt a)) = θ s k := by
@@ -320,7 +323,7 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
     have h2 : ∑ a', w' a' = ∑ a', w a' + δ := by
       simp only [hw', Finset.sum_add_distrib]
       simp
-    simp only at h1
+    simp only [Set.mem_setOf_eq] at h1
     linarith
   -- the minimal saturated level
   set kmin : S → ℕ := fun a => Nat.find (hsat a) with hkmin
@@ -345,7 +348,7 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
     obtain ⟨a₀, -, rfl⟩ := Finset.mem_image.1 hA
     simp only [hφ, Prod.mk.injEq]
     constructor
-    · rintro ⟨h1, h2⟩; rw [← h1]; exact h2
+    · rintro ⟨h1, h2⟩; rw [h1] at h2; exact h2
     · intro h
       have hk0 := hkmin_spec a₀
       -- `a` is saturated at level `kmin a₀`
