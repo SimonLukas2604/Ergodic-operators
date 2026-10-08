@@ -108,7 +108,8 @@ theorem furmanStatement : FurmanStatement := by
       have := (abs_le.1 (hgb (k + 1) y (by omega))).1
       push_cast at this
       linarith
-    simp only [integral_const, measureReal_univ_eq_one, one_smul] at this
+    rw [integral_const, smul_eq_mul, measureReal_def, measure_univ, ENNReal.toReal_one,
+      one_mul] at this
     rw [neg_mul]
     exact this
   have hlamg : (⨅ k : ℕ, (∫ y, g (k + 1) y ∂μ) / (k + 1)) ≤
