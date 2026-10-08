@@ -54,6 +54,7 @@ import DamanikFillman.Ch3.EntropyConj
 import DamanikFillman.Ch3.Examples
 import DamanikFillman.Ch3.FlowUH
 import DamanikFillman.Ch3.Flows
+import DamanikFillman.Ch3.FlowBirkhoff
 import DamanikFillman.Ch3.Furman
 import DamanikFillman.Ch3.Generic
 import DamanikFillman.Ch3.Kingman
