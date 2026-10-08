@@ -269,7 +269,7 @@ lemma stVec_spec {T : Ω → Ω} {A : Ω → M2} (hdet : ∀ ω, (A ω).det = 1)
       rw [he0, actC_sub, actC_smul, inner_sub_right, inner_smul_right,
         inner_self_eq_norm_sq_to_K]
       field_simp
-      try ring
+      first | ring | simp | rw [add_sub_cancel_right]
     have hbound : ∀ n, ‖zseq T A n ω - v 1‖ ≤
         ‖actC (iter T A n ω) v‖ / ‖actC (iter T A n ω) e1c‖ := by
       intro n
