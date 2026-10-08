@@ -597,7 +597,7 @@ theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L 
   have hlim : Tendsto (fun n : ℕ => ENNReal.ofReal (Real.exp (-(((n : ℝ) + 1) - 2 * R0))))
       atTop (𝓝 0) := by
     simpa using ENNReal.tendsto_ofReal (Real.tendsto_exp_atBot.comp htend)
-  exact le_antisymm (le_of_tendsto' hlim fun n : ℕ => key ((n : ℝ) + 1) (by positivity)) zero_le
+  exact le_antisymm (ge_of_tendsto' hlim fun n : ℕ => key ((n : ℝ) + 1) (by positivity)) zero_le
 
 /-! ### Theorem A.2.8 (ii) -/
 
