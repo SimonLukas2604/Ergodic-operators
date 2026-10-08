@@ -19,10 +19,13 @@ I. General Theory*, GSM 221, AMS 2022.
 * `DF.ErgodicFamily.ishii_pastur` — **Theorem 4.7.2 (Ishii–Pastur)**, (4.7.4): for `μ`-a.e. `ω`,
   the absolutely continuous part of `η_ω` gives no weight to `{x : L(x) > 0} = ℝ \ Z`.
 
+* `DF.ErgodicFamily.ishii_pastur'` — the same, unconditionally: Theorem 2.4.2(b) is supplied by
+  `DF.genEigSupport` (`Ch2/GenEigSupportProof.lean`).
+
 ## Hypotheses
-The proof uses Theorem 2.4.2(b) (generalized eigenvalues support the canonical spectral
-measure), which is only available as the statement `DF.GenEigSupportStatement`; it enters as a
-hypothesis (for the potentials `V_ω`).
+`DF.ErgodicFamily.ishii_pastur` takes Theorem 2.4.2(b) (generalized eigenvalues support the
+canonical spectral measure, `DF.GenEigSupportStatement`) as a hypothesis for the potentials
+`V_ω`; `ishii_pastur'` discharges it with `DF.genEigSupport`.
 
 ## Deviations
 The absolutely continuous part of a measure `η` is written
@@ -30,7 +33,7 @@ The absolutely continuous part of a measure `η` is written
 -/
 import DamanikFillman.Ch4.Lyapunov
 import DamanikFillman.Ch3.Ruelle
-import DamanikFillman.Ch2.GenEigenSupport
+import DamanikFillman.Ch2.GenEigSupportProof
 import DamanikFillman.Ch1.SpectralDecomposition
 
 noncomputable section
@@ -413,6 +416,12 @@ theorem ishii_pastur (hGE : ∀ ω, GenEigSupportStatement (E.V ω) (E.bddPot ω
   rw [hC, add_zero]
   refine (measure_union_le _ _).trans ?_
   rw [hA, hB, add_zero]
+
+/-- **Theorem 4.7.2 (Ishii–Pastur)**, unconditional form: for `μ`-a.e. `ω` the absolutely
+continuous part of `η_ω` gives zero weight to `{x : L(x) ≠ 0}`. -/
+theorem ishii_pastur' :
+    ∀ᵐ ω ∂E.μ, volume.withDensity ((E.canonical ω).rnDeriv volume) {x : ℝ | E.lyap x ≠ 0} = 0 :=
+  E.ishii_pastur fun ω => genEigSupport (E.bddPot ω)
 
 end ErgodicFamily
 

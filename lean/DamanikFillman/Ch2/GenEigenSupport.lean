@@ -14,8 +14,7 @@ Borel calculus are those of `Ch1/BorelCalculus.lean`.
   key steps are `DF.specProj_eq_zero_of_null` (`χ_I(H) = 0`, using the cyclicity of
   `{δ₀, δ₁}`, Proposition 2.2.1) and an explicit inverse of `H - E`.
 * **Theorem 2.4.2 (b)** is recorded as the statement `DF.GenEigSupportStatement`
-  (not proved: the book's proof uses Radon–Nikodym derivatives of the complex measures
-  `μ_{n,m}`).
+  here; it is proved as `DF.genEigSupport` in `Ch2/GenEigSupportProof.lean`.
 * **Theorem 2.4.2 (c)**: `DF.spectrum_eq_closure_genEig` — assuming
   `DF.GenEigSupportStatement V`, `σ(H) = closure G`; the inclusion `closure G ⊆ σ(H)`
   holds unconditionally (`DF.closure_genEigReal_subset_spectrum`).

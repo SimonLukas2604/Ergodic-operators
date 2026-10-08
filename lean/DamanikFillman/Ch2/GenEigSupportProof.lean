@@ -18,7 +18,8 @@ to `μ_b = μ_{δ_b}`. Testing against all bounded Borel `g` gives, `μ_b`-a.e.,
 truncation and Cauchy–Schwarz give `∫ |Fₙ|² dμ_b ≤ 1`. With `wₙ = (1 + |n|)^{-2δ}` summable, the
 function `∑ wₙ |Fₙ|²` is `μ_b`-integrable, hence finite a.e., and `n ↦ Fₙ(E)` is a nonzero solution
 with `|Fₙ(E)| ≤ C (1 + |n|)^δ`. Consequences: `DF.spectrum_eq_closure_genEig` and the Ishii–Pastur
-theorem `DF.ishii_pastur` now hold unconditionally (`DF.spectrum_eq_closure_genEig'`).
+theorem hold unconditionally (`DF.spectrum_eq_closure_genEig'`,
+`DF.ErgodicFamily.ishii_pastur'` in `Ch4/IshiiPastur.lean`).
 -/
 import DamanikFillman.Ch2.GenEigenSupport
 
