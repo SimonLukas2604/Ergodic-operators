@@ -281,7 +281,7 @@ lemma eigDensity_eq_ae (hV : BddPot V) (b n : ℤ) :
       exact hH.isSymmetric _ _
     rw [schr_dlt hV, inner_add_left, inner_add_left, inner_smul_left, Complex.conj_ofReal,
       eigDensity_rep hV b _ hg, eigDensity_rep hV b _ hg, eigDensity_rep hV b _ hg,
-      eigDensity_rep hV b _ (isBddBorel_truncId.mul hg)] at hsym
+      eigDensity_rep hV b _ ((isBddBorel_truncId (A := schr V)).mul hg)] at hsym
     have i1 := (integrable_eigDensity hV b (n - 1)).bdd_mul hg.meas.aestronglyMeasurable
       (Eventually.of_forall hg.bdd.choose_spec)
     have i2 := (integrable_eigDensity hV b (n + 1)).bdd_mul hg.meas.aestronglyMeasurable
@@ -289,8 +289,8 @@ lemma eigDensity_eq_ae (hV : BddPot V) (b n : ℤ) :
     have i3 := (integrable_eigDensity hV b n).bdd_mul hg.meas.aestronglyMeasurable
       (Eventually.of_forall hg.bdd.choose_spec)
     have i4 := (integrable_eigDensity hV b n).bdd_mul
-      (isBddBorel_truncId.mul hg).meas.aestronglyMeasurable
-      (Eventually.of_forall (isBddBorel_truncId.mul hg).bdd.choose_spec)
+      ((isBddBorel_truncId (A := schr V)).mul hg).meas.aestronglyMeasurable
+      (Eventually.of_forall ((isBddBorel_truncId (A := schr V)).mul hg).bdd.choose_spec)
     have : ∫ x, g x * (F (n - 1) x + F (n + 1) x + (V n : ℂ) * F n x
         - truncId (schr V) x * F n x) ∂(muB hV b) =
         (∫ x, g x * F (n - 1) x ∂(muB hV b)) + (∫ x, g x * F (n + 1) x ∂(muB hV b)) +
