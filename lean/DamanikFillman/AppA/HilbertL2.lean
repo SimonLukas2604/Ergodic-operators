@@ -69,55 +69,54 @@ lemma symb_ae : ∀ᵐ ξ ∂(volume : Measure ℝ), ‖symb ξ‖ = 1 ∧ symb 
   · exact absurd h (by simpa using hξ)
   · rw [symb_of_pos h]; exact ⟨by rw [norm_neg, Complex.norm_I], by rw [neg_mul_neg, I_mul_I]⟩
 
-lemma memLp_mulSymb (f : Lp (α := ℝ) ℂ 2) : MemLp (fun ξ => symb ξ * f ξ) 2 :=
+lemma memLp_mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) : MemLp (fun ξ => symb ξ * f ξ) 2 :=
   (Lp.memLp f).of_le (measurable_symb.aestronglyMeasurable.mul (Lp.aestronglyMeasurable f))
     (Eventually.of_forall fun ξ => by
       rw [norm_mul]; exact mul_le_of_le_one_left (norm_nonneg _) (norm_symb_le ξ))
 
 /-- Multiplication by `-i sgn ξ` on `L²(ℝ)`. -/
-def mulSymb (f : Lp (α := ℝ) ℂ 2) : Lp (α := ℝ) ℂ 2 := (memLp_mulSymb f).toLp _
+def mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) : Lp ℂ 2 (volume : Measure ℝ) := (memLp_mulSymb f).toLp _
 
-lemma coeFn_mulSymb (f : Lp (α := ℝ) ℂ 2) :
+lemma coeFn_mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) :
     (mulSymb f : ℝ → ℂ) =ᵐ[volume] fun ξ => symb ξ * f ξ :=
   MemLp.coeFn_toLp _
 
-lemma mulSymb_add (f g : Lp (α := ℝ) ℂ 2) : mulSymb (f + g) = mulSymb f + mulSymb g := by
+lemma mulSymb_add (f g : Lp ℂ 2 (volume : Measure ℝ)) : mulSymb (f + g) = mulSymb f + mulSymb g := by
   apply Lp.ext
   filter_upwards [coeFn_mulSymb (f + g), coeFn_mulSymb f, coeFn_mulSymb g, Lp.coeFn_add f g,
     Lp.coeFn_add (mulSymb f) (mulSymb g)] with ξ h1 h2 h3 h4 h5
   rw [h5, Pi.add_apply, h1, h2, h3, h4, Pi.add_apply]
   ring
 
-lemma mulSymb_smul (c : ℂ) (f : Lp (α := ℝ) ℂ 2) : mulSymb (c • f) = c • mulSymb f := by
+lemma mulSymb_smul (c : ℂ) (f : Lp ℂ 2 (volume : Measure ℝ)) : mulSymb (c • f) = c • mulSymb f := by
   apply Lp.ext
   filter_upwards [coeFn_mulSymb (c • f), coeFn_mulSymb f, Lp.coeFn_smul c f,
     Lp.coeFn_smul c (mulSymb f)] with ξ h1 h2 h3 h4
   rw [h4, Pi.smul_apply, h1, h2, h3, Pi.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
-lemma mulSymb_neg (f : Lp (α := ℝ) ℂ 2) : mulSymb (-f) = -mulSymb f := by
+lemma mulSymb_neg (f : Lp ℂ 2 (volume : Measure ℝ)) : mulSymb (-f) = -mulSymb f := by
   apply Lp.ext
   filter_upwards [coeFn_mulSymb (-f), coeFn_mulSymb f, Lp.coeFn_neg f,
     Lp.coeFn_neg (mulSymb f)] with ξ h1 h2 h3 h4
   rw [h4, Pi.neg_apply, h1, h2, h3, Pi.neg_apply]
   ring
 
-lemma mulSymb_mulSymb (f : Lp (α := ℝ) ℂ 2) : mulSymb (mulSymb f) = -f := by
+lemma mulSymb_mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) : mulSymb (mulSymb f) = -f := by
   apply Lp.ext
   filter_upwards [coeFn_mulSymb (mulSymb f), coeFn_mulSymb f, Lp.coeFn_neg f, symb_ae]
     with ξ h1 h2 h3 h4
   rw [h1, h2, h3, Pi.neg_apply, ← mul_assoc, h4.2]
   ring
 
-lemma norm_mulSymb (f : Lp (α := ℝ) ℂ 2) : ‖mulSymb f‖ = ‖f‖ := by
-  rw [Lp.norm_def, Lp.norm_def]
-  congr 1
-  refine eLpNorm_congr_norm_ae ?_
-  filter_upwards [coeFn_mulSymb f, symb_ae] with ξ h1 h2
-  rw [h1, norm_mul, h2.1, one_mul]
+lemma norm_mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) : ‖mulSymb f‖ = ‖f‖ := by
+  have h : ∀ᵐ ξ ∂(volume : Measure ℝ), ‖(mulSymb f : ℝ → ℂ) ξ‖ = ‖(f : ℝ → ℂ) ξ‖ := by
+    filter_upwards [coeFn_mulSymb f, symb_ae] with ξ h1 h2
+    rw [h1, norm_mul, h2.1, one_mul]
+  rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_norm_ae h]
 
 /-- Multiplication by `-i sgn ξ` as a unitary operator. -/
-def mulSymbₗᵢ : Lp (α := ℝ) ℂ 2 ≃ₗᵢ[ℂ] Lp (α := ℝ) ℂ 2 where
+def mulSymbₗᵢ : Lp ℂ 2 (volume : Measure ℝ) ≃ₗᵢ[ℂ] Lp ℂ 2 (volume : Measure ℝ) where
   toFun := mulSymb
   invFun f := -mulSymb f
   map_add' := mulSymb_add
@@ -131,18 +130,18 @@ def mulSymbₗᵢ : Lp (α := ℝ) ℂ 2 ≃ₗᵢ[ℂ] Lp (α := ℝ) ℂ 2 whe
   norm_map' := norm_mulSymb
 
 /-- The Hilbert transform on `L²(ℝ)`: `U = 𝓕⁻¹ ∘ (-i sgn ξ) ∘ 𝓕`. -/
-def hilbertL2 : Lp (α := ℝ) ℂ 2 ≃ₗᵢ[ℂ] Lp (α := ℝ) ℂ 2 :=
+def hilbertL2 : Lp ℂ 2 (volume : Measure ℝ) ≃ₗᵢ[ℂ] Lp ℂ 2 (volume : Measure ℝ) :=
   (Lp.fourierTransformₗᵢ ℝ ℂ).trans (mulSymbₗᵢ.trans (Lp.fourierTransformₗᵢ ℝ ℂ).symm)
 
-lemma hilbertL2_apply (f : Lp (α := ℝ) ℂ 2) :
+lemma hilbertL2_apply (f : Lp ℂ 2 (volume : Measure ℝ)) :
     hilbertL2 f = (Lp.fourierTransformₗᵢ ℝ ℂ).symm (mulSymb (Lp.fourierTransformₗᵢ ℝ ℂ f)) :=
   rfl
 
-lemma fourier_hilbertL2 (f : Lp (α := ℝ) ℂ 2) :
+lemma fourier_hilbertL2 (f : Lp ℂ 2 (volume : Measure ℝ)) :
     Lp.fourierTransformₗᵢ ℝ ℂ (hilbertL2 f) = mulSymb (Lp.fourierTransformₗᵢ ℝ ℂ f) := by
   rw [hilbertL2_apply, LinearIsometryEquiv.apply_symm_apply]
 
-lemma hilbertL2_hilbertL2 (f : Lp (α := ℝ) ℂ 2) : hilbertL2 (hilbertL2 f) = -f := by
+lemma hilbertL2_hilbertL2 (f : Lp ℂ 2 (volume : Measure ℝ)) : hilbertL2 (hilbertL2 f) = -f := by
   rw [hilbertL2_apply, fourier_hilbertL2, mulSymb_mulSymb, map_neg,
     LinearIsometryEquiv.symm_apply_apply]
 
@@ -221,7 +220,8 @@ lemma kernel_eq {y : ℝ} (hy : 0 < y) (x : ℝ) :
   unfold poissonQ
   have := sq_add_sq_pos hy x
   have hπ := Real.pi_pos
-  field_simp; ring
+  rw [div_eq_div_iff (mul_pos (by positivity) this).ne' (mul_pos hπ this).ne']
+  ring
 
 /-! ### The difference kernel `Q_y - 1_{|x| > y} / (π x)` -/
 
@@ -441,8 +441,8 @@ lemma continuous_fFun (g : 𝓢(ℝ, ℂ)) : Continuous (fFun g) := by
   refine continuous_of_dominated (bound := fun ξ => ‖hFun g ξ‖) (fun t => ?_)
     (fun t => Eventually.of_forall fun ξ => ?_) (integrable_hFun g).norm
     (Eventually.of_forall fun ξ => by fun_prop)
-  · exact ((by fun_prop : Continuous fun ξ : ℝ => cexp (((2 * π * ξ * t : ℝ) : ℂ) * I)).
-      aestronglyMeasurable).mul (integrable_hFun g).aestronglyMeasurable
+  · exact ((by fun_prop : Continuous fun ξ : ℝ => cexp (((2 * π * ξ * t : ℝ) : ℂ) * I)).aestronglyMeasurable).mul
+      (integrable_hFun g).aestronglyMeasurable
   · rw [norm_mul, norm_cexp_mul_I, one_mul]
 
 lemma tendsto_damped (g : 𝓢(ℝ, ℂ)) (t : ℝ) :
@@ -452,10 +452,9 @@ lemma tendsto_damped (g : 𝓢(ℝ, ℂ)) (t : ℝ) :
   refine tendsto_integral_filter_of_dominated_convergence (fun ξ => ‖hFun g ξ‖) ?_ ?_
     (integrable_hFun g).norm ?_
   · exact Eventually.of_forall fun y =>
-      ((by fun_prop : Continuous fun ξ : ℝ => ((rexp (-(2 * π * y) * |ξ|) : ℝ) : ℂ)).
-        aestronglyMeasurable).mul
-        (((by fun_prop : Continuous fun ξ : ℝ => cexp (((2 * π * ξ * t : ℝ) : ℂ) * I)).
-          aestronglyMeasurable).mul (integrable_hFun g).aestronglyMeasurable)
+      ((by fun_prop : Continuous fun ξ : ℝ => ((rexp (-(2 * π * y) * |ξ|) : ℝ) : ℂ)).aestronglyMeasurable).mul
+        (((by fun_prop : Continuous fun ξ : ℝ => cexp (((2 * π * ξ * t : ℝ) : ℂ) * I)).aestronglyMeasurable).mul
+          (integrable_hFun g).aestronglyMeasurable)
   · filter_upwards [self_mem_nhdsWithin] with y hy
     refine Eventually.of_forall fun ξ => ?_
     have hy' : 0 < y := hy
@@ -586,7 +585,10 @@ lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
   have hloc : LocallyIntegrable (fun t => hilbertL2 (g.toLp 2) t - fFun g t) :=
     ((Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable (by norm_num)).sub
       (continuous_fFun g).locallyIntegrable
-  refine (ae_eq_zero_of_integral_contDiff_smul_eq_zero hloc ?_).mono fun t ht => sub_eq_zero.1 ht
+  suffices H : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
+      ∫ x, ψ x • (hilbertL2 (g.toLp 2) x - fFun g x) = 0 by
+    filter_upwards [ae_eq_zero_of_integral_contDiff_smul_eq_zero hloc H] with t ht
+    exact sub_eq_zero.1 ht
   intro ψ hψ hψc
   -- the test function as a Schwartz function
   have hcs : HasCompactSupport (fun x => ((ψ x : ℝ) : ℂ)) :=
