@@ -56,21 +56,14 @@ lemma iterate_catMf_ne_zero {n : Fin 2 → ℤ} (hn : n ≠ 0) (k : ℕ) : catMf
   | zero => simpa using hn
   | succ k ih => rw [iterate_succ_apply']; exact catMf_ne_zero ih
 
-/-- Cayley–Hamilton for `2 × 2` matrices. -/
-lemma mul_self_fin_two (A : Matrix (Fin 2) (Fin 2) ℤ) :
-    A * A = A.trace • A - A.det • (1 : Matrix (Fin 2) (Fin 2) ℤ) := by
-  ext i j
-  fin_cases i <;> fin_cases j <;>
-    simp [Matrix.mul_apply, Fin.sum_univ_two, Matrix.trace_fin_two, Matrix.det_fin_two,
-      Matrix.one_apply] <;> ring
-
 lemma det_catM : catM.det = 1 := by simp [catM, Matrix.det_fin_two]
 
-lemma trace_catM : catM.trace = 3 := by
-  simp [catM, Matrix.trace_fin_two]; norm_num
+lemma trace_catM : catM.trace = 3 := by simp [catM, Matrix.trace_fin_two]
 
 lemma catM_sq : catM * catM = (3 : ℤ) • catM - (1 : Matrix (Fin 2) (Fin 2) ℤ) := by
-  rw [mul_self_fin_two, det_catM, trace_catM, one_smul]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [catM, Matrix.mul_apply, Fin.sum_univ_two, Matrix.one_apply] <;> norm_num
 
 lemma trace_catM_pow_succ_succ (m : ℕ) :
     (catM ^ (m + 2)).trace = 3 * (catM ^ (m + 1)).trace - (catM ^ m).trace := by
@@ -82,9 +75,8 @@ lemma trace_catM_pow_ge (m : ℕ) :
     (m : ℤ) + 2 ≤ (catM ^ m).trace ∧ (catM ^ m).trace + 1 ≤ (catM ^ (m + 1)).trace := by
   induction m with
   | zero =>
-    refine ⟨by simp [Matrix.trace_fin_two], ?_⟩
-    simp only [pow_zero, pow_one, trace_catM, Matrix.trace_one, Fintype.card_fin]
-    norm_num
+    refine ⟨by simp, ?_⟩
+    norm_num [trace_catM, Matrix.trace_one]
   | succ m ih =>
     refine ⟨by push_cast; linarith [ih.1, ih.2], ?_⟩
     rw [show m + 1 + 1 = m + 2 by ring, trace_catM_pow_succ_succ]
@@ -93,17 +85,24 @@ lemma trace_catM_pow_ge (m : ℕ) :
 /-- A `2 × 2` integer matrix of determinant `1` with a nonzero fixed vector has trace `2`. -/
 lemma trace_eq_two_of_fixed {A : Matrix (Fin 2) (Fin 2) ℤ} (hA : A.det = 1) {w : Fin 2 → ℤ}
     (hw : w ≠ 0) (hfix : A.mulVec w = w) : A.trace = 2 := by
-  have h := congrArg (fun B => B.mulVec w) (mul_self_fin_two A)
-  simp only [← Matrix.mulVec_mulVec, hfix, Matrix.sub_mulVec, Matrix.smul_mulVec_assoc,
-    hA, one_smul, Matrix.one_mulVec] at h
-  -- `w = tr • w - w`
-  have h2 : (A.trace - 2) • w = 0 := by
-    rw [sub_smul, two_smul]
-    rw [← h]
-    abel
-  rcases smul_eq_zero.1 h2 with h3 | h3
-  · linarith
-  · exact absurd h3 hw
+  have e1 := congrFun hfix 0
+  have e2 := congrFun hfix 1
+  simp only [Matrix.mulVec, dotProduct, Fin.sum_univ_two] at e1 e2
+  rw [Matrix.det_fin_two] at hA
+  rw [Matrix.trace_fin_two]
+  -- `((a-1)(d-1) - bc) wᵢ = 0`
+  have k0 : ((A 0 0 - 1) * (A 1 1 - 1) - A 0 1 * A 1 0) * w 0 = 0 := by
+    linear_combination (A 1 1 - 1) * e1 - A 0 1 * e2
+  have k1 : ((A 0 0 - 1) * (A 1 1 - 1) - A 0 1 * A 1 0) * w 1 = 0 := by
+    linear_combination -(A 1 0) * e1 + (A 0 0 - 1) * e2
+  have hX : (A 0 0 - 1) * (A 1 1 - 1) - A 0 1 * A 1 0 = 0 := by
+    by_contra hX
+    apply hw
+    funext i
+    fin_cases i
+    · exact (mul_eq_zero.1 k0).resolve_left hX
+    · exact (mul_eq_zero.1 k1).resolve_left hX
+  linear_combination -hX + hA
 
 lemma catMf_iterate_injective {n : Fin 2 → ℤ} (hn : n ≠ 0) :
     Injective fun k : ℕ => catMf^[k] n := by
@@ -182,8 +181,8 @@ lemma catMap_preserving :
   have hL := measurePreserving_prod_add μ μ
   have hU : MeasurePreserving (fun z : UnitAddCircle × UnitAddCircle => (z.1 + z.2, z.2))
       (μ.prod μ) (μ.prod μ) := by
-    have h := (measurePreserving_swap.comp (measurePreserving_prod_add μ μ)).comp
-      (measurePreserving_swap (μ := μ) (ν := μ))
+    have h := (Measure.measurePreserving_swap.comp (measurePreserving_prod_add μ μ)).comp
+      (Measure.measurePreserving_swap (μ := μ) (ν := μ))
     convert h using 1
     funext z
     simp [add_comm]
@@ -205,10 +204,10 @@ lemma catT_preserving :
 lemma mFourier_neg_catTinv (n : Fin 2 → ℤ) (z : UnitAddTorus (Fin 2)) :
     mFourier (-n) (catTinv z) = mFourier (-catMf n) z := by
   have h1 : fourier (-(n 0 - n 1)) (z 0) = fourier (-n 0) (z 0) * fourier (- -n 1) (z 0) := by
-    rw [fourier_mul_same]; congr 1; ring
+    rw [fourier_mul_same, show -n 0 + - -n 1 = -(n 0 - n 1) by ring]
   have h2 : fourier (-(-n 0 + 2 * n 1)) (z 1) =
       fourier (-n 1) (z 1) * fourier (-n 1) (z 1) * fourier (- -n 0) (z 1) := by
-    rw [fourier_mul_same, fourier_mul_same]; congr 1; ring
+    rw [fourier_mul_same, fourier_mul_same, show -n 1 + -n 1 + - -n 0 = -(-n 0 + 2 * n 1) by ring]
   simp only [mFourier_two, catTinv, catMf, Pi.neg_apply, Matrix.cons_val_zero,
     Matrix.cons_val_one, Matrix.cons_val_fin_one]
   rw [h1, h2]
