@@ -2,7 +2,7 @@
 Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger Operators,
 I. General Theory*, GSM 221, AMS 2022.
 
-# Appendix A.2: Frostman's theorem (Theorem A.2.8), part (i)   (book pp. 415–416)
+# Appendix A.2: Frostman's theorem (Theorem A.2.8)   (book pp. 415–416)
 
 ## Main results
 
@@ -18,8 +18,15 @@ I. General Theory*, GSM 221, AMS 2022.
   point of its support.)
 * `DF.exists_logPotential_lt_of_far` — `Φ_μ(z) → -∞` as `z → ∞`.
 * `DF.IsEquilibriumMeasure.logPotential_le_energy` — **Theorem A.2.8 (i)**: `Φ_ρ ≤ E(ρ)` on `ℂ`.
+* `DF.capacity_iUnion_eq_zero` — countable unions of compact sets of capacity zero (in a fixed
+  ball) have capacity zero;
+* `DF.IsEquilibriumMeasure.capacity_lt_eq_zero` — **Theorem A.2.8 (ii)**: the compact sublevel
+  sets `{Φ_ρ ≤ E(ρ) - 1/n} ∩ K` have capacity zero by the first variation
+  (`DF.exists_energy_lt_of_variation`), hence so does their union;
+* `DF.frostmanStatement_holds` — the Statement `DF.FrostmanStatement`.
 -/
 import DamanikFillman.AppA.Frostman
+import Mathlib.Analysis.Complex.AbsMax
 
 noncomputable section
 
@@ -404,5 +411,263 @@ theorem IsEquilibriumMeasure.logPotential_le_energy (hK : IsCompact K) (hcap : c
   exact lt_irrefl _ this
 
 end Continuity
+
+/-! ### Countable unions of compact sets of capacity zero -/
+
+lemma iint_normSum_le {ν : Measure ℂ} [IsProbabilityMeasure ν] {C : Set ℂ} (hνC : ν Cᶜ = 0)
+    {R : ℝ} (hR : ∀ z ∈ C, ‖z‖ ≤ R) : ∫ z, ∫ w, (‖z‖ + ‖w‖) ∂ν ∂ν ≤ 2 * R := by
+  have hae : ∀ᵐ w ∂ν, w ∈ C := measure_eq_zero_iff_ae_notMem.1 hνC |>.mono fun w hw => by
+    simpa using hw
+  have hin : ∀ z ∈ C, ∫ w, (‖z‖ + ‖w‖) ∂ν ≤ 2 * R := by
+    intro z hz
+    have := integral_mono_of_nonneg
+      (Eventually.of_forall fun w => add_nonneg (norm_nonneg z) (norm_nonneg w) :
+        0 ≤ᵐ[ν] fun w => ‖z‖ + ‖w‖)
+      (integrable_const (2 * R)) (hae.mono fun w hw => by
+        show ‖z‖ + ‖w‖ ≤ 2 * R
+        linarith [hR z hz, hR w hw])
+    rwa [integral_const, smul_eq_mul, measureReal_def, measure_univ, ENNReal.toReal_one,
+      one_mul] at this
+  have := integral_mono_of_nonneg
+    (Eventually.of_forall fun z => integral_nonneg fun w => add_nonneg (norm_nonneg z)
+      (norm_nonneg w) : 0 ≤ᵐ[ν] fun z => ∫ w, (‖z‖ + ‖w‖) ∂ν)
+    (integrable_const (2 * R)) (hae.mono fun z hz => hin z hz)
+  rwa [integral_const, smul_eq_mul, measureReal_def, measure_univ, ENNReal.toReal_one,
+    one_mul] at this
+
+lemma exists_open_of_capacity_lt {B : Set ℂ} {ε : ℝ≥0∞} (h : capacity B < ε) :
+    ∃ O : Set ℂ, IsOpen O ∧ Bornology.IsBounded O ∧ B ⊆ O ∧
+      ∀ C, IsCompact C → C ⊆ O → capCompact C < ε := by
+  unfold capacity at h
+  simp only [iInf_lt_iff] at h
+  obtain ⟨O, hO, hOb, hBO, hlt⟩ := h
+  exact ⟨O, hO, hOb, hBO, fun C hC hCO =>
+    lt_of_le_of_lt (le_iSup_of_le C (le_iSup_of_le hC (le_iSup_of_le hCO le_rfl))) hlt⟩
+
+/-- A countable union of compact sets of capacity zero (inside a fixed ball) has capacity zero.
+(A probability measure on a compact `C ⊆ ⋃_{i ∈ t} Cᵢ` with energy `E` puts mass
+`mᵢ ≤ ((E + 2R)/aᵢ)^{1/2}` on `Cᵢ` if `Cap(Cᵢ) ≤ e^{-aᵢ}`; with `aᵢ = A 4^{i+1}` these masses
+cannot add up to `1` unless `E ≥ A - 2R`.) -/
+theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L n))
+    (h0 : ∀ n, capCompact (L n) = 0) {R0 : ℝ} (hsub : ∀ n, L n ⊆ ball 0 R0) :
+    capacity (⋃ n, L n) = 0 := by
+  have key : ∀ A : ℝ, 0 < A →
+      capacity (⋃ n, L n) ≤ ENNReal.ofReal (Real.exp (-(A - 2 * R0))) := by
+    intro A hA
+    obtain ⟨a, hadef⟩ : ∃ a : ℕ → ℝ, ∀ i, a i = A * ((2 : ℝ) ^ (i + 1)) ^ 2 :=
+      ⟨_, fun i => rfl⟩
+    have hU : ∀ n, ∃ O : Set ℂ, IsOpen O ∧ Bornology.IsBounded O ∧ L n ⊆ O ∧
+        ∀ C, IsCompact C → C ⊆ O → capCompact C < ENNReal.ofReal (Real.exp (-a n)) := by
+      intro n
+      refine exists_open_of_capacity_lt ?_
+      rw [capacity_eq_capCompact (hL n), h0 n]
+      exact ENNReal.ofReal_pos.2 (Real.exp_pos _)
+    choose U hUo hUb hLU hUc using hU
+    obtain ⟨V, hVdef⟩ : ∃ V : ℕ → Set ℂ, V = fun n => U n ∩ ball 0 R0 := ⟨_, rfl⟩
+    have hVo : ∀ n, IsOpen (V n) := fun n => by rw [hVdef]; exact (hUo n).inter isOpen_ball
+    have hVU : ∀ n, V n ⊆ U n := fun n => by rw [hVdef]; exact inter_subset_left
+    have hVb : ∀ n, V n ⊆ ball 0 R0 := fun n => by rw [hVdef]; exact inter_subset_right
+    have hLV : ∀ n, L n ⊆ V n := fun n => by rw [hVdef]; exact subset_inter (hLU n) (hsub n)
+    unfold capacity
+    refine iInf_le_of_le (⋃ n, V n) (iInf_le_of_le (isOpen_iUnion hVo)
+      (iInf_le_of_le (Metric.isBounded_ball.subset (iUnion_subset hVb))
+        (iInf_le_of_le (iUnion_mono hLV) ?_)))
+    refine iSup_le fun C => iSup_le fun hC => iSup_le fun hCO => ?_
+    obtain ⟨t, ht⟩ := hC.elim_finite_subcover V hVo hCO
+    obtain ⟨Ci, hCic, hCiV, hCeq⟩ := hC.finite_compact_cover t V (fun i _ => hVo i) ht
+    have hR : ∀ z ∈ C, ‖z‖ ≤ R0 := by
+      intro z hz
+      obtain ⟨n, hn⟩ := mem_iUnion.1 (hCO hz)
+      have := hVb n hn
+      rw [mem_ball, dist_zero_right] at this
+      exact this.le
+    rw [show ENNReal.ofReal (Real.exp (-(A - 2 * R0))) = expNeg ((A - 2 * R0 : ℝ) : EReal) by
+      rw [expNeg_coe]]
+    show expNeg (⨅ μ ∈ M1 C, energy μ) ≤ _
+    refine expNeg_antitone (le_iInf₂ fun ν hν => ?_)
+    haveI := hν.1
+    by_cases htop : energy ν = ⊤
+    · rw [htop]; exact le_top
+    obtain ⟨E', hE'⟩ : ∃ E' : ℝ, energy ν = (E' : EReal) :=
+      ⟨_, (EReal.coe_toReal htop (energy_ne_bot ν)).symm⟩
+    rw [hE', EReal.coe_le_coe_iff]
+    by_contra hlt
+    push_neg at hlt
+    have hνa : Adm ν := ⟨inferInstance, integrable_norm_of_compact hC hν.2⟩
+    obtain ⟨X, hX⟩ : ∃ X : ℝ, X = E' + ∫ z, ∫ w, (‖z‖ + ‖w‖) ∂ν ∂ν := ⟨_, rfl⟩
+    have hXA : X < A := by
+      have := iint_normSum_le hν.2 hR
+      rw [hX]
+      linarith
+    have hItr : ∀ N, Itr N ν ν ≤ E' := fun N => by
+      have := Itr_le_energy ν N
+      rwa [hE', EReal.coe_le_coe_iff] at this
+    have hmass : ∀ i ∈ t, (ν (Ci i)).toReal < (1 / 2 : ℝ) ^ (i + 1) := by
+      intro i _
+      obtain ⟨m, hm⟩ : ∃ m : ℝ, m = (ν (Ci i)).toReal := ⟨_, rfl⟩
+      rw [← hm]
+      have hm0 : 0 ≤ m := by rw [hm]; exact ENNReal.toReal_nonneg
+      rcases hm0.eq_or_lt with hm0' | hmpos
+      · rw [← hm0']; positivity
+      have hνCi : ν (Ci i) ≠ 0 := fun h => by
+        rw [hm, h, ENNReal.toReal_zero] at hmpos
+        exact lt_irrefl _ hmpos
+      set c : ℝ≥0∞ := (ν (Ci i))⁻¹ with hc
+      have hcR : c.toReal = m⁻¹ := by rw [hc, ENNReal.toReal_inv, ← hm]
+      set η := c • ν.restrict (Ci i) with hη
+      have hηM : η ∈ M1 (Ci i) := by
+        refine ⟨⟨?_⟩, ?_⟩
+        · simp only [hη, Measure.smul_apply, Measure.restrict_apply_univ, smul_eq_mul, hc]
+          exact ENNReal.inv_mul_cancel hνCi (measure_ne_top _ _)
+        · simp only [hη, Measure.smul_apply, smul_eq_mul]
+          rw [Measure.restrict_apply (hCic i).measurableSet.compl, compl_inter_self,
+            measure_empty, mul_zero]
+      have hItrη : ∀ N, Itr N η η ≤ m⁻¹ * (m⁻¹ * X) := by
+        intro N
+        rw [hη, Itr_smul_left, Itr_smul_right, hcR]
+        have h1 := Itr_restrict_le hνa (Ci i) N
+        have h2 := hItr N
+        have hm1 : 0 ≤ m⁻¹ := inv_nonneg.2 hm0
+        refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left ?_ hm1) hm1
+        rw [hX]
+        linarith
+      have hEη : energy η ≤ ((m⁻¹ * (m⁻¹ * X) : ℝ) : EReal) :=
+        iSup_le fun N => EReal.coe_le_coe_iff.2 (hItrη N)
+      have hηne : energy η ≠ ⊤ := ne_top_of_le_ne_top (EReal.coe_ne_top _) hEη
+      have hcapi : capCompact (Ci i) < ENNReal.ofReal (Real.exp (-a i)) :=
+        hUc i (Ci i) (hCic i) ((hCiV i).trans (hVU i))
+      have h1 := (expNeg_energy_le_capCompact hηM).trans hcapi.le
+      obtain ⟨e, he⟩ : ∃ e : ℝ, energy η = (e : EReal) :=
+        ⟨_, (EReal.coe_toReal hηne (energy_ne_bot η)).symm⟩
+      rw [he, expNeg_coe, ENNReal.ofReal_le_ofReal_iff (Real.exp_pos _).le,
+        Real.exp_le_exp] at h1
+      have h2 : e ≤ m⁻¹ * (m⁻¹ * X) := by
+        rw [he] at hEη
+        exact EReal.coe_le_coe_iff.1 hEη
+      have h3 : a i * m ^ 2 ≤ X := by
+        have := mul_le_mul_of_nonneg_right (show a i ≤ m⁻¹ * (m⁻¹ * X) by linarith)
+          (sq_nonneg m)
+        calc a i * m ^ 2 ≤ m⁻¹ * (m⁻¹ * X) * m ^ 2 := this
+          _ = X := by field_simp
+      have h4 : ((2 : ℝ) ^ (i + 1) * m) ^ 2 < 1 := by
+        have h5 : A * ((2 : ℝ) ^ (i + 1) * m) ^ 2 < A * 1 := by
+          rw [mul_one]
+          calc A * ((2 : ℝ) ^ (i + 1) * m) ^ 2 = a i * m ^ 2 := by rw [hadef]; ring
+            _ ≤ X := h3
+            _ < A := hXA
+        exact lt_of_mul_lt_mul_left h5 hA.le
+      have h5 : (2 : ℝ) ^ (i + 1) * m < 1 :=
+        (pow_lt_one_iff_of_nonneg (by positivity) two_ne_zero).1 h4
+      have h6 : (0 : ℝ) < 2 ^ (i + 1) := by positivity
+      rw [one_div_pow, lt_div_iff₀ h6]
+      linarith
+    have hνC : ν C = 1 := (prob_compl_eq_zero_iff hC.measurableSet).1 hν.2
+    have hsum : (1 : ℝ) ≤ ∑ i ∈ t, (ν (Ci i)).toReal := by
+      have h1 : ν C ≤ ∑ i ∈ t, ν (Ci i) := by
+        rw [hCeq]
+        exact measure_biUnion_finset_le t Ci
+      have h2 := ENNReal.toReal_mono (ENNReal.sum_ne_top.2 fun i _ => measure_ne_top _ _) h1
+      rwa [hνC, ENNReal.toReal_one, ENNReal.toReal_sum (fun i _ => measure_ne_top _ _)] at h2
+    have hne : t.Nonempty := by
+      by_contra hemp
+      rw [Finset.not_nonempty_iff_eq_empty] at hemp
+      rw [hemp, Finset.sum_empty] at hsum
+      linarith
+    have hlt' := Finset.sum_lt_sum_of_nonempty hne hmass
+    have hgeom : ∑ i ∈ t, (1 / 2 : ℝ) ^ (i + 1) ≤ 1 := by
+      obtain ⟨M, hM⟩ : ∃ M, t ⊆ Finset.range M :=
+        ⟨t.sup id + 1, fun i hi =>
+          Finset.mem_range.2 (Nat.lt_succ_of_le (Finset.le_sup (f := id) hi))⟩
+      calc ∑ i ∈ t, (1 / 2 : ℝ) ^ (i + 1) ≤ ∑ i ∈ Finset.range M, (1 / 2 : ℝ) ^ (i + 1) :=
+            Finset.sum_le_sum_of_subset_of_nonneg hM (fun _ _ _ => by positivity)
+        _ = (1 / 2) * ∑ i ∈ Finset.range M, (1 / 2 : ℝ) ^ i := by
+            rw [Finset.mul_sum]
+            exact Finset.sum_congr rfl fun i _ => by ring
+        _ ≤ (1 / 2) * 2 := by gcongr; exact sum_geometric_two_le M
+        _ = 1 := by norm_num
+    linarith
+  have htend : Tendsto (fun n : ℕ => -(((n : ℝ) + 1) - 2 * R0)) atTop atBot := by
+    refine tendsto_neg_atTop_atBot.comp (tendsto_atTop_atTop.2 fun b => ?_)
+    obtain ⟨N, hN⟩ := exists_nat_ge (b + 2 * R0)
+    exact ⟨N, fun n hn => by
+      have : (N : ℝ) ≤ n := by exact_mod_cast hn
+      linarith⟩
+  have hlim : Tendsto (fun n : ℕ => ENNReal.ofReal (Real.exp (-(((n : ℝ) + 1) - 2 * R0))))
+      atTop (𝓝 0) := by
+    simpa using ENNReal.tendsto_ofReal (Real.tendsto_exp_atBot.comp htend)
+  exact le_antisymm (le_of_tendsto' hlim fun n => key ((n : ℝ) + 1) (by positivity)) zero_le
+
+/-! ### Theorem A.2.8 (ii) -/
+
+/-- **Theorem A.2.8 (ii)** (Frostman): `Φ_ρ ≥ E(ρ)` quasi-everywhere on `K`. -/
+theorem IsEquilibriumMeasure.capacity_lt_eq_zero {K : Set ℂ} {ρ : Measure ℂ} (hK : IsCompact K)
+    (hcap : capCompact K ≠ 0) (h : IsEquilibriumMeasure K ρ) :
+    capacity {z ∈ K | logPotential ρ z < energy ρ} = 0 := by
+  haveI := h.1.1
+  have hρa := adm_of_M1 hK h.1
+  have hEeq := h.energy_eq_coe hcap
+  obtain ⟨E, hE⟩ : ∃ E : ℝ, E = (energy ρ).toReal := ⟨_, rfl⟩
+  rw [← hE] at hEeq
+  obtain ⟨L, hLdef⟩ : ∃ L : ℕ → Set ℂ,
+      L = fun n => K ∩ logPotential ρ ⁻¹' Iic ((E - 1 / ((n : ℝ) + 1) : ℝ) : EReal) :=
+    ⟨_, rfl⟩
+  have hLc : ∀ n, IsCompact (L n) := fun n => by
+    rw [hLdef]
+    exact hK.inter_right ((lowerSemicontinuous_logPotential hρa.2).isClosed_preimage _)
+  have hL0 : ∀ n, capCompact (L n) = 0 := by
+    intro n
+    rw [capCompact_eq_zero_iff]
+    intro ν hν
+    by_contra hνt
+    haveI := hν.1
+    have hνK : ν ∈ M1 K := M1_mono (by rw [hLdef]; exact inter_subset_left) hν
+    have hνa := adm_of_M1 hK hνK
+    have hB : ∀ N, Itr N ν ν ≤ (energy ν).toReal := fun N => by
+      have := Itr_le_energy ν N
+      rwa [(EReal.coe_toReal hνt (energy_ne_bot ν)).symm, EReal.coe_le_coe_iff] at this
+    have hγ : (0 : ℝ) < 1 / ((n : ℝ) + 1) := by positivity
+    have hae : ∀ᵐ z ∂ν, z ∈ L n := measure_eq_zero_iff_ae_notMem.1 hν.2 |>.mono fun z hz => by
+      simpa using hz
+    have hI : ∀ N, 0 ≤ N → Itr N ρ ν ≤ (energy ρ).toReal - 1 / ((n : ℝ) + 1) := by
+      intro N _
+      rw [← hE]
+      have := integral_mono_ae (integrable_potTrunc_wrt hρa hνa N)
+        (integrable_const (E - 1 / ((n : ℝ) + 1)))
+        (hae.mono fun z hz => by
+          have h1 : ((potT ρ N z : ℝ) : EReal) ≤ logPotential ρ z :=
+            le_iSup (fun N : ℕ => ((potT ρ N z : ℝ) : EReal)) N
+          have h2 : logPotential ρ z ≤ ((E - 1 / ((n : ℝ) + 1) : ℝ) : EReal) := by
+            rw [hLdef] at hz
+            exact hz.2
+          exact EReal.coe_le_coe_iff.1 (h1.trans h2))
+      rwa [integral_const, smul_eq_mul, measureReal_def, measure_univ, ENNReal.toReal_one,
+        one_mul] at this
+    obtain ⟨μ, hμ, hlt⟩ := exists_energy_lt_of_variation hK h.1 hνK hγ (h.Itr_le hcap) hB hI
+    have := h.2 μ hμ
+    rw [h.energy_eq_coe hcap] at this
+    exact absurd (lt_of_le_of_lt this hlt) (lt_irrefl _)
+  obtain ⟨R0, hR0⟩ := hK.isBounded.subset_ball 0
+  have hLsub : ∀ n, L n ⊆ ball 0 R0 := fun n => by
+    rw [hLdef]; exact inter_subset_left.trans hR0
+  refine le_antisymm ((capacity_mono ?_).trans (capacity_iUnion_eq_zero hLc hL0 hLsub).le)
+    zero_le
+  intro z hz
+  obtain ⟨hzK, hzlt⟩ := hz
+  rw [hEeq] at hzlt
+  have hnt : logPotential ρ z ≠ ⊤ := ne_top_of_lt hzlt
+  obtain ⟨φ, hφ⟩ : ∃ φ : ℝ, logPotential ρ z = (φ : EReal) :=
+    ⟨_, (EReal.coe_toReal hnt (logPotential_ne_bot ρ z)).symm⟩
+  rw [hφ, EReal.coe_lt_coe_iff] at hzlt
+  obtain ⟨n, hn⟩ := exists_nat_one_div_lt (sub_pos.2 hzlt)
+  refine mem_iUnion.2 ⟨n, ?_⟩
+  rw [hLdef]
+  refine ⟨hzK, ?_⟩
+  show logPotential ρ z ≤ _
+  rw [hφ, EReal.coe_le_coe_iff]
+  linarith
+
+/-- **Theorem A.2.8** (Frostman): the Statement `DF.FrostmanStatement`. -/
+theorem frostmanStatement_holds : FrostmanStatement := fun _ _ hK hcap h =>
+  ⟨h.logPotential_le_energy hK hcap, h.capacity_lt_eq_zero hK hcap⟩
 
 end DF
