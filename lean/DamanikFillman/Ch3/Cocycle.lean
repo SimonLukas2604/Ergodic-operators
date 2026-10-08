@@ -32,7 +32,8 @@ Statements (stated as `Prop`s, not asserted):
   `DamanikFillman.Ch3.UHStable` (`DF.Cocycle.uniformHyperbolicityCharacterization`). Robustness (Corollary 3.8.5, fixed `T`) is in `DamanikFillman.Ch3.UHOpen`;
 * `DF.Cocycle.RuelleStatement` — Theorem 3.8.7 (deterministic Oseledets/Ruelle theorem,
   complex case); **proved** in `DamanikFillman.Ch3.Ruelle` (`DF.Cocycle.ruelle`);
-* `DF.Cocycle.OseledetsStatement` — Corollary 3.8.8 (multiplicative ergodic theorem).
+* `DF.Cocycle.OseledetsStatement` — Corollary 3.8.8 (multiplicative ergodic theorem);
+  **proved** in `DamanikFillman.Ch3.Oseledets` (`DF.Cocycle.oseledets`).
 -/
 import DamanikFillman.Ch3.Kingman
 
@@ -318,8 +319,8 @@ def RuelleStatement : Prop :=
 /-- **Corollary 3.8.8** (Oseledets' multiplicative ergodic theorem). For an invertible ergodic
 `T` and bounded measurable `A : Ω → SL(2, ℂ)` with `L_μ(A) > 0`, there are measurable line fields
 (represented by nonzero vectors) `vˢ, vᵘ`, invariant under the cocycle, along which
-`(1/n) log ‖A_n(ω) v‖ → -L_μ(A)` resp. `(1/n) log ‖A_{-n}(ω) v‖ → -L_μ(A)` a.e. Stated, not
-proved. -/
+`(1/n) log ‖A_n(ω) v‖ → -L_μ(A)` resp. `(1/n) log ‖A_{-n}(ω) v‖ → -L_μ(A)` a.e. Proved as
+`DF.Cocycle.oseledets` (`Ch3/Oseledets.lean`). -/
 def OseledetsStatement : Prop :=
   ∀ (Ω : Type) [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] (T : Ω ≃ᵐ Ω)
     (A : Ω → SL2C), Ergodic T μ → Measurable (fun ω => (A ω : M2)) →

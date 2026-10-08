@@ -21,7 +21,8 @@ Main results:
 * `DF.homotopic_of_eq_add_proj` — the easy direction of **Proposition 3.9.9**;
 * `DF.isLiftAlong_add_int` — lifts can be shifted by integers.
 
-Statements: `DF.FlowBirkhoffStatement` (Theorem 3.9.2) is stated only. `DF.FlowUHStatement`
+Statements: `DF.FlowBirkhoffStatement` (Theorem 3.9.2) is **proved** in
+`DamanikFillman.Ch3.FlowBirkhoff` (`DF.flowBirkhoff`). `DF.FlowUHStatement`
 (Theorem 3.9.5, items (a), (c), (d)) is **proved** in `DamanikFillman.Ch3.FlowUH` (`DF.flowUH`). `DF.SuspensionErgodicStatement` (Lemma 3.9.7) is **proved**
 in `DamanikFillman.Ch3.Suspension` (`DF.suspension_ergodic`).
 `DF.HomotopyLiftStatement` (Proposition 3.9.9, converse direction) and `DF.SchwartzmanStatement`
@@ -56,7 +57,8 @@ def FlowErgodic [MeasurableSpace Ω] (ϕ : Flow ℝ Ω) (μ : Measure Ω) : Prop
     ∀ E : Set Ω, MeasurableSet E → (∀ t : ℝ, ϕ t ⁻¹' E = E) → μ E = 0 ∨ μ Eᶜ = 0
 
 /-- **Theorem 3.9.2** (Birkhoff's theorem for flows): for an ergodic flow and `f ∈ L¹`,
-`(1/t) ∫₀ᵗ f(ϕ_s ω) ds → E(f)` for a.e. `ω`. Stated, not proved. -/
+`(1/t) ∫₀ᵗ f(ϕ_s ω) ds → E(f)` for a.e. `ω`. Proved as `DF.flowBirkhoff`
+(`Ch3/FlowBirkhoff.lean`). -/
 def FlowBirkhoffStatement : Prop :=
   ∀ (X : Type) [TopologicalSpace X] [MeasurableSpace X] [BorelSpace X] (ϕ : Flow ℝ X)
     (μ : Measure X) [IsProbabilityMeasure μ], FlowErgodic ϕ μ →

@@ -33,7 +33,8 @@ Statements:
   **proved** in `DamanikFillman.Ch3.Generic` (`DF.ergodicMeasureExists`), by a nested-faces
   argument replacing the Krein–Milman theorem;
 * `DF.FurmanStatement` — Theorem 3.5.8 (Furman) in full generality; the version with the bound
-  `|f_n| ≤ C n` is proved in `DamanikFillman.Ch3.Furman` (`DF.furman`);
+  `|f_n| ≤ C n` is proved in `DamanikFillman.Ch3.Furman` (`DF.furman`), the general statement
+  in `DamanikFillman.Ch3.FurmanGeneral` (`DF.furmanStatement`);
 * `DF.ErgodicDecompositionStatement` — Theorem 3.5.12 (ergodic decomposition), stated only.
 -/
 import DamanikFillman.Ch3.Birkhoff
@@ -356,7 +357,7 @@ theorem uniquelyErgodic_iff [Nonempty Ω] (hT : Continuous T) :
 /-- **Theorem 3.5.8** (Furman). If `T` is uniquely ergodic with invariant measure `μ` and the
 continuous `f_n` are subadditive, then `limsup f_n(ω)/n ≤ inf_n (1/n) ∫ f_n dμ` uniformly in `ω`:
 for every `ε > 0` there is `N` with `f_n(ω)/n < inf_k (1/k) ∫ f_k dμ + ε` for `n ≥ N` and all
-`ω` (3.5.12). Stated, not proved. -/
+`ω` (3.5.12). Proved as `DF.furmanStatement` (`Ch3/FurmanGeneral.lean`). -/
 def FurmanStatement : Prop :=
   ∀ (X : Type) [MetricSpace X] [CompactSpace X] [MeasurableSpace X] [BorelSpace X]
     (S : X → X) (μ : Measure X), Continuous S → invMeasures S = {μ} →
