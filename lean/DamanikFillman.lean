@@ -34,6 +34,7 @@ import DamanikFillman.Ch1.Wiener
 import DamanikFillman.Ch2.CombesThomas
 import DamanikFillman.Ch2.GenEigen
 import DamanikFillman.Ch2.GenEigenSupport
+import DamanikFillman.Ch2.GenEigSupportProof
 import DamanikFillman.Ch2.GilbertPearson
 import DamanikFillman.Ch2.Green
 import DamanikFillman.Ch2.HalfLine

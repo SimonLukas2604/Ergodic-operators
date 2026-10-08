@@ -44,10 +44,10 @@ lemma volume_torus_eq_haar (d : ℕ) :
 local instance (priority := high) haarMeasureSpace : MeasureSpace UnitAddCircle :=
   ⟨AddCircle.haarAddCircle⟩
 
-local instance : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
+local instance torusIsAddHaar : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (Measure.IsAddHaarMeasure AddCircle.haarAddCircle)
 
-local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
+local instance torusIsProb : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (IsProbabilityMeasure AddCircle.haarAddCircle)
 
 /-- The translation vector as a point of `𝕋^d`. -/

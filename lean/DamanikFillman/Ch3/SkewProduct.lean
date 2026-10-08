@@ -298,7 +298,7 @@ end skew
 
 /-! ### Theorem 3.5.11(b) -/
 
-local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
+local instance skewProdIsProb : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
   ⟨UnitAddCircle.measure_univ⟩
 
 /-- **Theorem 3.5.11(b)**: for irrational `α` the skew-shift on `𝕋²` is uniquely ergodic, with

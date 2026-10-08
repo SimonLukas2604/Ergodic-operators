@@ -34,10 +34,10 @@ lemma volume_prod_eq_haar :
 
 attribute [local instance] haarMeasureSpace
 
-local instance : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
+local instance skewIsAddHaar : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (Measure.IsAddHaarMeasure AddCircle.haarAddCircle)
 
-local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
+local instance skewIsProb : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (IsProbabilityMeasure AddCircle.haarAddCircle)
 
 /-- The skew-shift on `UnitAddTorus (Fin 2)`. -/

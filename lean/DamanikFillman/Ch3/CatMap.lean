@@ -127,10 +127,10 @@ lemma catMf_iterate_injective {n : Fin 2 → ℤ} (hn : n ≠ 0) :
 
 attribute [local instance] haarMeasureSpace
 
-local instance : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
+local instance catIsAddHaar : Measure.IsAddHaarMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (Measure.IsAddHaarMeasure AddCircle.haarAddCircle)
 
-local instance : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
+local instance catIsProb : IsProbabilityMeasure (volume : Measure UnitAddCircle) :=
   inferInstanceAs (IsProbabilityMeasure AddCircle.haarAddCircle)
 
 /-- The cat map on `UnitAddTorus (Fin 2)`. -/
