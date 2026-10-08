@@ -1,6 +1,7 @@
 import DamanikFillman.AppA.Equilibrium
 import DamanikFillman.AppA.Fourier
 import DamanikFillman.AppA.HolderHilbert
+import DamanikFillman.AppA.HilbertL2
 import DamanikFillman.AppA.FourierDecay
 import DamanikFillman.AppA.Frostman
 import DamanikFillman.AppA.FrostmanMain
