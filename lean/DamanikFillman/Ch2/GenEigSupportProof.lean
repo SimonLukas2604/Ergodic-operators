@@ -321,7 +321,7 @@ lemma eigDensity_eq_ae (hV : BddPot V) (b n : ℤ) :
 /-- `∫ |Fₙ|² dμ_b ≤ 1`. -/
 lemma lintegral_eigDensity_le (hV : BddPot V) (b n : ℤ) :
     ∫⁻ x, ‖eigDensity hV b n x‖ₑ ^ 2 ∂(muB hV b) ≤ 1 := by
-  have := lintegral_norm_sq_matDensity_le (A := schr V) (hA := isSelfAdjoint_schr hV)
+  have := lintegral_norm_sq_matDensity_le (H := L2 ℤ) (A := schr V) (hA := isSelfAdjoint_schr hV)
     (dlt b) (dlt n)
   rwa [norm_dlt, one_pow, ENNReal.ofReal_one] at this
 
@@ -357,8 +357,8 @@ theorem ae_mem_genEigSet (hV : BddPot V) (b : ℤ) {δ : ℝ} (hδ : 1 / 2 < δ)
     calc ∑' n, ∫⁻ x, w n * ‖F n x‖ₑ ^ 2 ∂(muB hV b)
         ≤ ∑' n, w n := ENNReal.tsum_le_tsum fun n => by
           rw [lintegral_const_mul _ (hFm2 n)]
-          calc w n * ∫⁻ x, ‖F n x‖ₑ ^ 2 ∂(muB hV b) ≤ w n * 1 :=
-                mul_le_mul_left' (lintegral_eigDensity_le hV b n) _
+          calc w n * ∫⁻ x, ‖F n x‖ₑ ^ 2 ∂(muB hV b) ≤ w n * 1 := by
+                gcongr; exact lintegral_eigDensity_le hV b n
             _ = w n := mul_one _
       _ < ∞ := by
           rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => by positivity) (summable_weight hδ)]
@@ -372,7 +372,8 @@ theorem ae_mem_genEigSet (hV : BddPot V) (b : ℤ) {δ : ℝ} (hδ : 1 / 2 < δ)
   · intro h0
     have := congrFun h0 b
     simp only [Pi.zero_apply] at this
-    rw [hx1] at this
+    have h1' : F b x = 1 := hx1
+    rw [h1'] at this
     exact one_ne_zero this
   · -- `wₙ |Fₙ|² ≤ K`
     have hterm : w n * ‖F n x‖ₑ ^ 2 ≤ ∑' m, w m * ‖F m x‖ₑ ^ 2 :=
