@@ -35,7 +35,8 @@ I. General Theory*, GSM 221, AMS 2022.
   `FourierDecay.lean`;
 * `HilbertL2Statement` — Proposition A.1.5;
 * `HolderHilbertStatement` — Theorem A.1.6 (Plemelj–Privalov); its second sentence (Lipschitz
-  `g`) is derived as `holder_hilbertR_of_lipschitz`.
+  `g`) is derived as `holder_hilbertR_of_lipschitz`.  Proved in `HolderHilbert.lean`
+  (`holderHilbertStatement_holds`, `holder_hilbertR_of_lipschitz'`).
 -/
 import Mathlib.Analysis.Fourier.AddCircle
 import Mathlib.Analysis.Fourier.AddCircleMulti

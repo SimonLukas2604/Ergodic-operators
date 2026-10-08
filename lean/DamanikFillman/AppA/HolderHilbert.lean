@@ -6,6 +6,7 @@ I. General Theory*, GSM 221, AMS 2022.
 
 ## Main results
 
+* `DF.holder_hilbertR_of_lipschitz'` — the Lipschitz case, unconditionally.
 * `DF.holderHilbertStatement_holds` — **Theorem A.1.6**: if `g ∈ L²(ℝ)` is uniformly
   `α`-Hölder continuous at scales `≤ 1` (`0 < α < 1`), then so is its Hilbert transform.
   This includes the general case that the book leaves as Exercise A.1.3.
@@ -568,5 +569,12 @@ theorem holderHilbertStatement_holds : HolderHilbertStatement := by
       have := h0.symm
       rwa [abs_eq_zero, sub_eq_zero] at this
     rw [this, sub_self, norm_zero]
+
+/-- **Theorem A.1.6**, second sentence (unconditional): Lipschitz `g ∈ L²(ℝ)` have `α`-Hölder
+continuous Hilbert transforms for every `α < 1`. -/
+theorem holder_hilbertR_of_lipschitz' {g : ℝ → ℂ} (hg : MemLp g 2) {L : ℝ}
+    (hL : ∀ y t, ‖g y - g t‖ ≤ L * |y - t|) {α : ℝ} (hα : 0 < α) (hα1 : α < 1) :
+    ∃ C' : ℝ, ∀ s t, |s - t| ≤ 1 → ‖hilbertR g s - hilbertR g t‖ ≤ C' * |s - t| ^ α :=
+  holder_hilbertR_of_lipschitz holderHilbertStatement_holds hg hL hα hα1
 
 end DF
