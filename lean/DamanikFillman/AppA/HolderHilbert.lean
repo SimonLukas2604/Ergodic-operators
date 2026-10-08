@@ -27,6 +27,7 @@ import DamanikFillman.AppA.Fourier
 noncomputable section
 
 open Real Complex Set Filter Topology MeasureTheory
+open scoped ENNReal
 
 namespace DF
 
@@ -252,7 +253,7 @@ lemma norm_integrand_le {α C0 M d δ s y : ℝ} (hα : 0 < α) (hC0 : 0 ≤ C0)
       Set.indicator (Icc (-(3 * δ)) (3 * δ)) (fun _ => C0 * (3 * δ) ^ α / δ) y +
       Set.indicator (Ioi (3 * δ)) (fun r => 2 * δ * (C0 + M) * r ^ (α - 2)) |y| := by
     rw [norm_mul]
-    rcases le_or_lt |y| (3 * δ) with hy | hy
+    rcases le_or_gt |y| (3 * δ) with hy | hy
     · have hy1 : |y| ≤ 1 := by linarith
       rw [if_pos hy1, mul_one]
       have hP : ‖pvKer (2 * δ) (y + d) - pvKer (2 * δ) y‖ ≤ 1 / δ := by
@@ -297,7 +298,7 @@ lemma norm_integrand_le {α C0 M d δ s y : ℝ} (hα : 0 < α) (hC0 : 0 ≤ C0)
       3 / 2 * M ≤ Set.indicator (Icc (1 - δ) (1 + δ)) (fun _ => 3 / 2 * M) y +
         Set.indicator (Icc (-1 - δ) (-1 + δ)) (fun _ => 3 / 2 * M) y := by
     intro h1 h2
-    rcases le_or_lt 0 y with hy | hy
+    rcases le_or_gt 0 y with hy | hy
     · rw [abs_of_nonneg hy] at h1 h2
       simp only [Set.indicator_of_mem (show y ∈ Icc (1 - δ) (1 + δ) from ⟨h1, h2⟩)]
       linarith
@@ -394,8 +395,15 @@ lemma integral_psi_le {α C0 M δ : ℝ} (hα : 0 < α) (hα1 : α < 1) (hC0 : 0
   have i1 := integrable_indicator_Icc_const (-(3 * δ)) (3 * δ) (C0 * (3 * δ) ^ α / δ)
   have i3 := integrable_indicator_Icc_const (1 - δ) (1 + δ) (3 / 2 * M)
   have i4 := integrable_indicator_Icc_const (-1 - δ) (-1 + δ) (3 / 2 * M)
+  have i12 : Integrable (fun y : ℝ =>
+      Set.indicator (Icc (-(3 * δ)) (3 * δ)) (fun _ => C0 * (3 * δ) ^ α / δ) y +
+      Set.indicator (Ioi (3 * δ)) (fun r => 2 * δ * (C0 + M) * r ^ (α - 2)) |y|) := i1.add i2
+  have i123 : Integrable (fun y : ℝ =>
+      Set.indicator (Icc (-(3 * δ)) (3 * δ)) (fun _ => C0 * (3 * δ) ^ α / δ) y +
+      Set.indicator (Ioi (3 * δ)) (fun r => 2 * δ * (C0 + M) * r ^ (α - 2)) |y| +
+      Set.indicator (Icc (1 - δ) (1 + δ)) (fun _ => 3 / 2 * M) y) := i12.add i3
   unfold psi
-  rw [integral_add ((i1.add i2).add i3) i4, integral_add (i1.add i2) i3, integral_add i1 i2,
+  rw [integral_add i123 i4, integral_add i12 i3, integral_add i1 i2,
     integral_indicator_Icc_const (by linarith), integral_indicator_Icc_const (by linarith),
     integral_indicator_Icc_const (by linarith),
     integral_comp_abs (f := Set.indicator (Ioi (3 * δ)) (fun r => 2 * δ * (C0 + M) *
@@ -455,8 +463,13 @@ lemma norm_truncHilbert_sub_le' (hg : MemLp g 2) {α C0 M : ℝ} (hα : 0 < α) 
         g s * (pvCut (2 * δ) (y + d) - pvCut (2 * δ) y)) =
         fun y => (g (s - y) * pvKer (2 * δ) (y + d) - g (s - y) * pvKer (2 * δ) y) -
           g s * (pvCut (2 * δ) (y + d) - pvCut (2 * δ) y) := funext fun y => by ring
-    rw [hfun, integral_sub (i1.sub i0) ((iQ1.sub iQ0).const_mul (g s)), integral_sub i1 i0,
-      integral_const_mul, integral_sub iQ1 iQ0, hQ1, hQ0]
+    have i10 : Integrable (fun y => g (s - y) * pvKer (2 * δ) (y + d) -
+        g (s - y) * pvKer (2 * δ) y) := i1.sub i0
+    have iQ : Integrable (fun y => g s * (pvCut (2 * δ) (y + d) - pvCut (2 * δ) y)) :=
+      (iQ1.sub iQ0).const_mul (g s)
+    have iQ' : Integrable (fun y => pvCut (2 * δ) (y + d) - pvCut (2 * δ) y) := iQ1.sub iQ0
+    rw [hfun, integral_sub i10 iQ, integral_sub i1 i0, integral_const_mul, integral_sub iQ1 iQ0,
+      hQ1, hQ0]
     simp
   rw [e]
   refine (norm_integral_le_of_norm_le (integrable_psi hδ0 hα1)
@@ -490,7 +503,7 @@ lemma holder_small (hg : MemLp g 2) {α C0 M : ℝ} (hα : 0 < α) (hα1 : α < 
         (truncHilbert (2 * δ) g t - truncHilbert (2 * δ) g s) +
         (truncHilbert (2 * δ) g s - hilbertR g s) := by ring
   rw [hsplit]
-  refine (norm_add_le _ _).trans ((add_le_add_right (norm_add_le _ _) _).trans ?_)
+  refine (norm_add_le _ _).trans ((add_le_add (norm_add_le _ _) le_rfl).trans ?_)
   rw [norm_neg]
   have hπ : 0 < 1 / π := by positivity
   have hb : 2 * C0 * ((2 * δ) ^ α / α) ≤ 2 * C0 * (2 * δ ^ α / α) :=
@@ -547,7 +560,7 @@ theorem holderHilbertStatement_holds : HolderHilbertStatement := by
         (hilbertR g (t + e + e) - hilbertR g (t + e)) + (hilbertR g (t + e) - hilbertR g t)‖ ≤
         ‖hilbertR g (t + e + e + e) - hilbertR g (t + e + e)‖ +
           ‖hilbertR g (t + e + e) - hilbertR g (t + e)‖ + ‖hilbertR g (t + e) - hilbertR g t‖ :=
-      (norm_add_le _ _).trans (add_le_add_right (norm_add_le _ _) _)
+      (norm_add_le _ _).trans (add_le_add (norm_add_le _ _) le_rfl)
     have hLp := mul_le_mul_of_nonneg_left hpow hL0
     linarith
   · rw [← h0, Real.zero_rpow hα.ne', mul_zero]
