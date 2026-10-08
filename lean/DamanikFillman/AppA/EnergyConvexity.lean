@@ -23,6 +23,7 @@ import DamanikFillman.AppA.Frostman
 import Mathlib.Analysis.SpecialFunctions.Gaussian.FourierTransform
 import Mathlib.MeasureTheory.Measure.CharacteristicFunction.TaylorExpansion
 import Mathlib.MeasureTheory.Integral.ExpDecay
+import Mathlib.Analysis.SpecialFunctions.FrullaniIntegral
 
 noncomputable section
 
@@ -247,7 +248,8 @@ lemma integrableOn_frullani {r : ℝ} (hr : 0 < r) :
   have hm : 0 < min r 1 := lt_min hr one_pos
   have hb : IntegrableOn (fun t : ℝ => |r - 1| * rexp (-(min r 1 * t))) (Ioi 0) := by
     have := (exp_neg_integrableOn_Ioi 0 hm).const_mul |r - 1|
-    simpa only [neg_mul] using this
+    simp only [neg_mul] at this
+    exact this
   refine Integrable.mono' hb (Measurable.aestronglyMeasurable (by fun_prop)) ?_
   refine (ae_restrict_iff' measurableSet_Ioi).2 (Eventually.of_forall fun t ht => ?_)
   rw [Real.norm_eq_abs]
@@ -329,7 +331,7 @@ lemma ae_prod_mem {K : Set ℂ} {α β : Measure ℂ} [SFinite α] [SFinite β] 
   rw [ae_iff]
   refine measure_mono_null (t := Kᶜ ×ˢ univ ∪ univ ×ˢ Kᶜ) ?_ (measure_union_null ?_ ?_)
   · intro p hp
-    simp only [mem_setOf_eq, not_and_or] at hp
+    simp only [Set.mem_ofPred_eq, not_and_or] at hp
     rcases hp with h | h
     · exact Or.inl ⟨h, trivial⟩
     · exact Or.inr ⟨trivial, h⟩
@@ -339,7 +341,7 @@ lemma ae_prod_mem {K : Set ℂ} {α β : Measure ℂ} [SFinite α] [SFinite β] 
 lemma integrable_prod_of_continuous {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ}
     (hα : α ∈ M1 K) (hβ : β ∈ M1 K) {f : ℂ × ℂ → ℝ} (hf : Continuous f) :
     Integrable f (β.prod α) := by
-  haveI := hα.1; haveI := hβ.1
+  have := hα.1; have := hβ.1
   obtain ⟨C, hC⟩ := (hK.prod hK).exists_bound_of_continuousOn hf.continuousOn
   refine Integrable.of_bound hf.aestronglyMeasurable C ?_
   filter_upwards [ae_prod_mem hα.2 hβ.2] with p hp
@@ -348,7 +350,7 @@ lemma integrable_prod_of_continuous {K : Set ℂ} (hK : IsCompact K) {α β : Me
 lemma iint_eq_prod {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα : α ∈ M1 K)
     (hβ : β ∈ M1 K) {f : ℂ → ℝ} (hf : Continuous f) :
     ∫ z, ∫ w, f (z - w) ∂α ∂β = ∫ p, f (p.1 - p.2) ∂(β.prod α) := by
-  haveI := hα.1; haveI := hβ.1
+  have := hα.1; have := hβ.1
   have hc : Continuous fun p : ℂ × ℂ => f (p.1 - p.2) := hf.comp (continuous_fst.sub continuous_snd)
   exact (integral_prod _ (integrable_prod_of_continuous hK hα hβ hc)).symm
 
@@ -371,7 +373,7 @@ lemma kform_le_Itr {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα :
 lemma Itr_le_kform {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα : α ∈ M1 K)
     (hβ : β ∈ M1 K) {b : ℝ} (hb : 0 < b) (N : ℕ) :
     Itr N α β ≤ kform b α β + (1 / 2) * Real.log (1 + b * rexp (N : ℝ) ^ 2) := by
-  haveI := hα.1; haveI := hβ.1
+  have := hα.1; have := hβ.1
   unfold kform Itr
   rw [iint_eq_prod hK hα hβ (continuous_kb hb), iint_eq_prod hK hα hβ (continuous_logKer N)]
   have hint := integrable_prod_of_continuous hK hα hβ
@@ -382,7 +384,8 @@ lemma Itr_le_kform {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα :
           ((continuous_logKer N).comp (continuous_fst.sub continuous_snd)))
           (hint.add (integrable_const _)) fun p => logKer_le_kb hb N _
     _ = _ := by
-        rw [integral_add hint (integrable_const _), integral_const]
+        rw [integral_add (f := fun p : ℂ × ℂ => kb b (p.1 - p.2)) hint (integrable_const _),
+          integral_const]
         simp
 
 /-- Fubini: the smoothed mutual energy as a mixture of Gaussian forms. -/
@@ -391,7 +394,7 @@ lemma kform_eq {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα : α 
     IntegrableOn (fun t : ℝ => t⁻¹ * (rexp (-(b * t)) * gform t α β - rexp (-t))) (Ioi 0) ∧
     kform b α β = (1 / 2) *
       ∫ t in Ioi (0 : ℝ), t⁻¹ * (rexp (-(b * t)) * gform t α β - rexp (-t)) := by
-  haveI := hα.1; haveI := hβ.1
+  have := hα.1; have := hβ.1
   obtain ⟨R, hR⟩ := hK.isBounded.exists_norm_le
   obtain ⟨F, hF⟩ : ∃ F : (ℂ × ℂ) × ℝ → ℝ, ∀ q, F q =
       q.2⁻¹ * (rexp (-((‖q.1.1 - q.1.2‖ ^ 2 + b) * q.2)) - rexp (-q.2)) := ⟨_, fun _ => rfl⟩
@@ -402,12 +405,13 @@ lemma kform_eq {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα : α 
   have hFi : Integrable F ((β.prod α).prod (volume.restrict (Ioi 0))) := by
     have hg : Integrable (fun t : ℝ => rexp (-(min b 1 * t))) (volume.restrict (Ioi 0)) := by
       have := exp_neg_integrableOn_Ioi 0 hm
-      simpa only [neg_mul] using this
+      simp only [neg_mul] at this
+      exact this
     refine Integrable.mono' ((integrable_const (4 * R ^ 2 + b + 1 : ℝ)).mul_prod hg)
       (Measurable.aestronglyMeasurable (by rw [hFeq]; fun_prop)) ?_
-    have h1 : ∀ᵐ q ∂((β.prod α).prod (volume.restrict (Ioi 0))), q.1.1 ∈ K ∧ q.1.2 ∈ K :=
+    have h1 : ∀ᵐ q ∂((β.prod α).prod (volume.restrict (Ioi (0 : ℝ)))), q.1.1 ∈ K ∧ q.1.2 ∈ K :=
       Measure.quasiMeasurePreserving_fst.ae (ae_prod_mem hα.2 hβ.2)
-    have h2 : ∀ᵐ q ∂((β.prod α).prod (volume.restrict (Ioi 0))), q.2 ∈ Ioi (0 : ℝ) :=
+    have h2 : ∀ᵐ q ∂((β.prod α).prod (volume.restrict (Ioi (0 : ℝ)))), q.2 ∈ Ioi (0 : ℝ) :=
       Measure.quasiMeasurePreserving_snd.ae (ae_restrict_mem measurableSet_Ioi)
     filter_upwards [h1, h2] with q hq hq2
     have ht : 0 < q.2 := hq2
@@ -423,8 +427,8 @@ lemma kform_eq {K : Set ℂ} (hK : IsCompact K) {α β : Measure ℂ} (hα : α 
     have hexp : rexp (-(min (‖q.1.1 - q.1.2‖ ^ 2 + b) 1 * q.2)) ≤ rexp (-(min b 1 * q.2)) := by
       refine Real.exp_le_exp.2 (neg_le_neg (mul_le_mul_of_nonneg_right ?_ ht.le))
       exact min_le_min_right _ (by linarith [sq_nonneg ‖q.1.1 - q.1.2‖])
-    exact mul_le_mul hr1 hexp (Real.exp_pos _).le (by linarith [abs_nonneg (b - 1),
-      abs_nonneg (‖q.1.1 - q.1.2‖ ^ 2 + b - 1)])
+    have hR0 : 0 ≤ 4 * R ^ 2 + b + 1 := by nlinarith [sq_nonneg R]
+    exact mul_le_mul hr1 hexp (Real.exp_pos _).le hR0
   -- the inner integrals
   have hinner : ∀ t : ℝ, 0 < t → ∫ p, F (p, t) ∂(β.prod α) =
       t⁻¹ * (rexp (-(b * t)) * gform t α β - rexp (-t)) := by
@@ -493,11 +497,11 @@ lemma kcombo_eq {K : Set ℂ} (hK : IsCompact K) {μ ν : Measure ℂ} (hμ : μ
 
 end Convexity
 
-open Convexity in
+open DF.Convexity in
 /-- **Proposition A.2.5** (strict convexity of the logarithmic energy). -/
 theorem energyStrictConvexityStatement_holds : EnergyStrictConvexityStatement := by
   intro K hK μ hμ ν hν hEμ hEν hne
-  haveI := hμ.1; haveI := hν.1
+  have := hμ.1; have := hν.1
   have hμa := adm_of_M1 hK hμ
   have hνa := adm_of_M1 hK hν
   obtain ⟨Eμ, hEμd⟩ : ∃ E, E = (energy μ).toReal := ⟨_, rfl⟩
