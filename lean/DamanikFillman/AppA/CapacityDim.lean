@@ -89,12 +89,12 @@ lemma abs_sub_lt_of_idx_eq {k : ℕ} {z w : ℂ} (h : idx k z = idx k w) :
   have hp : (0 : ℝ) < 2 ^ k := by positivity
   rw [← sub_mul, abs_mul, abs_of_pos hp] at h1 h2
   constructor
-  · rw [lt_inv_iff_mul_lt₀ hp]; linarith
-  · rw [lt_inv_iff_mul_lt₀ hp]; linarith
+  · rw [← one_div, lt_div_iff₀ hp]; linarith
+  · rw [← one_div, lt_div_iff₀ hp]; linarith
 
 lemma ediam_D_le (k : ℕ) (B : ℤ × ℤ) :
-    EMetric.diam (D k B) ≤ ENNReal.ofReal (2 * ((2 : ℝ) ^ k)⁻¹) := by
-  refine EMetric.diam_le fun z hz w hw => ?_
+    Metric.ediam (D k B) ≤ ENNReal.ofReal (2 * ((2 : ℝ) ^ k)⁻¹) := by
+  refine Metric.ediam_le fun z hz w hw => ?_
   rw [edist_dist]
   refine ENNReal.ofReal_le_ofReal ?_
   have h := abs_sub_lt_of_idx_eq (hz.trans hw.symm)
@@ -130,12 +130,12 @@ lemma ball_subset {k : ℕ} (x : ℂ) {r : ℝ} (hr : r ≤ ((2 : ℝ) ^ k)⁻¹
     rw [← sub_mul, abs_mul, abs_of_pos hp]
     have := (Complex.abs_re_le_norm (z - x)).trans_lt (hz.trans_le hr)
     rw [Complex.sub_re] at this
-    rwa [lt_inv_iff_mul_lt₀ hp] at this
+    rwa [← one_div, lt_div_iff₀ hp] at this
   have him : |z.im * 2 ^ k - x.im * 2 ^ k| < 1 := by
     rw [← sub_mul, abs_mul, abs_of_pos hp]
     have := (Complex.abs_im_le_norm (z - x)).trans_lt (hz.trans_le hr)
     rw [Complex.sub_im] at this
-    rwa [lt_inv_iff_mul_lt₀ hp] at this
+    rwa [← one_div, lt_div_iff₀ hp] at this
   simp only [mem_iUnion, exists_prop]
   refine ⟨idx k z, ?_, rfl⟩
   have h1 := floor_near hre
@@ -154,7 +154,7 @@ lemma exists_content_pos {s : ℝ} (hs : 0 < s) {K : Set ℂ} (hK : μH[s] K ≠
       ∑ A ∈ F, θ s A.1 < 1 / ((m : ℝ) + 1) := fun m => hcon _ (by positivity)
   choose F hFK hFs using hF
   apply hK
-  refine le_antisymm ?_ (zero_le _)
+  refine le_antisymm ?_ zero_le
   -- covers by the squares of `F m`
   set r : ℕ → ℝ≥0∞ := fun m => ENNReal.ofReal (2 * (1 / ((m : ℝ) + 1)) ^ (1 / s)) with hr
   have hr0 : Tendsto r atTop (𝓝 0) := by
@@ -163,7 +163,7 @@ lemma exists_content_pos {s : ℝ} (hs : 0 < s) {K : Set ℂ} (hK : μH[s] K ≠
     have h2 : Tendsto (fun m : ℕ => 2 * (1 / ((m : ℝ) + 1)) ^ (1 / s)) atTop (𝓝 0) := by
       have := ((Real.continuousAt_rpow_const 0 (1 / s) (Or.inr (by positivity))).tendsto.comp
         h1).const_mul 2
-      simpa [Real.zero_rpow (by positivity : (1 / s) ≠ 0)] using this
+      simpa [Real.zero_rpow (by positivity : (1 / s) ≠ 0), Real.zero_rpow (inv_ne_zero hs.ne')] using this
     simpa [hr] using (ENNReal.tendsto_ofReal h2)
   have hθ : ∀ m, ∀ A ∈ F m, ((2 : ℝ) ^ A.1)⁻¹ ≤ (1 / ((m : ℝ) + 1)) ^ (1 / s) := by
     intro m A hA
@@ -171,7 +171,7 @@ lemma exists_content_pos {s : ℝ} (hs : 0 < s) {K : Set ℂ} (hK : μH[s] K ≠
       (Finset.single_le_sum (fun B _ => θ_nonneg s B.1) hA).trans (hFs m).le
     have h2 := Real.rpow_le_rpow (θ_nonneg s A.1) h1 (by positivity : 0 ≤ 1 / s)
     rwa [θ, ← Real.rpow_mul (by positivity), mul_one_div_cancel hs.ne', Real.rpow_one] at h2
-  have key := hausdorffMeasure_le_liminf_sum (X := ℂ) s K r hr0
+  have key := Measure.hausdorffMeasure_le_liminf_sum (X := ℂ) s K r hr0
     (fun m (A : F m) => D A.1.1 A.1.2)
     (Eventually.of_forall fun m A => (ediam_D_le _ _).trans (ENNReal.ofReal_le_ofReal
       (mul_le_mul_of_nonneg_left (hθ m A.1 A.2) (by norm_num))))
@@ -182,10 +182,10 @@ lemma exists_content_pos {s : ℝ} (hs : 0 < s) {K : Set ℂ} (hK : μH[s] K ≠
       exact ⟨⟨A, hA⟩, hzA⟩)
   refine key.trans (le_of_eq ?_)
   -- the sums tend to zero
-  have hsum : ∀ m, ∑ A : F m, EMetric.diam (D A.1.1 A.1.2) ^ s ≤
+  have hsum : ∀ m, ∑ A : F m, Metric.ediam (D A.1.1 A.1.2) ^ s ≤
       ENNReal.ofReal (2 ^ s * (1 / ((m : ℝ) + 1))) := by
     intro m
-    calc ∑ A : F m, EMetric.diam (D A.1.1 A.1.2) ^ s
+    calc ∑ A : F m, Metric.ediam (D A.1.1 A.1.2) ^ s
         ≤ ∑ A : F m, ENNReal.ofReal (2 ^ s * θ s A.1.1) := by
           refine Finset.sum_le_sum fun A _ => ?_
           refine (ENNReal.rpow_le_rpow (ediam_D_le _ _) hs.le).trans_eq ?_
@@ -202,8 +202,8 @@ lemma exists_content_pos {s : ℝ} (hs : 0 < s) {K : Set ℂ} (hK : μH[s] K ≠
     have := (tendsto_one_div_add_atTop_nhds_zero_nat.const_mul ((2 : ℝ) ^ s))
     rw [mul_zero] at this
     simpa using ENNReal.tendsto_ofReal this
-  refine le_antisymm ?_ (zero_le _)
-  calc liminf (fun m => ∑ A : F m, EMetric.diam (D A.1.1 A.1.2) ^ s) atTop
+  refine le_antisymm ?_ zero_le
+  calc liminf (fun m => ∑ A : F m, Metric.ediam (D A.1.1 A.1.2) ^ s) atTop
       ≤ liminf (fun m : ℕ => ENNReal.ofReal (2 ^ s * (1 / ((m : ℝ) + 1)))) atTop :=
         liminf_le_liminf (Eventually.of_forall hsum)
     _ = 0 := hlim.liminf_eq
@@ -297,13 +297,17 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
     set w' : S → ℝ := fun a' => w a' + if a' = a then δ else 0 with hw'
     have hcs' : ∀ k B, cs w' k B = cs w k B + if idx k (pt a) = B then δ else 0 := by
       intro k B
-      simp only [hcs, hw']
-      rw [← Finset.sum_ite_eq' Finset.univ a (fun a' => if idx k (pt a') = B then δ else 0),
-        ← Finset.sum_add_distrib]
-      refine Finset.sum_congr rfl fun a' _ => ?_
-      by_cases h1 : a' = a
-      · subst h1; split_ifs <;> simp
-      · simp [h1]
+      have hpt : ∀ a' : S, (if idx k (pt a') = B then w' a' else 0) =
+          (if idx k (pt a') = B then w a' else 0) +
+            (if a' = a then (if idx k (pt a) = B then δ else 0) else 0) := by
+        intro a'
+        simp only [hw']
+        by_cases h1 : a' = a
+        · subst h1; split_ifs <;> simp
+        · simp [h1]
+      simp only [hcs]
+      rw [Finset.sum_congr rfl (fun a' _ => hpt a'), Finset.sum_add_distrib]
+      simp
     have hw'P : w' ∈ P := by
       rw [hmemP]
       refine ⟨fun a' => ?_, fun k hk B => ?_⟩
@@ -313,7 +317,10 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
         · subst hB; linarith [hδle k hk]
         · linarith [hwc k hk B]
     have h1 := hmax hw'P
-    simp only [hw', Finset.sum_add_distrib, Finset.sum_ite_eq', Finset.mem_univ, if_true] at h1
+    have h2 : ∑ a', w' a' = ∑ a', w a' + δ := by
+      simp only [hw', Finset.sum_add_distrib]
+      simp
+    simp only at h1
     linarith
   -- the minimal saturated level
   set kmin : S → ℕ := fun a => Nat.find (hsat a) with hkmin
@@ -331,14 +338,14 @@ lemma exists_level_measure {K : Set ℂ} (hK : IsCompact K) {s c : ℝ} (hs : 0 
     simp only [mem_iUnion, exists_prop]
     refine ⟨φ a, Finset.mem_image_of_mem _ (Finset.mem_univ _), ?_⟩
     show idx (kmin a) z = idx (kmin a) (pt a)
-    exact idx_eq_of_idx_eq (hkmin_spec a).1 (by rw [hptidx]; rfl)
+    exact idx_eq_of_idx_eq (hkmin_spec a).1 (by rw [hptidx])
   -- the fibres of `φ`
   have hfib : ∀ A ∈ F, ∀ a : S, φ a = A ↔ idx A.1 (pt a) = A.2 := by
     intro A hA a
     obtain ⟨a₀, -, rfl⟩ := Finset.mem_image.1 hA
     simp only [hφ, Prod.mk.injEq]
     constructor
-    · rintro ⟨h1, h2⟩; rw [← h1, h2]
+    · rintro ⟨h1, h2⟩; rw [← h1]; exact h2
     · intro h
       have hk0 := hkmin_spec a₀
       -- `a` is saturated at level `kmin a₀`
@@ -497,11 +504,11 @@ lemma Itr_le_of_ball_le {K : Set ℂ} (hK : IsCompact K) {p : Measure ℂ} (hp :
     have h1 : ∫ w, logKer N (z - w) ∂p ≤ ∫ w, g w ∂p :=
       integral_mono hf hgi fun w => le_max_left _ _
     refine h1.trans ?_
-    rw [integral_eq_lintegral_of_nonneg_ae (Eventually.of_forall fun w => le_max_right _ _)
+    rw [integral_eq_lintegral_of_nonneg_ae (f := g) (Eventually.of_forall fun w => le_max_right _ _)
       hgi.aestronglyMeasurable]
     refine ENNReal.toReal_le_of_le_ofReal (by positivity) ?_
-    rw [lintegral_eq_lintegral_meas_lt p (Eventually.of_forall fun w => le_max_right _ _)
-      hgm.aemeasurable]
+    rw [lintegral_eq_lintegral_meas_lt (f := g) p
+      (Eventually.of_forall fun w => le_max_right _ _) hgm.aemeasurable]
     have hset : ∀ t ∈ Ioi (0 : ℝ), p {w | t < g w} ≤ ENNReal.ofReal (C * rexp (-s * t)) := by
       intro t ht
       have ht' : 0 < t := ht
@@ -557,6 +564,6 @@ theorem capacityZeroDimStatement_holds : CapacityZeroDimStatement := by
   have htop : energy p ≠ ⊤ := ne_top_of_le_ne_top (EReal.coe_ne_top _) hE
   have hpos : expNeg (energy p) ≠ 0 := by
     simp [expNeg, htop, energy_ne_bot p, Real.exp_pos]
-  exact hpos (le_antisymm ((expNeg_energy_le_capCompact hp).trans hcap.le) (zero_le _))
+  exact hpos (le_antisymm ((expNeg_energy_le_capCompact hp).trans hcap.le) zero_le)
 
 end DF
