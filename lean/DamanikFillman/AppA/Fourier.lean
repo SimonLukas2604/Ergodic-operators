@@ -33,7 +33,7 @@ I. General Theory*, GSM 221, AMS 2022.
 * `ConjugatePoissonStatement` — Fourier coefficients of the Poisson kernel `P_r` and the
   conjugate kernel `Q_r` (contains `H P_r = Q_r` from Theorem A.1.2); proved in
   `FourierDecay.lean`;
-* `HilbertL2Statement` — Proposition A.1.5;
+* `HilbertL2Statement` — Proposition A.1.5 (proved in `HilbertL2.lean`: `hilbertL2Statement_holds`);
 * `HolderHilbertStatement` — Theorem A.1.6 (Plemelj–Privalov); its second sentence (Lipschitz
   `g`) is derived as `holder_hilbertR_of_lipschitz`.  Proved in `HolderHilbert.lean`
   (`holderHilbertStatement_holds`, `holder_hilbertR_of_lipschitz'`).
