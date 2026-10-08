@@ -442,7 +442,9 @@ lemma exists_open_of_capacity_lt {B : Set ℂ} {ε : ℝ≥0∞} (h : capacity B
   simp only [iInf_lt_iff] at h
   obtain ⟨O, hO, hOb, hBO, hlt⟩ := h
   exact ⟨O, hO, hOb, hBO, fun C hC hCO =>
-    lt_of_le_of_lt (le_iSup_of_le C (le_iSup_of_le hC (le_iSup_of_le hCO le_rfl))) hlt⟩
+    lt_of_le_of_lt ((le_iSup (fun _ : C ⊆ O => capCompact C) hCO).trans
+      ((le_iSup (fun _ : IsCompact C => ⨆ (_ : C ⊆ O), capCompact C) hC).trans
+        (le_iSup (fun C' => ⨆ (_ : IsCompact C') (_ : C' ⊆ O), capCompact C') C))) hlt⟩
 
 /-- A countable union of compact sets of capacity zero (inside a fixed ball) has capacity zero.
 (A probability measure on a compact `C ⊆ ⋃_{i ∈ t} Cᵢ` with energy `E` puts mass
@@ -595,7 +597,7 @@ theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L 
   have hlim : Tendsto (fun n : ℕ => ENNReal.ofReal (Real.exp (-(((n : ℝ) + 1) - 2 * R0))))
       atTop (𝓝 0) := by
     simpa using ENNReal.tendsto_ofReal (Real.tendsto_exp_atBot.comp htend)
-  exact le_antisymm (le_of_tendsto' hlim fun n => key ((n : ℝ) + 1) (by positivity)) zero_le
+  exact le_antisymm (le_of_tendsto' hlim fun n : ℕ => key ((n : ℝ) + 1) (by positivity)) zero_le
 
 /-! ### Theorem A.2.8 (ii) -/
 
@@ -609,7 +611,7 @@ theorem IsEquilibriumMeasure.capacity_lt_eq_zero {K : Set ℂ} {ρ : Measure ℂ
   obtain ⟨E, hE⟩ : ∃ E : ℝ, E = (energy ρ).toReal := ⟨_, rfl⟩
   rw [← hE] at hEeq
   obtain ⟨L, hLdef⟩ : ∃ L : ℕ → Set ℂ,
-      L = fun n => K ∩ logPotential ρ ⁻¹' Iic ((E - 1 / ((n : ℝ) + 1) : ℝ) : EReal) :=
+      L = fun n : ℕ => K ∩ logPotential ρ ⁻¹' Iic ((E - 1 / ((n : ℝ) + 1) : ℝ) : EReal) :=
     ⟨_, rfl⟩
   have hLc : ∀ n, IsCompact (L n) := fun n => by
     rw [hLdef]
