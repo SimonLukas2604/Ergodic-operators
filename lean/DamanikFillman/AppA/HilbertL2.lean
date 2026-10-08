@@ -582,9 +582,10 @@ lemma pairing_hilbertL2 (g φ : 𝓢(ℝ, ℂ)) :
 
 lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
     (hilbertL2 (g.toLp 2) : ℝ → ℂ) =ᵐ[volume] fFun g := by
-  have hloc : LocallyIntegrable (fun t => hilbertL2 (g.toLp 2) t - fFun g t) :=
-    ((Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable (by norm_num)).sub
-      (continuous_fFun g).locallyIntegrable
+  have h1 : LocallyIntegrable (hilbertL2 (g.toLp 2) : ℝ → ℂ) :=
+    (Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two
+  have h2 : LocallyIntegrable (fFun g) := (continuous_fFun g).locallyIntegrable
+  have hloc : LocallyIntegrable (fun t => hilbertL2 (g.toLp 2) t - fFun g t) := h1.sub h2
   suffices H : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
       ∫ x, ψ x • (hilbertL2 (g.toLp 2) x - fFun g x) = 0 by
     filter_upwards [ae_eq_zero_of_integral_contDiff_smul_eq_zero hloc H] with t ht
