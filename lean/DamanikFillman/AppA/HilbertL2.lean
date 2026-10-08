@@ -620,9 +620,14 @@ lemma ae_eq_of_pairing {u F : ℝ → ℂ} (hu : LocallyIntegrable u) (hF : Cont
   simp_rw [Complex.real_smul, mul_sub]
   rw [integral_sub hi1 hi2, hp', sub_self]
 
+lemma locallyIntegrable_Lp2 (f : Lp ℂ 2 (volume : Measure ℝ)) :
+    LocallyIntegrable (f : ℝ → ℂ) :=
+  (Lp.memLp f).locallyIntegrable (by norm_num)
+
+set_option maxHeartbeats 1000000 in
 lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
     ∀ᵐ t ∂(volume : Measure ℝ), hilbertL2 (g.toLp 2) t = fFun g t := by
-  refine ae_eq_of_pairing ((Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two)
+  refine ae_eq_of_pairing (locallyIntegrable_Lp2 _)
     (continuous_fFun g) (fun φ => ?_) (fun φ => ?_)
   · refine (MeasureTheory.L2.integrable_inner (𝕜 := ℂ) (φ.toLp 2)
       (hilbertL2 (g.toLp 2))).congr ?_
