@@ -606,12 +606,12 @@ lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
       ∫ t, ((ψ t : ℝ) : ℂ) * fFun g t := by
     calc ∫ t, ((ψ t : ℝ) : ℂ) * hilbertL2 (g.toLp 2) t
         = ∫ t, conj (conj (hilbertL2 (g.toLp 2) t) * ((ψ t : ℝ) : ℂ)) :=
-          integral_congr_ae (Eventually.of_forall fun t => e _ t)
+          integral_congr_ae (Eventually.of_forall fun t => e (hilbertL2 (g.toLp 2) t) t)
       _ = conj (∫ t, conj (hilbertL2 (g.toLp 2) t) * ((ψ t : ℝ) : ℂ)) := integral_conj
       _ = conj (∫ t, conj (fFun g t) * ((ψ t : ℝ) : ℂ)) := by rw [hp]
       _ = ∫ t, conj (conj (fFun g t) * ((ψ t : ℝ) : ℂ)) := integral_conj.symm
       _ = ∫ t, ((ψ t : ℝ) : ℂ) * fFun g t :=
-          integral_congr_ae (Eventually.of_forall fun t => (e _ t).symm)
+          integral_congr_ae (Eventually.of_forall fun t => (e (fFun g t) t).symm)
   have hi1 : Integrable fun t => ((ψ t : ℝ) : ℂ) * hilbertL2 (g.toLp 2) t := by
     refine (MeasureTheory.L2.integrable_inner (𝕜 := ℂ) (φ.toLp 2)
       (hilbertL2 (g.toLp 2))).congr ?_
