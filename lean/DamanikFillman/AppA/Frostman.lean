@@ -14,15 +14,9 @@ I. General Theory*, GSM 221, AMS 2022.
   smaller energy than `ρ` for small `t > 0`.
 * `DF.IsEquilibriumMeasure.ae_logPotential_le` — `Φ_ρ ≤ E(ρ)` holds `ρ`-a.e.;
 * `DF.IsEquilibriumMeasure.logPotential_le_of_mem_support` — `Φ_ρ ≤ E(ρ)` on `supp ρ`;
-* `DF.IsEquilibriumMeasure.eventually_logPotential_le` — the continuity principle at points of
-  `supp ρ` (`limsup Φ_ρ ≤ E(ρ)`), proved with the nearest-point estimate;
-* `DF.IsEquilibriumMeasure.logPotential_le` — **Theorem A.2.8 (i)**: `Φ_ρ ≤ E(ρ)` on `ℂ`
-  (maximum principle for the harmonic function `Φ_ρ` off `supp ρ`);
-* `DF.capCompact_le_of_union` — a subadditivity estimate for the capacity of finite unions of
-  compact sets, and `DF.capacity_iUnion_eq_zero` — countable unions of compact sets of capacity
-  zero (inside a fixed bounded set) have capacity zero;
-* `DF.IsEquilibriumMeasure.capacity_lt_eq_zero` — **Theorem A.2.8 (ii)**;
-* `DF.frostmanStatement_holds`.
+
+The continuity principle, the maximum principle, Theorem A.2.8 (i) and (ii) and
+`DF.frostmanStatement_holds` are in `DamanikFillman/AppA/FrostmanMain.lean`.
 -/
 import DamanikFillman.AppA.Equilibrium
 import Mathlib.MeasureTheory.Measure.Support

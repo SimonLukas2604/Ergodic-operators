@@ -57,7 +57,7 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
   `equilibriumExistenceStatement_holds`);
 * `CapacityRegularityStatement` — Prop. A.2.2(e) and consistency of (A.2.1) with (A.2.2)–(A.2.3)
   (proved in `Equilibrium.lean`: `capacityRegularityStatement_holds`);
-* `FrostmanStatement` — Thm. A.2.8;
+* `FrostmanStatement` — Thm. A.2.8 (proved in `FrostmanMain.lean`: `frostmanStatement_holds`);
 * `LowerEnvelopeStatement` — Thm. A.2.9, second half (equality q.e.);
 * `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature);
 * `CapacityZeroDimStatement` — Thm. A.2.11 (cited).

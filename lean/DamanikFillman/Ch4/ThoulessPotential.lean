@@ -31,7 +31,7 @@ here in terms of `Φ_{dk} = DF.logPotential (DF.toC k)`.
 * `DF.isEquilibriumMeasure_of_logPotential_eq_zero` — **Theorem 4.6.7** in abstract form: if
   `Φ_{dk} = 0` on `Σ` (i.e. `L = 0` on `Σ`), then `dk` is the equilibrium measure of `Σ`, and
   `Cap(Σ) = 1`.  Only the first half of Frostman's theorem (`Φ_ρ ≤ E(ρ)`) is used, taken from
-  `DF.FrostmanStatement`; the book's appeal to uniqueness of equilibrium measures is replaced by
+  `DF.FrostmanStatement` (proved: `DF.isEquilibriumMeasure_of_logPotential_eq_zero'`); the book's appeal to uniqueness of equilibrium measures is replaced by
   the direct verification that `dk` minimizes the energy (uniqueness, from
   `DF.EnergyStrictConvexityStatement`, then gives `dk = ρ_Σ`: `DF.eq_equilibrium_of_...`).
 
@@ -45,6 +45,7 @@ None introduced here.  `DF.FrostmanStatement` and `DF.EnergyStrictConvexityState
 (Appendix A.2) appear as hypotheses.
 -/
 import DamanikFillman.AppA.Equilibrium
+import DamanikFillman.AppA.FrostmanMain
 import DamanikFillman.AppA.Subharmonic
 
 noncomputable section
@@ -471,5 +472,14 @@ theorem eq_of_isEquilibriumMeasure_of_logPotential_eq_zero (hFrost : FrostmanSta
     (hρ : IsEquilibriumMeasure ((fun x : ℝ => (x : ℂ)) '' S) ρ) : toC k = ρ := by
   obtain ⟨h1, h2⟩ := isEquilibriumMeasure_of_logPotential_eq_zero hFrost hS hk hL
   exact IsEquilibriumMeasure.unique hconv (isCompact_image_ofReal hS) (by rw [h2]; simp) h1 hρ
+
+/-- **Theorem 4.6.7** (abstract form), unconditional: Frostman's theorem is
+`DF.frostmanStatement_holds`. -/
+theorem isEquilibriumMeasure_of_logPotential_eq_zero' {k : Measure ℝ} [IsProbabilityMeasure k]
+    {S : Set ℝ} (hS : IsCompact S) (hk : k Sᶜ = 0)
+    (hL : ∀ x ∈ S, logPotential (toC k) (x : ℂ) = 0) :
+    IsEquilibriumMeasure ((fun x : ℝ => (x : ℂ)) '' S) (toC k) ∧
+      capCompact ((fun x : ℝ => (x : ℂ)) '' S) = 1 :=
+  isEquilibriumMeasure_of_logPotential_eq_zero frostmanStatement_holds hS hk hL
 
 end DF
