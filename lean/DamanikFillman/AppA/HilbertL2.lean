@@ -28,7 +28,7 @@ import DamanikFillman.AppA.HolderHilbert
 noncomputable section
 
 open Real Complex Set Filter Topology MeasureTheory
-open scoped ENNReal ComplexConjugate InnerProductSpace
+open scoped ComplexConjugate InnerProductSpace ContDiff
 open FourierTransform SchwartzMap
 
 namespace DF
@@ -113,7 +113,7 @@ lemma norm_mulSymb (f : Lp ℂ 2 (volume : Measure ℝ)) : ‖mulSymb f‖ = ‖
   have h : ∀ᵐ ξ ∂(volume : Measure ℝ), ‖(mulSymb f : ℝ → ℂ) ξ‖ = ‖(f : ℝ → ℂ) ξ‖ := by
     filter_upwards [coeFn_mulSymb f, symb_ae] with ξ h1 h2
     rw [h1, norm_mul, h2.1, one_mul]
-  rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_norm_ae h]
+  rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_norm_ae (Lp.aestronglyMeasurable _) (Lp.aestronglyMeasurable _) h]
 
 /-- Multiplication by `-i sgn ξ` as a unitary operator. -/
 def mulSymbₗᵢ : Lp ℂ 2 (volume : Measure ℝ) ≃ₗᵢ[ℂ] Lp ℂ 2 (volume : Measure ℝ) where
