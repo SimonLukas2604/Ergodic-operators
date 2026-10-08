@@ -219,7 +219,7 @@ lemma ae_locInt (hmp : ∀ t, MeasurePreserving (ϕ t) μ μ) {g : X → ℝ} (h
 
 /-- For an ergodic flow, measurable sets invariant up to null sets under every `ϕ_t` are null or
 conull. -/
-theorem ae_mem_or_ae_notMem (hE : FlowErgodic ϕ μ) {E : Set X} (hEm : MeasurableSet E)
+theorem ae_mem_or_ae_notMem [SFinite μ] (hE : FlowErgodic ϕ μ) {E : Set X} (hEm : MeasurableSet E)
     (hinv : ∀ t, ∀ᵐ x ∂μ, (ϕ t x ∈ E ↔ x ∈ E)) : (∀ᵐ x ∂μ, x ∈ E) ∨ (∀ᵐ x ∂μ, x ∉ E) := by
   set S : Set (X × ℝ) := {p | ϕ p.2 p.1 ∉ E} with hSdef
   have hS : MeasurableSet S := (measurable_flow ϕ hEm).compl
@@ -272,11 +272,13 @@ theorem ae_mem_or_ae_notMem (hE : FlowErgodic ϕ μ) {E : Set X} (hEm : Measurab
 
 /-- For an ergodic flow, measurable functions invariant (a.e.) under every `ϕ_t` are a.e.
 constant. -/
-theorem ae_eq_const_of_ae_invariant (hE : FlowErgodic ϕ μ) {G : X → ℝ} (hG : Measurable G)
+theorem ae_eq_const_of_ae_invariant [SFinite μ] (hE : FlowErgodic ϕ μ) {G : X → ℝ} (hG : Measurable G)
     (hinv : ∀ t, ∀ᵐ x ∂μ, G (ϕ t x) = G x) : ∃ c, ∀ᵐ x ∂μ, G x = c := by
   obtain ⟨c, hc⟩ := Filter.exists_eventuallyEq_const_of_forall_separating (l := ae μ) (f := G)
     MeasurableSet fun U hU => ae_mem_or_ae_notMem hE (hG hU) fun t =>
-      (hinv t).mono fun x hx => by simp only [mem_preimage, hx]
+      (hinv t).mono fun x hx => by
+        show G (ϕ t x) ∈ U ↔ G x ∈ U
+        rw [hx]
   exact ⟨c, hc⟩
 
 /-! ### Theorem 3.9.2 -/
@@ -341,7 +343,7 @@ theorem tendsto_of_measurable [IsProbabilityMeasure μ] (hE : FlowErgodic ϕ μ)
   obtain ⟨c, hc⟩ := ae_eq_const_of_ae_invariant hE hGm.stronglyMeasurable_mk.measurable hG'inv
   have hcG : ∀ᵐ x ∂μ, G x = c := by
     filter_upwards [hGG', hc] with x h1 h2
-    rw [h1, h2]
+    exact h1.trans h2
   -- the constant is `∫ F = ∫ g`
   have htc : ∀ᵐ x ∂μ, Tendsto (fun n => birkhoffAverage ℝ (ϕ 1) (avgF ϕ g) n x) atTop (𝓝 c) := by
     filter_upwards [hBF, hcG] with x h1 h2
@@ -379,6 +381,7 @@ theorem flowBirkhoff : FlowBirkhoffStatement := by
   have hae : ∀ᵐ x ∂μ, ∀ᵐ s ∂(volume : Measure ℝ), ϕ s x ∉ N := by
     rw [Measure.ae_ae_comm (p := fun x s => ϕ s x ∉ N) hmeas]
     refine Eventually.of_forall fun s => measure_eq_zero_iff_ae_notMem.1 ?_
+    show μ (ϕ s ⁻¹' N) = 0
     rw [(hmp s).measure_preimage hNm.nullMeasurableSet, hN0]
   filter_upwards [tendsto_of_measurable hE hg hgm, hae] with x hx hxN
   have hint : ∀ t : ℝ, ∫ s in (0 : ℝ)..t, f (ϕ s x) = ∫ s in (0 : ℝ)..t, g (ϕ s x) := by

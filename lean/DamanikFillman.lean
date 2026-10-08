@@ -60,6 +60,7 @@ import DamanikFillman.Ch3.Generic
 import DamanikFillman.Ch3.Kingman
 import DamanikFillman.Ch3.Minimal
 import DamanikFillman.Ch3.Ruelle
+import DamanikFillman.Ch3.Oseledets
 import DamanikFillman.Ch3.Schwartzman
 import DamanikFillman.Ch3.Suspension
 import DamanikFillman.Ch3.TorusErgodic
