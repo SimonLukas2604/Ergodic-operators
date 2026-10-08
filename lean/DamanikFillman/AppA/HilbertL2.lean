@@ -580,10 +580,10 @@ lemma pairing_hilbertL2 (g φ : 𝓢(ℝ, ℂ)) :
     rfl
   rw [← h1, h2, h3]
 
+set_option maxHeartbeats 1000000 in
 lemma hilbertL2_ae_eq_fFun (g : 𝓢(ℝ, ℂ)) :
-    (hilbertL2 (g.toLp 2) : ℝ → ℂ) =ᵐ[volume] fFun g := by
-  have h1 : LocallyIntegrable (hilbertL2 (g.toLp 2) : ℝ → ℂ) :=
-    (Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two
+    ∀ᵐ t ∂(volume : Measure ℝ), hilbertL2 (g.toLp 2) t = fFun g t := by
+  have h1 := (Lp.memLp (hilbertL2 (g.toLp 2))).locallyIntegrable one_le_two
   have h2 : LocallyIntegrable (fFun g) := (continuous_fFun g).locallyIntegrable
   have hloc : LocallyIntegrable (fun t => hilbertL2 (g.toLp 2) t - fFun g t) := h1.sub h2
   suffices H : ∀ ψ : ℝ → ℝ, ContDiff ℝ ∞ ψ → HasCompactSupport ψ →
