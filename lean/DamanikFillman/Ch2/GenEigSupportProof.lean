@@ -163,9 +163,10 @@ lemma lintegral_norm_sq_matDensity_le (φ ψ : H) :
     intro M
     set gM : ℝ → ℂ := (s M).indicator fun x => conj (F x) with hgM
     have hgMB : IsBddBorel gM := by
-      refine ⟨(hFm.star).indicator (hsm M), M, fun x => ?_⟩
+      refine ⟨(Complex.continuous_conj.measurable.comp hFm).indicator (hsm M), M, fun x => ?_⟩
       by_cases hx : x ∈ s M
-      · simpa [hgM, indicator_of_mem hx] using hx
+      · simp only [hgM, indicator_of_mem hx, Complex.norm_conj]
+        exact hx
       · simp [hgM, indicator_of_notMem hx]
     have hrep := inner_borelCalc_eq_integral_density (A := A) (hA := hA) hgMB φ ψ
     set I := ∫ x in s M, ‖F x‖ ^ 2 ∂μ with hI
@@ -197,7 +198,9 @@ lemma lintegral_norm_sq_matDensity_le (φ ψ : H) :
   have hmono : Monotone fun M : ℕ => (s M).indicator fun x => ‖F x‖ₑ ^ 2 := by
     intro M N hMN x
     by_cases hx : x ∈ s M
-    · have hxN : x ∈ s N := le_trans hx (by exact_mod_cast hMN)
+    · have hxN : x ∈ s N := by
+        show ‖F x‖ ≤ (N : ℝ)
+        exact le_trans hx (by exact_mod_cast hMN)
       simp [indicator_of_mem hx, indicator_of_mem hxN]
     · simp [indicator_of_notMem hx]
   have hsup : (fun x => ‖F x‖ₑ ^ 2) =
@@ -245,13 +248,14 @@ lemma integrable_eigDensity (hV : BddPot V) (b n : ℤ) :
 
 /-- `F_b = 1` a.e. -/
 lemma eigDensity_self_ae (hV : BddPot V) (b : ℤ) : ∀ᵐ x ∂(muB hV b), eigDensity hV b b x = 1 := by
-  have h := ae_eq_zero_of_forall_integral_mul ((integrable_eigDensity hV b b).sub
-    (integrable_const (1 : ℂ))) fun g hg => by
+  have hI : Integrable (fun x => eigDensity hV b b x - 1) (muB hV b) :=
+    (integrable_eigDensity hV b b).sub (integrable_const (1 : ℂ))
+  have h := ae_eq_zero_of_forall_integral_mul hI fun g hg => by
     have h1 := eigDensity_rep hV b b hg
     rw [inner_borelCalc_self hg] at h1
-    have e : (fun x => g x * (eigDensity hV b b - fun _ => (1 : ℂ)) x) =
+    have e : (fun x => g x * (eigDensity hV b b x - 1)) =
         fun x => g x * eigDensity hV b b x - g x := by
-      funext x; simp only [Pi.sub_apply]; ring
+      funext x; ring
     rw [e, integral_sub ((integrable_eigDensity hV b b).bdd_mul hg.meas.aestronglyMeasurable
       (Eventually.of_forall (hg.bdd.choose_spec))) (hg.integrable _), ← h1, sub_self]
   filter_upwards [h] with x hx
@@ -274,8 +278,7 @@ lemma eigDensity_eq_ae (hV : BddPot V) (b n : ℤ) :
     have hsym : ⟪schr V (dlt n), borelCalc (schr V) hH g (dlt b)⟫_ℂ =
         ⟪dlt n, borelCalc (schr V) hH (truncId (schr V) * g) (dlt b)⟫_ℂ := by
       rw [borelCalc_mul isBddBorel_truncId hg, borelCalc_truncId, ContinuousLinearMap.mul_apply]
-      conv_lhs => rw [← hH.adjoint_eq]
-      rw [ContinuousLinearMap.adjoint_inner_left]
+      exact hH.isSymmetric _ _
     rw [schr_dlt hV, inner_add_left, inner_add_left, inner_smul_left, Complex.conj_ofReal,
       eigDensity_rep hV b _ hg, eigDensity_rep hV b _ hg, eigDensity_rep hV b _ hg,
       eigDensity_rep hV b _ (isBddBorel_truncId.mul hg)] at hsym
@@ -331,8 +334,7 @@ lemma summable_weight {δ : ℝ} (hδ : 1 / 2 < δ) :
       fun n hn => by simp only [Finset.mem_singleton] at hn; simp [hn])
   refine hg.of_nonneg_of_le (fun n => by positivity) fun n => ?_
   rcases eq_or_ne n 0 with rfl | hn
-  · simp only [Int.cast_zero, abs_zero, add_zero, Real.one_rpow]
-    rw [if_pos rfl]
+  · simp only [Int.cast_zero, abs_zero, add_zero, Real.one_rpow, eq_self_iff_true, if_true]
     have : (0 : ℝ) ≤ (0 : ℝ) ^ (-(2 * δ)) := Real.rpow_nonneg le_rfl _
     linarith
   · rw [if_neg hn, add_zero]
@@ -342,17 +344,19 @@ lemma summable_weight {δ : ℝ} (hδ : 1 / 2 < δ) :
 /-- **Theorem 2.4.2 (b)**, for the base vector `δ_b`: `μ_b`-a.e. `E` is a generalized eigenvalue
 with exponent `δ`. -/
 theorem ae_mem_genEigSet (hV : BddPot V) (b : ℤ) {δ : ℝ} (hδ : 1 / 2 < δ) :
-    ∀ᵐ x ∂(muB hV b), (x : ℂ) ∈ genEigSet V δ := by
+    ∀ᵐ x : ℝ ∂(muB hV b), ((x : ℝ) : ℂ) ∈ genEigSet V δ := by
   set w : ℤ → ℝ≥0∞ := fun n => ENNReal.ofReal ((1 + |(n : ℝ)|) ^ (-(2 * δ)))
   set F := eigDensity hV b
   -- `∑ wₙ |Fₙ|²` is integrable, hence finite a.e.
+  have hFm2 : ∀ n, Measurable fun x => ‖F n x‖ₑ ^ 2 := fun n =>
+    (measurable_matDensity _ _).enorm.pow_const 2
   have hmeas : ∀ n, Measurable fun x => w n * ‖F n x‖ₑ ^ 2 := fun n =>
-    measurable_const.mul ((measurable_matDensity _ _).enorm.pow_const 2)
+    measurable_const.mul (hFm2 n)
   have hfin : ∫⁻ x, ∑' n, w n * ‖F n x‖ₑ ^ 2 ∂(muB hV b) < ∞ := by
     rw [lintegral_tsum fun n => (hmeas n).aemeasurable]
     calc ∑' n, ∫⁻ x, w n * ‖F n x‖ₑ ^ 2 ∂(muB hV b)
         ≤ ∑' n, w n := ENNReal.tsum_le_tsum fun n => by
-          rw [lintegral_const_mul _ ((measurable_matDensity _ _).enorm.pow_const 2)]
+          rw [lintegral_const_mul _ (hFm2 n)]
           calc w n * ∫⁻ x, ‖F n x‖ₑ ^ 2 ∂(muB hV b) ≤ w n * 1 :=
                 mul_le_mul_left' (lintegral_eigDensity_le hV b n) _
             _ = w n := mul_one _
@@ -411,11 +415,8 @@ theorem genEigSupport (hV : BddPot V) : GenEigSupportStatement V hV := by
   have h0 := ae_mem_genEigSet hV 0 hδ
   have h1 := ae_mem_genEigSet hV 1 hδ
   rw [ae_iff] at h0 h1
-  simp only [canonicalMeasure, Measure.add_apply]
-  rw [show (spectralMeasure (schr V) (isSelfAdjoint_schr hV) (dlt 0))
-      {E : ℝ | (E : ℂ) ∉ genEigSet V δ} = 0 from h0,
-    show (spectralMeasure (schr V) (isSelfAdjoint_schr hV) (dlt 1))
-      {E : ℝ | (E : ℂ) ∉ genEigSet V δ} = 0 from h1, add_zero]
+  rw [canonicalMeasure, Measure.add_apply]
+  exact add_eq_zero.2 ⟨h0, h1⟩
 
 /-- **Theorem 2.4.2 (c)**, unconditionally: `σ(H) = closure G`. -/
 theorem spectrum_eq_closure_genEig' (hV : BddPot V) :
