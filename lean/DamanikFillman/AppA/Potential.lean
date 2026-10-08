@@ -61,7 +61,8 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
 * `FrostmanStatement` — Thm. A.2.8 (proved in `FrostmanMain.lean`: `frostmanStatement_holds`);
 * `LowerEnvelopeStatement` — Thm. A.2.9, second half (equality q.e.);
 * `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature);
-* `CapacityZeroDimStatement` — Thm. A.2.11 (cited).
+* `CapacityZeroDimStatement` — Thm. A.2.11 (cited; proved in `CapacityDim.lean` via Frostman's lemma:
+  `capacityZeroDimStatement_holds`).
 -/
 import DamanikFillman.AppA.Subharmonic
 import Mathlib.MeasureTheory.Integral.Prod
