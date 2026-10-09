@@ -95,7 +95,7 @@ lemma hasCompactSupport_moll {r : ℝ} (hr : 0 < r) : HasCompactSupport (moll r)
 
 lemma integral_moll {r : ℝ} (hr : 0 < r) : ∫ z, moll r z = 1 := by
   unfold moll
-  rw [integral_const_mul, integral_comp_inv_smul_of_nonneg volume bump0 hr.le,
+  rw [integral_const_mul, Measure.integral_comp_inv_smul_of_nonneg volume bump0 hr.le,
     Complex.finrank_real_complex, smul_eq_mul]
   change (bumpMass * r ^ 2)⁻¹ * (r ^ 2 * bumpMass) = 1
   have := bumpMass_pos.ne'
