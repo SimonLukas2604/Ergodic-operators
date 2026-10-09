@@ -23,7 +23,7 @@ import DamanikFillman.AppA.ContinuousPotential
 noncomputable section
 
 open Real Complex Metric Set Filter Topology MeasureTheory
-open scoped ENNReal
+open scoped ENNReal BoundedContinuousFunction
 
 namespace DF
 
@@ -114,7 +114,8 @@ theorem capCompact_eq_zero_of_subset_exceptional {K : Set ℂ} (hK : IsCompact K
         ENNReal.ofReal (∫ w, f w ∂ρ + c) := by
     intro ρ _ hρ hρM
     have hρa := integrable_norm_of_compact hK hρ
-    rw [lintegral_iSup (fun N => ENNReal.measurable_ofReal.comp
+    rw [lintegral_iSup (f := fun N z => ENNReal.ofReal (potT ρ N z + c))
+      (fun N => ENNReal.measurable_ofReal.comp
         ((continuous_potTrunc hρa N).add continuous_const).measurable)
       (fun m n hmn z => ENNReal.ofReal_le_ofReal (by
         have := potTrunc_mono hρa z hmn
