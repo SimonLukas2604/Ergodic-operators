@@ -11,6 +11,7 @@ import DamanikFillman.AppA.ContinuousPotential
 import DamanikFillman.AppA.LowerEnvelope
 import DamanikFillman.AppA.Distributional
 import DamanikFillman.AppA.RieszLaplacian
+import DamanikFillman.AppA.Radial
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Subharmonic
 import DamanikFillman.Basic
