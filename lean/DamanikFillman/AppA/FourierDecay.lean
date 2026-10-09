@@ -20,7 +20,8 @@ I. General Theory*, GSM 221, AMS 2022.
 
 ## Statements (recorded, not proved)
 
-* `RieszRepresentationStatement` — Theorem A.3.2 (cited by the book);
+* `RieszRepresentationStatement` — Theorem A.3.2 (cited by the book); proved as
+  `DF.rieszRepresentationStatement_holds` in `DamanikFillman/AppA/RieszRepresentation.lean`;
 * `RieszMeasureBoundStatement` — Theorem A.3.4 (cited by the book);
 * `SubharmonicFourierDecayStatement` — Theorem A.3.1 (its proof combines A.3.2, A.3.4,
   Lemma A.3.5 and Cauchy estimates for harmonic functions).
