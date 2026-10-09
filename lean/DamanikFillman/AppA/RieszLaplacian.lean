@@ -58,7 +58,8 @@ theorem integral_log_sub_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 
 /-- The translated local integrable majorant of `|log |z - w||`. -/
 lemma integrable_indicator_log (ρ : ℝ) (w : ℂ) :
     Integrable (fun z => (ball (0 : ℂ) ρ).indicator (fun y => ‖Real.log ‖y‖‖) (z - w)) :=
-  ((integrableOn_log_norm ρ).norm.integrable_indicator measurableSet_ball).comp_sub_right w
+  (IntegrableOn.integrable_indicator (f := fun y : ℂ => ‖Real.log ‖y‖‖)
+    (integrableOn_log_norm ρ).norm measurableSet_ball).comp_sub_right w
 
 lemma norm_log_mul_le {g : ℂ → ℝ} {S R M : ℝ} (hgM : ∀ z, ‖g z‖ ≤ M)
     (hgR : ∀ z, R < ‖z‖ → g z = 0) {w : ℂ} (hw : ‖w‖ ≤ S) (z : ℂ) :
@@ -107,7 +108,6 @@ theorem integrable_prod_log {μ : Measure ℂ} [IsFiniteMeasure μ] {S R M : ℝ
   refine ⟨hae.mono fun w hw => hint w (by simpa using hw), ?_⟩
   refine (integrable_const (M * C0)).mono' hmeas.norm.integral_prod_right' ?_
   filter_upwards [hae] with w hw
-  beta_reduce
   rw [Real.norm_of_nonneg (integral_nonneg fun _ => norm_nonneg _)]
   exact hbound w (by simpa using hw)
 
@@ -194,7 +194,7 @@ theorem integrableOn_logPotential {μ : Measure ℂ} [IsFiniteMeasure μ] {S : �
   have hI := integrable_prod_log hμS hgm hgM hgR
   have hμ := integrable_norm_of_bounded hμS
   -- the inner integrals give an integrable function
-  have hJ : Integrable (fun z => ∫ w, Real.log ‖z - w‖ * g z ∂μ) := hI.integral_prod_left
+  have hJ : Integrable (fun z => ∫ w, Real.log ‖z - w‖ * g z ∂μ) := hI.integral_prod_right
   rw [← integrable_indicator_iff measurableSet_closedBall]
   refine hJ.neg.congr ?_
   filter_upwards [ae_measure_singleton_eq_zero μ, hI.prod_left_ae] with z hz hzi
