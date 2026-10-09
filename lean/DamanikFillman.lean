@@ -7,6 +7,7 @@ import DamanikFillman.AppA.Frostman
 import DamanikFillman.AppA.FrostmanMain
 import DamanikFillman.AppA.EnergyConvexity
 import DamanikFillman.AppA.CapacityDim
+import DamanikFillman.AppA.ContinuousPotential
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Subharmonic
 import DamanikFillman.Basic
