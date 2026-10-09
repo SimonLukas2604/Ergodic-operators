@@ -60,7 +60,12 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
   (proved in `Equilibrium.lean`: `capacityRegularityStatement_holds`);
 * `FrostmanStatement` — Thm. A.2.8 (proved in `FrostmanMain.lean`: `frostmanStatement_holds`);
 * `LowerEnvelopeStatement` — Thm. A.2.9, second half (equality q.e.);
-* `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature);
+* `ContinuousPotentialStatement` — Lemma A.2.10 (the book cites the literature).
+  Both are derived in `LowerEnvelope.lean` from `CapacitabilityStatement` (Choquet
+  capacitability of Borel sets), via the inner forms proved there and in
+  `ContinuousPotential.lean` (`capCompact_eq_zero_of_subset_exceptional`,
+  `exists_continuous_potential_of_compact`, the continuity principle
+  `continuous_logPotential_of_carrier`);
 * `CapacityZeroDimStatement` — Thm. A.2.11 (cited; proved in `CapacityDim.lean` via Frostman's lemma:
   `capacityZeroDimStatement_holds`).
 -/
