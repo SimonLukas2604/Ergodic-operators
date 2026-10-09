@@ -141,7 +141,7 @@ theorem norm_circleCoeff_logPotential_le {μ : Measure ℂ} [IsFiniteMeasure μ]
     rw [integral_const_mul, integral_complex_ofReal]
     push_cast
     ring
-  have hJ : Integrable (fun t => ∫ w, F (w, t) ∂μ) ν := hFint.integral_prod_left
+  have hJ : Integrable (fun t => ∫ w, F (w, t) ∂μ) ν := hFint.integral_prod_right
   have hII : Integrable (fun t => ex (-(k * t)) * ((logPotential μ (ex t)).toReal : ℂ)) ν :=
     hJ.neg.congr (hpt.mono fun t ht => ht.symm)
   refine ⟨(intervalIntegrable_iff_integrableOn_Ioc_of_le zero_le_one).2 hII, ?_⟩
@@ -289,7 +289,9 @@ theorem subharmonicFourierDecayStatement_holds : SubharmonicFourierDecayStatemen
   set r : ℝ := ρ / 12 with hr_def
   have hr : 0 < r := by positivity
   set K : ℝ := ∫ x, |Dv (moll r) 1 x| + ∫ x, |Dv (moll r) I x| with hK
-  have hK0 : 0 ≤ K := add_nonneg (integral_nonneg fun _ => abs_nonneg _)
+  have hK0 : 0 ≤ K := by
+    rw [hK]
+    exact add_nonneg (integral_nonneg fun _ => abs_nonneg _)
     (integral_nonneg fun _ => abs_nonneg _)
   refine ⟨|C'| * K + |C'| / 2, fun u M hu hM k hk => ?_⟩
   have hM0 : 0 ≤ M := (abs_nonneg _).trans (hM 1 (by
