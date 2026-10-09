@@ -116,7 +116,8 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
           exact lt_of_lt_of_le ht.2 hρδ.le
         calc ‖fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e) - fderiv ℝ (fderiv ℝ φ) z‖
             = dist (fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e)) (fderiv ℝ (fderiv ℝ φ) z) :=
-              (dist_eq_norm _ _).symm
+              (dist_eq_norm (fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e))
+                (fderiv ℝ (fderiv ℝ φ) z)).symm
           _ ≤ ε := hlt.le)
     intro t ht
     have h := this t ht
