@@ -47,7 +47,7 @@ lemma norm_le_of_line {f : ℂ → ℂ} (hf : DifferentiableOn ℂ f {z | 0 < z.
     simp only [mem_setOf_eq] at hw ⊢
     linarith
   have hexp : ∃ c < (2 : ℝ), ∃ B,
-      g =O[cobounded ℂ ⊓ 𝓟 {w | 0 < w.re}] fun w => Real.exp (B * ‖w‖ ^ c) := by
+      g =O[Bornology.cobounded ℂ ⊓ 𝓟 {w | 0 < w.re}] fun w => Real.exp (B * ‖w‖ ^ c) := by
     refine ⟨1, by norm_num, 0, Asymptotics.IsBigO.of_bound M ?_⟩
     refine eventually_inf_principal.2 (Eventually.of_forall fun w hw => ?_)
     simp only [zero_mul, Real.exp_zero, norm_one, mul_one]
@@ -289,7 +289,7 @@ theorem eq_zero_of_tendsto {H : ℂ → ℂ} (hH : DifferentiableOn ℂ H {z | 0
             refine ⟨?_, by simp; linarith⟩
             rw [mem_closedBall, dist_zero_right]
             refine (norm_point_le t (η + δ)).trans ?_
-            rw [abs_of_pos (by linarith [hδ.1])]; linarith
+            rw [abs_of_pos (show (0 : ℝ) < η + δ by linarith [hδ.1])]; linarith
           have hd : dist ((t : ℂ) + δ * I) ((t : ℂ) + ((η + δ : ℝ) : ℂ) * I) < η1 := by
             rw [dist_eq_norm]
             have e2 : (t : ℂ) + δ * I - ((t : ℂ) + ((η + δ : ℝ) : ℂ) * I) =
@@ -320,7 +320,7 @@ theorem eq_zero_of_tendsto {H : ℂ → ℂ} (hH : DifferentiableOn ℂ H {z | 0
           have hfar : ∀ t' ∈ J0, r ≤ |t' - t| := by
             intro t' ht'
             by_contra hlt
-            push_neg at hlt
+            push Not at hlt
             exact ht (mem_thickening_iff.2 ⟨t', ht', by rw [Real.dist_eq, abs_sub_comm]; exact hlt⟩)
           have hW := im_le_far hJ0fin hJ0m t hη hr hfar
           have hpos : 0 < ((t : ℂ) + ((η + δ : ℝ) : ℂ) * I).im := by
@@ -334,7 +334,7 @@ theorem eq_zero_of_tendsto {H : ℂ → ℂ} (hH : DifferentiableOn ℂ H {z | 0
             (𝓝 M') := by
           have : Continuous fun η : ℝ => M' * Real.exp (k * (vJ * η / r ^ 2)) := by fun_prop
           simpa using (this.tendsto 0).mono_left nhdsWithin_le_nhds
-        refine le_of_tendsto hlimη ?_
+        refine ge_of_tendsto hlimη ?_
         filter_upwards [Ioo_mem_nhdsGT (lt_min (lt_min hη1 one_pos) hz)] with η hη
         have h1 : η < η1 := lt_of_lt_of_le hη.2 ((min_le_left _ _).trans (min_le_left _ _))
         have h2 : η ≤ 1 := (lt_of_lt_of_le hη.2 ((min_le_left _ _).trans (min_le_right _ _))).le
