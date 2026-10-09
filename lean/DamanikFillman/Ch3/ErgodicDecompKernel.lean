@@ -35,6 +35,8 @@ open Birkhoff
 
 variable {X : Type*} [MetricSpace X] [CompactSpace X] [MeasurableSpace X] [BorelSpace X]
 
+attribute [local instance] Classical.propDecidable
+
 /-! ### Birkhoff averages of continuous functions -/
 
 lemma birkhoffAverage_sub' (S : X → X) (f g : X → ℝ) (n : ℕ) (x : X) :
@@ -59,7 +61,7 @@ lemma abs_birkhoffAverage_le (S : X → X) (f : C(X, ℝ)) (n : ℕ) (x : X) :
 lemma measurable_birkhoffAverage {S : X → X} (hS : Measurable S) {f : X → ℝ}
     (hf : Measurable f) (n : ℕ) : Measurable (birkhoffAverage ℝ S f n) := by
   unfold birkhoffAverage
-  exact (measurable_birkhoffSum hS hf n).const_smul _
+  exact (measurable_birkhoffSum hS hf n).const_smul ((n : ℝ)⁻¹)
 
 lemma measurable_birkhoffLimit {S : X → X} (hS : Measurable S) {f : X → ℝ}
     (hf : Measurable f) : Measurable (birkhoffLimit S f) :=
@@ -143,7 +145,7 @@ instance (S : X → X) (n : ℕ) (x : X) : IsProbabilityMeasure (emp S n x) := �
 
 lemma integral_emp (S : X → X) (n : ℕ) (x : X) (f : C(X, ℝ)) :
     ∫ y, f y ∂(emp S n x) = birkhoffAverage ℝ S f (n + 1) x := by
-  rw [emp, integral_smul_measure, integral_finset_sum_measure
+  rw [emp, integral_smul_measure, integral_finsetSum_measure
     (fun i _ => integrable_cont _ f)]
   simp only [integral_dirac]
   have h : ((n : ℝ≥0∞) + 1).toReal = (n : ℝ) + 1 := by
@@ -183,6 +185,8 @@ lemma exists_tendsto_empP {S : X → X} {x : X} (hx : x ∈ G S) :
   refine ⟨ms, ?_⟩
   have hν'' := hint ν' (ns ∘ ms) (hns.comp hms.tendsto_atTop) hν'
   have hνν : ν' = ν := by
+    have := ν.2
+    have := ν'.2
     apply Subtype.ext
     apply ext_of_forall_integral_eq_of_IsFiniteMeasure
     intro f
@@ -192,10 +196,10 @@ lemma exists_tendsto_empP {S : X → X} {x : X} (hx : x ∈ G S) :
   rw [← hνν]
   exact hν'
 
-open Classical in
 /-- The ergodic decomposition kernel `E(x)`. -/
 def E (S : X → X) (x : X) : ProbabilityMeasure X :=
-  if hx : x ∈ G S then (exists_tendsto_empP hx).choose else ⟨Measure.dirac x, inferInstance⟩
+  if hx : x ∈ G S then (exists_tendsto_empP hx).choose
+  else (⟨Measure.dirac x, inferInstance⟩ : ProbabilityMeasure X)
 
 lemma integral_E {S : X → X} {x : X} (hx : x ∈ G S) (f : C(X, ℝ)) :
     ∫ y, f y ∂(E S x : Measure X) = birkhoffLimit S f x := by
@@ -223,7 +227,7 @@ lemma measurable_E {S : X → X} (hS : Measurable S) : Measurable (E S) := by
     rw [heq]
     exact Measurable.ite hG (ENNReal.measurable_ofReal.comp
       (measurable_birkhoffLimit hS g'.continuous.measurable))
-      (ENNReal.measurable_coe_nnreal_ennreal.comp g.continuous.measurable)
+      (measurable_coe_nnreal_ennreal.comp g.continuous.measurable)
   -- closed sets
   have hclosed : ∀ F : Set X, IsClosed F → Measurable fun x => (E S x : Measure X) F := by
     intro F hF
@@ -299,6 +303,8 @@ lemma birkhoffLimit_comp {S : X → X} {x : X} (hx : x ∈ G S) (f : C(X, ℝ)) 
 
 lemma ProbabilityMeasure.ext_integral {ν ν' : ProbabilityMeasure X}
     (h : ∀ f : C(X, ℝ), ∫ y, f y ∂(ν : Measure X) = ∫ y, f y ∂(ν' : Measure X)) : ν = ν' := by
+  have := ν.2
+  have := ν'.2
   apply Subtype.ext
   apply ext_of_forall_integral_eq_of_IsFiniteMeasure
   intro f
@@ -311,8 +317,9 @@ lemma E_comp {S : X → X} {x : X} (hx : x ∈ G S) : E S (S x) = E S x :=
 /-- `E(x)` is `S`-invariant. -/
 lemma map_E {S : X → X} (hS : Continuous S) {x : X} (hx : x ∈ G S) :
     (E S x : Measure X).map S = E S x := by
+  have := (E S x).2
   have : IsProbabilityMeasure ((E S x : Measure X).map S) :=
-    isProbabilityMeasure_map hS.measurable.aemeasurable
+    (Measure.isProbabilityMeasure_map_iff hS.measurable.aemeasurable).2 inferInstance
   refine ext_of_forall_integral_eq_of_IsFiniteMeasure fun f => ?_
   rw [integral_map hS.measurable.aemeasurable f.continuous.aestronglyMeasurable]
   set g : C(X, ℝ) := f.toContinuousMap.comp ⟨S, hS⟩ with hg
@@ -328,7 +335,6 @@ lemma map_E {S : X → X} (hS : Continuous S) {x : X} (hx : x ∈ G S) :
     congr 1
     refine Finset.sum_congr rfl fun k _ => ?_
     rw [← Function.iterate_succ_apply' S k x, Function.iterate_succ_apply]
-    rfl
   have hlim := (tendsto_comp_iff f.toContinuousMap x _).2
     (tendsto_birkhoffLimit hx f.toContinuousMap)
   have hg' : Tendsto (fun n => birkhoffAverage ℝ S g n x) atTop
