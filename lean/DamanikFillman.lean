@@ -14,6 +14,7 @@ import DamanikFillman.AppA.RieszLaplacian
 import DamanikFillman.AppA.Radial
 import DamanikFillman.AppA.Mollifier
 import DamanikFillman.AppA.Weyl
+import DamanikFillman.AppA.SubharmonicLocal
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Subharmonic
 import DamanikFillman.Basic
