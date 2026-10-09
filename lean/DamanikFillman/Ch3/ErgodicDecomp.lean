@@ -98,8 +98,10 @@ lemma ae_eq_const_of_sq {ν : Measure X} [IsProbabilityMeasure ν] {v : X → �
   have hi3 : Integrable (fun x => (v x - a) ^ 2) ν := by
     rw [e]; exact (hi2.sub (hi.const_mul _)).add (integrable_const _)
   have hint : ∫ x, (v x - a) ^ 2 ∂ν = 0 := by
-    rw [e, integral_add (hi2.sub (hi.const_mul _)) (integrable_const _),
-      integral_sub hi2 (hi.const_mul _), integral_const_mul, integral_const, h]
+    have i2 : Integrable (fun x => 2 * a * v x) ν := hi.const_mul _
+    have i1 : Integrable (fun x => v x ^ 2 - 2 * a * v x) ν := hi2.sub i2
+    rw [e, integral_add i1 (integrable_const _), integral_sub hi2 i2, integral_const_mul,
+      integral_const, h]
     simp only [probReal_univ, one_smul]
     ring
   have hnn : (0 : X → ℝ) ≤ fun x => (v x - a) ^ 2 := fun x => sq_nonneg _

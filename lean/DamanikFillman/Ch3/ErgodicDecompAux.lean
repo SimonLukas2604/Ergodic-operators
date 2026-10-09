@@ -102,10 +102,10 @@ lemma integral_mul_birkhoffAverage {S : X → X} {μ : Measure X} [IsFiniteMeasu
       exact mul_le_mul (hψb x) (hgb _) (abs_nonneg _) ((abs_nonneg _).trans (hψb x))
   have hk : ∀ k, ∫ x, ψ x * g (S^[k] x) ∂μ = ∫ x, ψ x * g x ∂μ := by
     intro k
-    have := integral_comp_iterate hμ (hψm.mul hgm) k
-    rw [← this]
-    refine integral_congr_ae (Eventually.of_forall fun x => ?_)
-    simp only [iterate_invariant hψ k x]
+    calc ∫ x, ψ x * g (S^[k] x) ∂μ = ∫ x, (fun x => ψ x * g x) (S^[k] x) ∂μ := by
+          simp only [iterate_invariant hψ k]
+      _ = ∫ x, (fun x => ψ x * g x) x ∂μ :=
+          integral_comp_iterate hμ (g := fun x => ψ x * g x) (hψm.mul hgm) k
   have hn' : (n : ℝ) ≠ 0 := by exact_mod_cast hn.ne'
   calc ∫ x, ψ x * birkhoffAverage ℝ S g n x ∂μ
       = ∫ x, (n : ℝ)⁻¹ * ∑ k ∈ Finset.range n, ψ x * g (S^[k] x) ∂μ := by
@@ -125,14 +125,15 @@ lemma integral_mul_fstar {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ
     (hψb : ∀ x, |ψ x| ≤ c) (hψ : ∀ x, ψ (S x) = ψ x) (f : C(X, ℝ)) :
     ∫ x, ψ x * fstar S f x ∂μ = ∫ x, ψ x * f x ∂μ := by
   have hS := hμ.measurable
-  have hc : 0 ≤ c := (abs_nonneg _).trans (hψb (Classical.arbitrary X))
+  have hψb2 : ∀ x, |ψ x| ≤ max c 0 := fun x => (hψb x).trans (le_max_left _ _)
+  have hc : (0 : ℝ) ≤ max c 0 := le_max_right _ _
   have hlim : Tendsto (fun n => ∫ x, ψ x * birkhoffAverage ℝ S f n x ∂μ) atTop
       (𝓝 (∫ x, ψ x * fstar S f x ∂μ)) := by
-    refine tendsto_integral_of_dominated_convergence (fun _ => c * ‖f‖) (fun n => ?_)
+    refine tendsto_integral_of_dominated_convergence (fun _ => max c 0 * ‖f‖) (fun n => ?_)
       (integrable_const _) (fun n => Eventually.of_forall fun x => ?_) ?_
     · exact (hψm.mul (measurable_birkhoffAverage hS f.continuous.measurable n)).aestronglyMeasurable
     · rw [Real.norm_eq_abs, abs_mul]
-      exact mul_le_mul (hψb x) (abs_birkhoffAverage_le S f n x) (abs_nonneg _) hc
+      exact mul_le_mul (hψb2 x) (abs_birkhoffAverage_le S f n x) (abs_nonneg _) hc
     · filter_upwards [ae_mem_G hμ] with x hx
       have := (tendsto_birkhoffLimit hx f).const_mul (ψ x)
       rwa [fstar, if_pos hx]
@@ -173,8 +174,8 @@ lemma bind_withDensity {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ]
   refine ext_of_forall_lintegral_eq_of_IsFiniteMeasure fun g => ?_
   have hgm : Measurable fun y => (g y : ℝ≥0∞) :=
     measurable_coe_nnreal_ennreal.comp g.continuous.measurable
-  set g' : C(X, ℝ) := ⟨fun y => (g y : ℝ), NNReal.continuous_coe.comp g.continuous⟩ with hg'
-  have hg'0 : ∀ y, 0 ≤ g' y := fun y => (g y).2
+  set g' : C(X, ℝ) := nnC g with hg'
+  have hg'0 : ∀ y, 0 ≤ g' y := fun y => NNReal.coe_nonneg (g y)
   have hg'b : ∀ y, |g' y| ≤ ‖g'‖ := fun y => by
     rw [← Real.norm_eq_abs]; exact g'.norm_coe_le_norm y
   rw [Measure.lintegral_bind hEm.aemeasurable hgm.aemeasurable,
@@ -186,14 +187,10 @@ lemma bind_withDensity {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ]
     filter_upwards [ae_mem_G hμ] with x hx
     have := (E S x).2
     simp only [Pi.mul_apply]
-    rw [← integral_E_eq_fstar hx g', ← BoundedContinuousFunction.toReal_lintegral_coe_eq_integral g,
-      ENNReal.ofReal_toReal (lintegral_lt_top_of_nnreal _ g).ne,
-      ENNReal.ofReal_mul (hψ0 x)]
-    congr 1
-    exact (ENNReal.ofReal_toReal (lintegral_lt_top_of_nnreal _ g).ne).symm
+    rw [← integral_E_eq_fstar hx g', ENNReal.ofReal_mul (hψ0 x), hg', lintegral_nnreal_eq]
   have hR : ∀ x, ((fun x => ENNReal.ofReal (ψ x)) * fun y => (g y : ℝ≥0∞)) x =
       ENNReal.ofReal (ψ x * g' x) := fun x => by
-    simp only [Pi.mul_apply, hg', ContinuousMap.coe_mk]
+    simp only [Pi.mul_apply, hg', nnC, ContinuousMap.coe_mk]
     rw [ENNReal.ofReal_mul (hψ0 x), ENNReal.ofReal_coe_nnreal]
   rw [lintegral_congr_ae hL, lintegral_congr (fun x => hR x),
     ← ofReal_integral_eq_lintegral_ofReal, ← ofReal_integral_eq_lintegral_ofReal,
@@ -217,7 +214,6 @@ lemma lintegral_mul_lintegral_E {S : X → X} {μ : Measure X} [IsProbabilityMea
   have hS := hμ.measurable
   have hψm' : Measurable fun x => ENNReal.ofReal (ψ x) := ENNReal.measurable_ofReal.comp hψm
   have h := congrArg (fun m : Measure X => ∫⁻ y, φ y ∂m) (bind_withDensity hμ hψm hψ0 hψb hψ)
-  simp only at h
   rw [Measure.lintegral_bind (measurable_E_coe hS).aemeasurable hφ.aemeasurable,
     lintegral_withDensity_eq_lintegral_mul _ hψm' (measurable_lintegral_E hS hφ),
     lintegral_withDensity_eq_lintegral_mul _ hψm' hφ] at h
@@ -345,8 +341,9 @@ theorem ae_ae_fstar_eq {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ]
   have hvar : ∫ y, (u y - u x) ^ 2 ∂(E S x : Measure X) = 0 := by
     have e : (fun y => (u y - u x) ^ 2) = fun y => u y ^ 2 - 2 * u x * u y + u x ^ 2 := by
       funext y; ring
-    rw [e, integral_add (hi2.sub (hi1.const_mul _)) (integrable_const _),
-      integral_sub hi2 (hi1.const_mul _), integral_const_mul, hx2, hx1]
+    have i2 : Integrable (fun y => 2 * u x * u y) (E S x : Measure X) := hi1.const_mul _
+    have i1 : Integrable (fun y => u y ^ 2 - 2 * u x * u y) (E S x : Measure X) := hi2.sub i2
+    rw [e, integral_add i1 (integrable_const _), integral_sub hi2 i2, integral_const_mul, hx2, hx1]
     simp only [integral_const, measureReal_univ_eq_one, one_smul]
     ring
   have hz := (integral_eq_zero_iff_of_nonneg (fun y => sq_nonneg (u y - u x))
@@ -459,7 +456,7 @@ dense sequence of continuous functions are a.e. constant is ergodic. -/
 theorem ergodic_of_fstar_const {S : X → X} {ν : Measure X} [IsProbabilityMeasure ν]
     (hν : MeasurePreserving S ν ν) {D : ℕ → C(X, ℝ)} (hD : DenseRange D)
     (hc : ∀ i, ∃ c, ∀ᵐ y ∂ν, fstar S (D i) y = c) : Ergodic S ν := by
-  refine ⟨hν, ⟨fun A hA hAinv => ?_⟩⟩
+  refine Ergodic.of_preimage_eq hν fun A hA hAinv => ?_
   -- `ν(A) (1 - ν(A))`-type quantity is arbitrarily small
   have hsmall : ∀ ε > (0 : ℝ), min (ν.real A) (ν.real Aᶜ) ≤ 3 * ε := by
     intro ε hε
@@ -520,10 +517,11 @@ theorem ergodic_of_fstar_const {S : X → X} {ν : Measure X} [IsProbabilityMeas
     have := hsmall (ε / 3) (by positivity)
     linarith
   rcases min_eq_iff.1 hmin with ⟨h, -⟩ | ⟨h, -⟩
-  · left
-    exact (measureReal_eq_zero_iff (measure_ne_top ν A)).1 h
-  · right
-    exact (measureReal_eq_zero_iff (measure_ne_top ν Aᶜ)).1 h
+  · refine eventuallyEmptyOrUniv_iff.2 (Or.inr ?_)
+    exact measure_eq_zero_iff_ae_notMem.1 ((measureReal_eq_zero_iff (measure_ne_top ν A)).1 h)
+  · refine eventuallyEmptyOrUniv_iff.2 (Or.inl ?_)
+    exact (measure_eq_zero_iff_ae_notMem.1
+      ((measureReal_eq_zero_iff (measure_ne_top ν Aᶜ)).1 h)).mono fun x hx => not_not.1 hx
 
 /-! ### Generic points of ergodic measures -/
 
