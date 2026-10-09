@@ -186,7 +186,7 @@ lemma bind_withDensity {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ]
     filter_upwards [ae_mem_G hμ] with x hx
     have := (E S x).2
     simp only [Pi.mul_apply]
-    rw [← integral_E_eq_fstar hx g', ← toReal_lintegral_coe_eq_integral g,
+    rw [← integral_E_eq_fstar hx g', ← BoundedContinuousFunction.toReal_lintegral_coe_eq_integral g,
       ENNReal.ofReal_toReal (lintegral_lt_top_of_nnreal _ g).ne,
       ENNReal.ofReal_mul (hψ0 x)]
     congr 1

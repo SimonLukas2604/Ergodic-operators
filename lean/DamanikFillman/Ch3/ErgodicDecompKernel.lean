@@ -190,25 +190,29 @@ lemma exists_tendsto_empP {S : X → X} {x : X} (hx : x ∈ G S) :
     apply Subtype.ext
     apply ext_of_forall_integral_eq_of_IsFiniteMeasure
     intro f
-    have := hν'' f.toContinuousMap
-    rw [hint ν ψ hψ.tendsto_atTop hν f.toContinuousMap] at this
-    exact this
+    exact (hν'' f.toContinuousMap).trans (hint ν ψ hψ.tendsto_atTop hν f.toContinuousMap).symm
   rw [← hνν]
   exact hν'
 
+/-- The Dirac mass as a probability measure. -/
+def diracP (x : X) : ProbabilityMeasure X := ⟨Measure.dirac x, inferInstance⟩
+
 /-- The ergodic decomposition kernel `E(x)`. -/
 def E (S : X → X) (x : X) : ProbabilityMeasure X :=
-  if hx : x ∈ G S then (exists_tendsto_empP hx).choose
-  else (⟨Measure.dirac x, inferInstance⟩ : ProbabilityMeasure X)
+  if hx : x ∈ G S then (exists_tendsto_empP hx).choose else diracP x
+
+lemma E_of_mem {S : X → X} {x : X} (hx : x ∈ G S) : E S x = (exists_tendsto_empP hx).choose :=
+  dif_pos hx
 
 lemma integral_E {S : X → X} {x : X} (hx : x ∈ G S) (f : C(X, ℝ)) :
     ∫ y, f y ∂(E S x : Measure X) = birkhoffLimit S f x := by
-  rw [E, dif_pos hx]
+  rw [E_of_mem hx]
   exact (exists_tendsto_empP hx).choose_spec.2 f
 
 lemma E_of_not_mem {S : X → X} {x : X} (hx : x ∉ G S) :
     (E S x : Measure X) = Measure.dirac x := by
-  rw [E, dif_neg hx]; rfl
+  have : E S x = diracP x := dif_neg hx
+  rw [this]; rfl
 
 /-- `E` is measurable for the Giry σ-algebra. -/
 lemma measurable_E {S : X → X} (hS : Measurable S) : Measurable (E S) := by
@@ -221,7 +225,7 @@ lemma measurable_E {S : X → X} (hS : Measurable S) : Measurable (E S) := by
         if x ∈ G S then ENNReal.ofReal (birkhoffLimit S g' x) else (g x : ℝ≥0∞) := by
       funext x
       split_ifs with hx
-      · rw [← integral_E hx g', ← toReal_lintegral_coe_eq_integral g,
+      · rw [← integral_E hx g', ← BoundedContinuousFunction.toReal_lintegral_coe_eq_integral g,
           ENNReal.ofReal_toReal (lintegral_lt_top_of_nnreal _ g).ne]
       · rw [E_of_not_mem hx, lintegral_dirac]
     rw [heq]
