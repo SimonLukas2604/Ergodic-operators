@@ -26,9 +26,15 @@ namespace Distr
 /-- The unit vector `e^{iθ}`. -/
 def eθ (θ : ℝ) : ℂ := (Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I
 
-lemma eθ_re (θ : ℝ) : (eθ θ).re = Real.cos θ := by simp [eθ]
+lemma eθ_re (θ : ℝ) : (eθ θ).re = Real.cos θ := by
+  simp only [eθ, Complex.add_re, Complex.ofReal_re, Complex.mul_re, Complex.ofReal_im,
+    Complex.I_re, Complex.I_im]
+  ring
 
-lemma eθ_im (θ : ℝ) : (eθ θ).im = Real.sin θ := by simp [eθ]
+lemma eθ_im (θ : ℝ) : (eθ θ).im = Real.sin θ := by
+  simp only [eθ, Complex.add_im, Complex.ofReal_re, Complex.mul_im, Complex.ofReal_im,
+    Complex.I_re, Complex.I_im]
+  ring
 
 lemma norm_eθ (θ : ℝ) : ‖eθ θ‖ = 1 := norm_e θ
 
@@ -77,8 +83,10 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
     (hφ.fderiv_right (m := 1) (by norm_num)).continuous_fderiv one_ne_zero
   have hD2s : HasCompactSupport (fderiv ℝ (fderiv ℝ φ)) :=
     (hφc.fderiv (𝕜 := ℝ)).fderiv (𝕜 := ℝ)
-  obtain ⟨δ, hδ, hδu⟩ := Metric.uniformContinuous_iff.1
-    (hD2s.uniformContinuous_of_continuous hD2c) ε hε
+  have hu : UniformContinuous (fderiv ℝ (fderiv ℝ φ)) :=
+    hD2s.uniformContinuous_of_continuous hD2c
+  obtain ⟨δ, hδ, hδu⟩ :=
+    (Metric.uniformContinuous_iff (α := ℂ) (β := ℂ →L[ℝ] ℂ →L[ℝ] ℝ)).1 hu ε hε
   refine ⟨δ, hδ, fun ρ hρ0 hρδ z θ => ?_⟩
   set e := eθ θ with he
   have hne : ‖e‖ = 1 := norm_eθ θ
@@ -146,18 +154,18 @@ lemma integral_cos_mul_add_sin_mul (a b : ℝ) :
   rw [intervalIntegral.integral_add, intervalIntegral.integral_mul_const,
     intervalIntegral.integral_mul_const, integral_cos, integral_sin]
   · simp
-  · exact (continuous_cos.mul continuous_const).intervalIntegrable _ _
-  · exact (continuous_sin.mul continuous_const).intervalIntegrable _ _
+  · exact (Real.continuous_cos.mul continuous_const).intervalIntegrable _ _
+  · exact (Real.continuous_sin.mul continuous_const).intervalIntegrable _ _
 
 lemma integral_quadratic (a b c : ℝ) :
     ∫ θ in (-π)..π, (Real.cos θ ^ 2 * a + Real.sin θ * Real.cos θ * b + Real.sin θ ^ 2 * c) =
       π * (a + c) := by
   have h1 : IntervalIntegrable (fun θ => Real.cos θ ^ 2 * a) volume (-π) π :=
-    ((continuous_cos.pow 2).mul continuous_const).intervalIntegrable _ _
+    ((Real.continuous_cos.pow 2).mul continuous_const).intervalIntegrable _ _
   have h2 : IntervalIntegrable (fun θ => Real.sin θ * Real.cos θ * b) volume (-π) π :=
-    ((continuous_sin.mul continuous_cos).mul continuous_const).intervalIntegrable _ _
+    ((Real.continuous_sin.mul Real.continuous_cos).mul continuous_const).intervalIntegrable _ _
   have h3 : IntervalIntegrable (fun θ => Real.sin θ ^ 2 * c) volume (-π) π :=
-    ((continuous_sin.pow 2).mul continuous_const).intervalIntegrable _ _
+    ((Real.continuous_sin.pow 2).mul continuous_const).intervalIntegrable _ _
   rw [intervalIntegral.integral_add (h1.add h2) h3, intervalIntegral.integral_add h1 h2,
     intervalIntegral.integral_mul_const, intervalIntegral.integral_mul_const,
     intervalIntegral.integral_mul_const, integral_cos_sq, integral_sin_sq]
@@ -189,11 +197,11 @@ lemma integral_taylor_poly {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (z : ℂ
   rw [setIntegral_Ioo_pi, intervalIntegral.integral_add, integral_cos_mul_add_sin_mul,
     integral_quadratic, laplacian_eq_Dv hφ, Dv_Dv_eq hd, Dv_Dv_eq hd]
   · ring
-  · exact ((continuous_cos.mul continuous_const).add
-      (continuous_sin.mul continuous_const)).intervalIntegrable _ _
-  · exact ((((continuous_cos.pow 2).mul continuous_const).add
-      ((continuous_sin.mul continuous_cos).mul continuous_const)).add
-      ((continuous_sin.pow 2).mul continuous_const)).intervalIntegrable _ _
+  · exact ((Real.continuous_cos.mul continuous_const).add
+      (Real.continuous_sin.mul continuous_const)).intervalIntegrable _ _
+  · exact ((((Real.continuous_cos.pow 2).mul continuous_const).add
+      ((Real.continuous_sin.mul Real.continuous_cos).mul continuous_const)).add
+      ((Real.continuous_sin.pow 2).mul continuous_const)).intervalIntegrable _ _
 
 /-- **Taylor expansion of circle integrals**: `∫_{-π}^{π} (φ(z + ρe^{iθ}) - φ(z)) dθ
 = (πρ²/2) Δφ(z) + O(ερ²)` uniformly in `z`. -/
