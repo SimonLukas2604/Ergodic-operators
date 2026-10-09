@@ -52,7 +52,8 @@ lemma tendsto_integral_of_continuous {K : Set ℂ} (hK : IsCompact K) {νs : ℕ
     show max (min (g w) |Cg|) (-|Cg|) = g w
     have := hCg w hw
     rw [Real.norm_eq_abs] at this
-    rw [min_eq_left ((le_abs_self _).trans this), max_eq_left (neg_le_of_abs_le this)]
+    have this' : |g w| ≤ |Cg| := this.trans (le_abs_self _)
+    rw [min_eq_left ((le_abs_self _).trans this'), max_eq_left (neg_le_of_abs_le this')]
   have hint : ∀ ρ : Measure ℂ, ρ Kᶜ = 0 → ∫ w, G w ∂ρ = ∫ w, g w ∂ρ := fun ρ hρ =>
     integral_congr_ae (by
       filter_upwards [measure_eq_zero_iff_ae_notMem.1 hρ] with w hw
@@ -124,8 +125,9 @@ theorem capCompact_eq_zero_of_subset_exceptional {K : Set ℂ} (hK : IsCompact K
     have heach : ∀ N : ℕ, ∫⁻ z, ENNReal.ofReal (potT ρ N z + c) ∂η =
         ENNReal.ofReal ((∫ z, potT η N z ∂ρ) + c) := by
       intro N
-      rw [← ofReal_integral_eq_lintegral_ofReal
-        (integrable_of_continuous_carrier hL hηL ((continuous_potTrunc hρa N).add continuous_const))
+      have hi : Integrable (fun z => potT ρ N z + c) η :=
+        integrable_of_continuous_carrier hL hηL ((continuous_potTrunc hρa N).add continuous_const)
+      rw [← ofReal_integral_eq_lintegral_ofReal hi
         (by
           filter_upwards [measure_eq_zero_iff_ae_notMem.1 hηL] with z hz
           have := hlow ρ hρ hρM N z (by simpa using hz)
@@ -167,7 +169,7 @@ theorem capCompact_eq_zero_of_subset_exceptional {K : Set ℂ} (hK : IsCompact K
     simp_rw [hA, hB]
     exact (ENNReal.continuous_ofReal.tendsto _).comp
       ((tendsto_integral_of_continuous hK hνs hν hconv hf).add_const c)
-  have hfatou := lintegral_liminf_le (μ := η) hAm
+  have hfatou := lintegral_liminf_le (μ := η) (u := atTop) hAm
   rw [hlim.liminf_eq] at hfatou
   -- the strict pointwise inequality on `L`
   have hstrict : ∀ᵐ z ∂η, B z < liminf (fun n => A n z) atTop := by
