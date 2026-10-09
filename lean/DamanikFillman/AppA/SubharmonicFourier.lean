@@ -292,7 +292,7 @@ theorem subharmonicFourierDecayStatement_holds : SubharmonicFourierDecayStatemen
   have hK0 : 0 ≤ K := by
     rw [hK]
     exact add_nonneg (integral_nonneg fun _ => abs_nonneg _)
-    (integral_nonneg fun _ => abs_nonneg _)
+      (integral_nonneg fun _ => abs_nonneg _)
   refine ⟨|C'| * K + |C'| / 2, fun u M hu hM k hk => ?_⟩
   have hM0 : 0 ≤ M := (abs_nonneg _).trans (hM 1 (by
     show 1 - ρ < ‖(1 : ℂ)‖ ∧ ‖(1 : ℂ)‖ < 1 + ρ
