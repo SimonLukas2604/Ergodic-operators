@@ -94,8 +94,8 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
   have hφd : Differentiable ℝ φ := hφ.differentiable (by norm_num)
   have hDd : Differentiable ℝ (Dv φ e) := differentiable_Dv hφ e
   -- first derivative
-  set k : ℝ → ℝ := fun t => Dv φ e (z + t * e) - Dv φ e z - t * Q with hk
-  have hk' : ∀ t, HasDerivAt k (Dv (Dv φ e) e (z + t * e) - Q) t := by
+  set k : ℝ → ℝ := fun t => Dv φ e (z + (t : ℂ) * e) - Dv φ e z - t * Q with hk
+  have hk' : ∀ t : ℝ, HasDerivAt k (Dv (Dv φ e) e (z + (t : ℂ) * e) - Q) t := by
     intro t
     have h1 := hasDerivAt_comp_line hDd z e t
     have h2 : HasDerivAt (fun t : ℝ => t * Q) Q t := by
@@ -103,12 +103,13 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
     exact (h1.sub_const _).sub h2
   have hkb : ∀ t ∈ Icc (0 : ℝ) ρ, ‖k t‖ ≤ ε * t := by
     have := norm_image_sub_le_of_norm_deriv_le_segment' (f := k) (C := ε)
+      (f' := fun t : ℝ => Dv (Dv φ e) e (z + (t : ℂ) * e) - Q)
       (fun t _ => (hk' t).hasDerivWithinAt) (fun t ht => by
         rw [hQ, Dv_Dv_eq hd, Dv_Dv_eq hd, ← ContinuousLinearMap.sub_apply,
           ← ContinuousLinearMap.sub_apply]
         refine (ContinuousLinearMap.le_opNorm₂ _ _ _).trans ?_
         rw [hne, mul_one, mul_one]
-        have hlt : dist (fderiv ℝ (fderiv ℝ φ) (z + t * e)) (fderiv ℝ (fderiv ℝ φ) z) < ε := by
+        have hlt : dist (fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e)) (fderiv ℝ (fderiv ℝ φ) z) < ε := by
           refine hδu ?_
           rw [dist_eq_norm, add_sub_cancel_left, norm_mul, hne, mul_one, Complex.norm_real,
             Real.norm_eq_abs, abs_of_nonneg ht.1]
@@ -121,8 +122,8 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
     rw [hk0, sub_zero, sub_zero] at h
     exact h
   -- the remainder
-  set m : ℝ → ℝ := fun t => φ (z + t * e) - φ z - t * Dv φ e z - t ^ 2 / 2 * Q with hm
-  have hm' : ∀ t, HasDerivAt m (k t) t := by
+  set m : ℝ → ℝ := fun t => φ (z + (t : ℂ) * e) - φ z - t * Dv φ e z - t ^ 2 / 2 * Q with hm
+  have hm' : ∀ t : ℝ, HasDerivAt m (k t) t := by
     intro t
     have h1 := hasDerivAt_comp_line hφd z e t
     have h2 : HasDerivAt (fun t : ℝ => t * Dv φ e z) (Dv φ e z) t := by
@@ -130,8 +131,8 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
     have h3 : HasDerivAt (fun t : ℝ => t ^ 2 / 2 * Q) (t * Q) t := by
       have := (((hasDerivAt_id t).mul (hasDerivAt_id t)).div_const 2).mul_const Q
       convert this using 1
-      · funext x; simp only [id]; ring
-      · simp only [id]; ring
+      · funext x; (try simp only [id]); ring
+      · (try simp only [id]); ring
     exact ((h1.sub_const _).sub h2).sub h3
   have hmb := norm_image_sub_le_of_norm_deriv_le_segment' (f := m) (C := ε * ρ)
     (fun t _ => (hm' t).hasDerivWithinAt) (fun t ht => (hkb t (Ico_subset_Icc_self ht)).trans
