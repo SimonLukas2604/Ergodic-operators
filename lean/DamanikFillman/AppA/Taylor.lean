@@ -114,8 +114,10 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
           rw [dist_eq_norm, add_sub_cancel_left, norm_mul, hne, mul_one, Complex.norm_real,
             Real.norm_eq_abs, abs_of_nonneg ht.1]
           exact lt_of_lt_of_le ht.2 hρδ.le
-        rw [dist_eq_norm] at hlt
-        exact hlt.le)
+        calc ‖fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e) - fderiv ℝ (fderiv ℝ φ) z‖
+            = dist (fderiv ℝ (fderiv ℝ φ) (z + (t : ℂ) * e)) (fderiv ℝ (fderiv ℝ φ) z) :=
+              (dist_eq_norm _ _).symm
+          _ ≤ ε := hlt.le)
     intro t ht
     have h := this t ht
     have hk0 : k 0 = 0 := by simp [hk]
@@ -129,10 +131,11 @@ theorem taylor_line {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
     have h2 : HasDerivAt (fun t : ℝ => t * Dv φ e z) (Dv φ e z) t := by
       simpa using (hasDerivAt_id t).mul_const (Dv φ e z)
     have h3 : HasDerivAt (fun t : ℝ => t ^ 2 / 2 * Q) (t * Q) t := by
-      have := (((hasDerivAt_id t).mul (hasDerivAt_id t)).div_const 2).mul_const Q
-      convert this using 1
-      · funext x; (try simp only [id]); ring
-      · (try simp only [id]); ring
+      have h := ((hasDerivAt_pow 2 t).div_const 2).mul_const Q
+      refine h.congr_deriv ?_
+      rw [show (2 : ℕ) - 1 = 1 from rfl, pow_one]
+      push_cast
+      ring
     exact ((h1.sub_const _).sub h2).sub h3
   have hmb := norm_image_sub_le_of_norm_deriv_le_segment' (f := m) (C := ε * ρ)
     (fun t _ => (hm' t).hasDerivWithinAt) (fun t ht => (hkb t (Ico_subset_Icc_self ht)).trans
