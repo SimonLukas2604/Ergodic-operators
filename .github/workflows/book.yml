@@ -45,7 +45,8 @@ jobs:
         run: |
           set -o pipefail
           lake build DamanikFillman 2>&1 | tee book.log || true
-          grep -E -A10 "^error: DamanikFillman" book.log | head -500 || true
+          echo "=================== ERRORS ==================="
+          awk '/^error: /{p=1} /^warning: /{p=0} /^(⚠|✔|✖|trace:)/{p=0} p' book.log | head -600 || true
           if grep -q "^error" book.log; then exit 1; fi
 
       - name: Count sorry

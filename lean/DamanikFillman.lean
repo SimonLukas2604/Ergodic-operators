@@ -75,6 +75,7 @@ import DamanikFillman.Ch3.SkewProduct
 import DamanikFillman.Ch3.CatMap
 import DamanikFillman.Ch3.TopErgodic
 import DamanikFillman.Ch3.ErgodicDecompKernel
+import DamanikFillman.Ch3.ErgodicDecompAux
 import DamanikFillman.Ch3.UH
 import DamanikFillman.Ch3.UH2
 import DamanikFillman.Ch3.UHOpen
