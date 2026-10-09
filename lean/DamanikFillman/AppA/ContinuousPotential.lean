@@ -86,7 +86,9 @@ theorem logPotential_eq_top_of_atom [IsFiniteMeasure μ] (hμ : Integrable (fun 
         exact neg_norm_le_logKer N (a - w)
     have hi1 : Integrable (({a} : Set ℂ).indicator (fun _ => (N : ℝ))) μ :=
       (integrable_const _).indicator (measurableSet_singleton a)
-    have := integral_mono (hi1.sub hint) (integrable_logKer hμ N a) hle
+    have hi2 : Integrable (fun w => ({a} : Set ℂ).indicator (fun _ => (N : ℝ)) w - ‖a - w‖) μ :=
+      hi1.sub hint
+    have := integral_mono hi2 (integrable_logKer hμ N a) hle
     rw [integral_sub hi1 hint, integral_indicator_const _ (measurableSet_singleton a),
       smul_eq_mul] at this
     calc m * N - C = μ.real {a} * N - C := rfl
@@ -159,7 +161,8 @@ theorem restrict_potential_continuousOn [IsFiniteMeasure μ] (hμ : Integrable (
   have hfx := (hf x hx).eventually (Metric.ball_mem_nhds (f x) (half_pos hδpos))
   have hg2x := hl2 x hx (g2 x - δ / 2) (by linarith)
   filter_upwards [hfx, hg2x, self_mem_nhdsWithin] with x' hx'1 hx'2 hx'L
-  rw [mem_ball, Real.dist_eq] at hx'1
+  rw [Real.dist_eq] at hx'1
+  have hx'2' : g2 x' > g2 x - δ / 2 := hx'2
   rw [hsum x' hx'L]
   have := hsum x hx
   have := (abs_lt.1 hx'1).2
