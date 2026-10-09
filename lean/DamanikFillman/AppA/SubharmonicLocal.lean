@@ -195,9 +195,14 @@ theorem trunc_le_integral_moll {F : ℂ → EReal} {U : Set ℂ} (hU : IsOpen U)
     have e1 : (fun θ => ρ * (truncBelow n (F (circleMap z ρ θ)) * mollRad R ρ)) =
         fun θ => (ρ * mollRad R ρ) * truncBelow n (F (circleMap z ρ θ)) := by
       funext θ; ring
-    rw [e1, integral_const_mul, integral_Ioo_circleMap (fun w => truncBelow n (F w)),
-      setIntegral_const, Real.volume_real_Ioo_of_le (show -π ≤ π by linarith [pi_pos]),
-      smul_eq_mul]
+    have hR1 : ∫ θ in Ioo (-π) π, ρ * (truncBelow n (F (circleMap z ρ θ)) * mollRad R ρ) =
+        ρ * mollRad R ρ * (2 * π * circleAverage (fun w => truncBelow n (F w)) z ρ) := by
+      rw [e1, integral_const_mul, integral_Ioo_circleMap (fun w => truncBelow n (F w))]
+    have hL1 : ∫ _θ in Ioo (-π) π, ρ * (t * mollRad R ρ) = 2 * π * (ρ * (t * mollRad R ρ)) := by
+      rw [setIntegral_const, Real.volume_real_Ioo_of_le (show -π ≤ π by linarith [pi_pos]),
+        smul_eq_mul]
+      ring
+    rw [hR1, hL1]
     have hsub := hF.truncBelow_le_circleAverage hρ0
       ((closedBall_subset_closedBall hρR).trans hzR) n
     have hρk : 0 ≤ ρ * mollRad R ρ := mul_nonneg hρ0.le (mollRad_nonneg R ρ)
@@ -318,7 +323,7 @@ theorem integrableOn_ball_of_subharmonic {u : ℂ → ℝ} {U : Set ℂ} (hU : I
   have hTle : ∀ n, ∀ w ∈ closedBall c R, T n w ≤ M := fun n w hw => by
     rw [hTeq n w (hcR hw)]
     exact max_le (hMu w hw) (by have := (Nat.cast_nonneg n : (0 : ℝ) ≤ n); linarith)
-  have hTge : ∀ n, ∀ w ∈ closedBall c R, -(n : ℝ) ≤ T n w := fun n w hw => by
+  have hTge : ∀ n : ℕ, ∀ w ∈ closedBall c R, -(n : ℝ) ≤ T n w := fun n w hw => by
     rw [hTeq n w (hcR hw)]; exact le_max_right _ _
   -- key estimate for each truncation
   have hkey : ∀ n : ℕ, ∫ w in ball c (R / 2), (M - T n w) ≤ (M - u c) / m₀ := by
