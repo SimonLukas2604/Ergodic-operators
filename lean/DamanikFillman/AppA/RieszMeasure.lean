@@ -43,7 +43,7 @@ lemma integrable_mul_of_integrableOn {u g : ℂ → ℝ} {K : Set ℂ} (hK : IsC
 /-- Supports of functions vanishing where `χ` vanishes. -/
 lemma tsupport_subset_of {F χ : ℂ → ℝ} (h : ∀ x, χ x = 0 → F x = 0) :
     tsupport F ⊆ tsupport χ :=
-  closure_minimal (fun x hx => subset_tsupport χ fun h0 => hx (h x h0)) isClosed_tsupport
+  closure_minimal (fun x hx => subset_tsupport χ fun h0 => hx (h x h0)) (isClosed_tsupport _)
 
 /-! ### The functional `ψ ↦ ∫ u Δψ` -/
 
@@ -103,7 +103,7 @@ theorem abs_Tfun_mul_le {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOpen U)
     have hs4 : tsupport (B • χ - s • (χ * g)) ⊆ tsupport χ :=
       tsupport_subset_of fun x h0 => by simp [h0]
     refine integral_mul_laplacian_nonneg hU hu (hBχ.sub hsg) ?_ (hs4.trans hχU) ?_
-    · exact hχc.of_isClosed_subset isClosed_tsupport hs4
+    · exact hχc.of_isClosed_subset (isClosed_tsupport _) hs4
     · intro x
       simp only [Pi.sub_apply, Pi.smul_apply, Pi.mul_apply, smul_eq_mul]
       have hgx := hB x
@@ -114,7 +114,7 @@ theorem abs_Tfun_mul_le {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOpen U)
         nlinarith [hχ0 x]
   have hexp : ∀ s : ℝ, Tfun u (B • χ - s • (χ * g)) = B * Tfun u χ - s * Tfun u (χ * g) := by
     intro s
-    rw [Tfun_sub hK huK hBχ (hχg.const_smul s) hs2
+    rw [Tfun_sub (ψ₁ := B • χ) (ψ₂ := s • (χ * g)) hK huK hBχ (hχg.const_smul s) hs2
       (tsupport_subset_of fun x h0 => by simp [h0]),
       Tfun_smul B hχ, Tfun_smul s hχg]
   have h1 := hpos 1 (Or.inl rfl)
@@ -132,7 +132,7 @@ lemma contDiff_smoothen {r : ℝ} (hr : 0 < r) {f : ℂ → ℝ} (hf : Continuou
     ContDiff ℝ 2 (smoothen r f) := by
   have hm : ContDiff ℝ ((2 : ℕ∞) : WithTop ℕ∞) (moll r) := by exact_mod_cast contDiff_moll r
   have := (hasCompactSupport_moll hr).contDiff_convolution_left
-    (ContinuousLinearMap.lsmul ℝ ℝ) hm hf.locallyIntegrable
+    (ContinuousLinearMap.lsmul ℝ ℝ) hm (hf.locallyIntegrable (μ := volume))
   exact_mod_cast this
 
 lemma hasCompactSupport_smoothen {r : ℝ} (hr : 0 < r) {f : ℂ → ℝ} (hfc : HasCompactSupport f) :
@@ -233,12 +233,12 @@ lemma aSeq_cauchy {f : ℂ → ℝ} (hf : Continuous f) (hfc : HasCompactSupport
   have hdiff : aSeq u χ f n - aSeq u χ f N =
       (2 * π)⁻¹ * Tfun u (χ * (smoothen (rr n) f - smoothen (rr N) f)) := by
     unfold aSeq
-    rw [← mul_sub, ← Tfun_sub hK huK (hχ.mul hgn) (hχ.mul hgN) (tsupport_subset_of fun x h0 => by simp [h0])
+    rw [← mul_sub, ← Tfun_sub (ψ₁ := χ * smoothen (rr n) f) (ψ₂ := χ * smoothen (rr N) f) hK huK (hχ.mul hgn) (hχ.mul hgN) (tsupport_subset_of fun x h0 => by simp [h0])
       (tsupport_subset_of fun x h0 => by simp [h0]), hsub]
   have hbd := abs_Tfun_mul_le hU hu hχ hχc hχU hχ0 (hgn.sub hgN) (B := 2 * η) fun x => by
     have h1 := hδu (rr n) (rr_pos n) (hrn n hn) x
     have h2 := hδu (rr N) (rr_pos N) (hrn N le_rfl) x
-    simp only [Pi.sub_apply]
+    show |smoothen (rr n) f x - smoothen (rr N) f x| ≤ 2 * η
     calc |smoothen (rr n) f x - smoothen (rr N) f x|
         = |(smoothen (rr n) f x - f x) - (smoothen (rr N) f x - f x)| := by congr 1; ring
       _ ≤ |smoothen (rr n) f x - f x| + |smoothen (rr N) f x - f x| := abs_sub _ _
@@ -261,7 +261,7 @@ lemma aSeq_add {f g : ℂ → ℝ} (hf : Continuous f) (hg : Continuous g) (n : 
   have hK := hχc.isCompact
   have huK : IntegrableOn u (tsupport χ) := integrableOn_of_subharmonic hU hu hK hχU
   rw [smoothen_add (rr_pos n) hf hg, mul_add,
-    Tfun_add hK huK (hχ.mul (contDiff_smoothen (rr_pos n) hf))
+    Tfun_add (ψ₁ := χ * smoothen (rr n) f) (ψ₂ := χ * smoothen (rr n) g) hK huK (hχ.mul (contDiff_smoothen (rr_pos n) hf))
       (hχ.mul (contDiff_smoothen (rr_pos n) hg)) (tsupport_subset_of fun x h0 => by simp [h0])
       (tsupport_subset_of fun x h0 => by simp [h0])]
   ring
@@ -269,7 +269,7 @@ lemma aSeq_add {f g : ℂ → ℝ} (hf : Continuous f) (hg : Continuous g) (n : 
 lemma aSeq_smul (c : ℝ) {f : ℂ → ℝ} (hf : Continuous f) (n : ℕ) :
     aSeq u χ (c • f) n = c * aSeq u χ f n := by
   unfold aSeq
-  rw [smoothen_smul, mul_smul_comm, Tfun_smul c (hχ.mul (contDiff_smoothen (rr_pos n) hf))]
+  rw [smoothen_smul, mul_smul_comm, Tfun_smul (ψ := χ * smoothen (rr n) f) c (hχ.mul (contDiff_smoothen (rr_pos n) hf))]
   ring
 
 lemma aSeq_nonneg {f : ℂ → ℝ} (hf : Continuous f) (hf0 : ∀ x, 0 ≤ f x) (n : ℕ) :
@@ -294,7 +294,6 @@ def Λpos : C_c(ℂ, ℝ) →ₚ[ℝ] ℝ :=
         have h' := (tendsto_aSeq hU hu hχ hχc hχU hχ0 f.continuous f.hasCompactSupport).add
           (tendsto_aSeq hU hu hχ hχc hχU hχ0 g.continuous g.hasCompactSupport)
         refine tendsto_nhds_unique h (h'.congr fun n => ?_)
-        simp only [CompactlySupportedContinuousMap.coe_add]
         exact (aSeq_add hU hu hχ hχc hχU hχ0 f.continuous g.continuous n).symm
       map_smul' := fun c f => by
         have h := (tendsto_aSeq hU hu hχ hχc hχU hχ0 (c • f).continuous
@@ -303,7 +302,6 @@ def Λpos : C_c(ℂ, ℝ) →ₚ[ℝ] ℝ :=
           f.hasCompactSupport).const_mul c
         simp only [RingHom.id_apply, smul_eq_mul]
         refine tendsto_nhds_unique h (h'.congr fun n => ?_)
-        simp only [CompactlySupportedContinuousMap.coe_smul]
         exact (aSeq_smul hU hu hχ hχc hχU hχ0 c f.continuous n).symm }
     (fun f hf => by
       have h := tendsto_aSeq hU hu hχ hχc hχU hχ0 f.continuous f.hasCompactSupport
@@ -393,7 +391,8 @@ theorem exists_rieszMeasure {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOpen U)
       calc ‖∫ z, (u z * smoothen (rr n) (Δ ψ) z - u z * Δ ψ z)‖
           ≤ ∫ z, K₁.indicator (fun z => η * |u z|) z := by
             refine norm_integral_le_of_norm_le
-              ((huK₁.abs.const_mul η).integrable_indicator hK₁c.measurableSet)
+              (IntegrableOn.integrable_indicator (f := fun z => η * |u z|)
+                (huK₁.abs.const_mul η) hK₁c.measurableSet)
               (Eventually.of_forall fun z => ?_)
             by_cases hz : z ∈ K₁
             · rw [indicator_of_mem hz, ← mul_sub, norm_mul, Real.norm_eq_abs, mul_comm]
@@ -414,7 +413,7 @@ theorem exists_rieszMeasure {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOpen U)
           have h4 : (2 * π)⁻¹ * (η * A) ≤ η * ((2 * π)⁻¹ * A + 1) := by nlinarith
           have h5 : η * ((2 * π)⁻¹ * A + 1) = ε / 2 := by
             have : (2 * π)⁻¹ * A + 1 ≠ 0 := by positivity
-            rw [hη]; field_simp; ring
+            rw [hη]; field_simp
           linarith
   · refine integrable_mul_of_integrableOn hK₁c huK₁ ?_ fun z hz => ?_
     · rw [← hΔS _ hr0]; exact continuous_laplacian (contDiff_smoothen hr0 hψ.continuous)
