@@ -87,7 +87,10 @@ theorem taylor_moll {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
       ((continuous_moll r).integrable_of_hasCompactSupport (hasCompactSupport_moll hr)).const_mul _
     have iC : Integrable (fun y => Δ φ z / 4 * (‖y‖ ^ 2 * moll r y)) :=
       (integrable_mul_moll (continuous_norm.pow 2) hr).const_mul _
-    rw [e, integral_sub (iA.sub iB) iC, integral_sub iA iB, integral_const_mul, integral_const_mul,
+    have iAB : Integrable (fun y => φ (z + y) * moll r y - φ z * moll r y) := iA.sub iB
+    rw [show (∫ y, f y) = ∫ y, ((φ (z + y) * moll r y - φ z * moll r y) -
+        Δ φ z / 4 * (‖y‖ ^ 2 * moll r y)) from by rw [e],
+      integral_sub iAB iC, integral_sub iA iB, integral_const_mul, integral_const_mul,
       integral_moll hr, mul_one, mollQ]
   have hQg : mollQ r = ∫ y, g y := rfl
   rw [← hexp, hPf, hQg, hPg, ← integral_const_mul, ← Real.norm_eq_abs]
@@ -172,14 +175,14 @@ theorem integral_mul_mollify_symm {f g : ℂ → ℝ} (hf : Integrable f) (hg : 
   -- rewrite both sides as iterated integrals of `K`
   have hL : ∀ z, f z * ∫ y, g (z + y) * moll r y = ∫ w, K z w := by
     intro z
-    have := integral_add_left_eq_self (fun w => g w * moll r (w - z)) z
+    have := integral_add_left_eq_self (μ := volume) (fun w => g w * moll r (w - z)) z
     simp only [add_sub_cancel_left] at this
     rw [this, ← integral_const_mul]
     refine integral_congr_ae (Eventually.of_forall fun w => ?_)
     simp only [hK]; ring
   have hR : ∀ z, (∫ y, f (z + y) * moll r y) * g z = ∫ w, K w z := by
     intro z
-    have := integral_add_left_eq_self (fun w => f w * moll r (w - z)) z
+    have := integral_add_left_eq_self (μ := volume) (fun w => f w * moll r (w - z)) z
     simp only [add_sub_cancel_left] at this
     rw [this, ← integral_mul_const]
     refine integral_congr_ae (Eventually.of_forall fun w => ?_)
