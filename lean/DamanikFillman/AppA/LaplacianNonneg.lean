@@ -54,8 +54,8 @@ lemma integrable_mul_moll {h : ℂ → ℝ} (hh : Continuous h) {r : ℝ} (hr : 
 /-- **Taylor expansion of mollifications**, uniformly in `z`. -/
 theorem taylor_moll {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasCompactSupport φ) {ε : ℝ}
     (hε : 0 < ε) : ∃ δ > 0, ∀ r : ℝ, 0 < r → r < δ → ∀ z : ℂ,
-      |∫ y, φ (z + y) * moll r y - φ z - Δ φ z / 4 * mollQ r| ≤ ε * mollQ r := by
-  obtain ⟨δ, hδ, hT⟩ := taylor_circle hφ hφc (ε := ε / (2 * π)) (by positivity)
+      |(∫ y, φ (z + y) * moll r y) - φ z - Δ φ z / 4 * mollQ r| ≤ ε * mollQ r := by
+  obtain ⟨δ, hδ, hT⟩ := taylor_circle hφ hφc hε
   refine ⟨δ, hδ, fun r hr hrδ z => ?_⟩
   have hc : Continuous φ := hφ.continuous
   set f : ℂ → ℝ := fun y => (φ (z + y) - φ z - ‖y‖ ^ 2 / 4 * Δ φ z) * moll r y with hf
@@ -77,7 +77,7 @@ theorem taylor_moll {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
   obtain ⟨hIg, hPg⟩ := polar_of_bdd hgc.measurable (C := Cg)
     (fun y => by rw [← Real.norm_eq_abs]; exact hCg y) hgs
   -- expand `∫ f`
-  have hexp : ∫ y, f y = ∫ y, φ (z + y) * moll r y - φ z - Δ φ z / 4 * mollQ r := by
+  have hexp : ∫ y, f y = (∫ y, φ (z + y) * moll r y) - φ z - Δ φ z / 4 * mollQ r := by
     have e : f = fun y => (φ (z + y) * moll r y - φ z * moll r y) -
         Δ φ z / 4 * (‖y‖ ^ 2 * moll r y) := by
       funext y; simp only [hf]; ring
@@ -119,12 +119,9 @@ theorem taylor_moll {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) (hφc : HasComp
   by_cases hρr : ρ < r
   · have h := hT ρ hρ0.le (hρr.trans hrδ) z
     calc ρ * mollRad r ρ * |∫ θ in Ioo (-π) π, (φ (z + ρ * eθ θ) - φ z - ρ ^ 2 / 4 * Δ φ z)|
-        ≤ ρ * mollRad r ρ * (2 * π * (ε / (2 * π)) * ρ ^ 2) :=
+        ≤ ρ * mollRad r ρ * (2 * π * ε * ρ ^ 2) :=
           mul_le_mul_of_nonneg_left h (mul_nonneg hρ0.le (mollRad_nonneg r ρ))
-      _ = ε * (2 * π * (ρ ^ 3 * mollRad r ρ)) := by
-          have := Real.pi_pos.ne'
-          field_simp
-          ring
+      _ = ε * (2 * π * (ρ ^ 3 * mollRad r ρ)) := by ring
   · have hk0 : mollRad r ρ = 0 := by
       have := moll_eq_zero hr (z := (ρ : ℂ)) (by
         rw [Complex.norm_real, Real.norm_eq_abs, abs_of_pos hρ0]; exact not_lt.1 hρr)
@@ -148,7 +145,7 @@ theorem integral_mul_mollify_symm {f g : ℂ → ℝ} (hf : Integrable f) (hg : 
     ((continuous_moll r).comp (continuous_id.sub continuous_const)).integrable_of_hasCompactSupport
       ((hasCompactSupport_moll hr).comp_homeomorph (Homeomorph.subRight z))
   have hintw : ∀ z : ℂ, ∫ w, moll r (w - z) = 1 := fun z => by
-    rw [integral_sub_right_eq_self (fun w => moll r w) z, integral_moll hr]
+    rw [integral_sub_right_eq_self (μ := volume) (fun w => moll r w) z, integral_moll hr]
   have hKint : Integrable (Function.uncurry K) (volume.prod volume) := by
     rw [integrable_prod_iff hmeas]
     refine ⟨Eventually.of_forall fun z => ?_, ?_⟩
@@ -225,7 +222,8 @@ theorem integral_mul_laplacian_nonneg {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOp
   have hvu : ∫ z, v z * Δ φ z = ∫ z, u z * Δ φ z := by
     refine integral_congr_ae (Eventually.of_forall fun z => ?_)
     by_cases hz : z ∈ tsupport φ
-    · simp only [hv, indicator_of_mem (self_subset_cthickening _ hz)]
+    · have hzK : z ∈ K' := self_subset_cthickening (δ := η) _ hz
+      simp only [hv, indicator_of_mem hzK]
     · simp only [hΔ0 z hz, mul_zero]
   set I := ∫ z, u z * Δ φ z
   set N := ∫ z, |v z| with hN
@@ -271,7 +269,8 @@ theorem integral_mul_laplacian_nonneg {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOp
             (Eventually.of_forall fun w => EReal.coe_ne_bot _)
           simp only [EReal.toReal_coe] at hle
           have hv1 : v z = u z := by
-            simp only [hv, indicator_of_mem (self_subset_cthickening _ hz)]
+            have hzK : z ∈ K' := self_subset_cthickening (δ := η) _ hz
+            simp only [hv, indicator_of_mem hzK]
           have hv2 : Mv z = ∫ y, u (z + y) * moll r y := by
             refine integral_congr_ae (Eventually.of_forall fun y => ?_)
             by_cases hy : ‖y‖ ≤ r
@@ -299,8 +298,8 @@ theorem integral_mul_laplacian_nonneg {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOp
       (hvint.bdd_mul (c := ε * mollQ r) herrc.aestronglyMeasurable
         (Eventually.of_forall fun z => by rw [Real.norm_eq_abs]; exact herrb z)).congr
         (Eventually.of_forall fun z => mul_comm _ _)
-    have hsplit : ∫ z, v z * Mφ z - ∫ z, v z * φ z =
-        mollQ r / 4 * ∫ z, v z * Δ φ z + ∫ z, v z * err z := by
+    have hsplit : (∫ z, v z * Mφ z) - ∫ z, v z * φ z =
+        mollQ r / 4 * (∫ z, v z * Δ φ z) + ∫ z, v z * err z := by
       rw [← integral_sub hint1 hint2, ← integral_const_mul, ← integral_add (hint3.const_mul _)
         hint4]
       refine integral_congr_ae (Eventually.of_forall fun z => ?_)
@@ -315,7 +314,7 @@ theorem integral_mul_laplacian_nonneg {u : ℂ → ℝ} {U : Set ℂ} (hU : IsOp
             exact mul_le_mul_of_nonneg_right (herrb z) (abs_nonneg _)
         _ = ε * mollQ r * N := by rw [integral_const_mul]
     have hQ := mollQ_pos hr
-    have hge : 0 ≤ ∫ z, v z * Mφ z - ∫ z, v z * φ z := by
+    have hge : 0 ≤ (∫ z, v z * Mφ z) - ∫ z, v z * φ z := by
       rw [show ∫ z, v z * Mφ z = ∫ z, Mv z * φ z from hsym]
       linarith
     rw [hsplit, hvu] at hge

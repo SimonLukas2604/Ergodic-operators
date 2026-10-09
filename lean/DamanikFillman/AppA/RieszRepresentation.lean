@@ -324,7 +324,7 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       integrable_u_laplacian (isCompact_closedBall 0 S) hΦ'S hψ (hψU'.trans hU'S)
     have hharm : ∫ z, h' z * Δ ψ z = 0 := integral_harmonic_mul_laplacian hU' hh' hψ hψc hψU'
     have e : ∫ z, h' z * Δ ψ z =
-        ∫ z, u z * Δ ψ z + ∫ z, (logPotential μ' z).toReal * Δ ψ z := by
+        (∫ z, u z * Δ ψ z) + ∫ z, (logPotential μ' z).toReal * Δ ψ z := by
       rw [← integral_add hi1 hi2]
       refine integral_congr_ae (Eventually.of_forall fun z => ?_)
       by_cases hz : z ∈ U'
@@ -332,7 +332,7 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       · simp only [hΔ0 z hz, mul_zero, add_zero]
     rw [hharm, hkey ψ hψ hψc hψU', integral_logPotential_mul_laplacian hμ'S hψ hψc] at e
     have hπ : (0 : ℝ) < 2 * π := by positivity
-    have e2 : 2 * π * (∫ z, ψ z ∂μ' - ∫ z, ψ z ∂μ) = 0 := by linarith
+    have e2 : 2 * π * ((∫ z, ψ z ∂μ') - ∫ z, ψ z ∂μ) = 0 := by linarith
     rcases mul_eq_zero.1 e2 with h0 | h0
     · linarith
     · linarith
