@@ -216,7 +216,7 @@ theorem ergodicDecompositionStatement_holds : ErgodicDecompositionStatement := b
     rw [hmc, Measure.map_apply hEm hB, ← hbind, Measure.bind_apply (hEm hB) hcoe.aemeasurable,
       ← lintegral_indicator_one hB]
     refine lintegral_congr_ae ?_
-    have herg : ∀ᵐ ν ∂(m' : Measure (ProbabilityMeasure X)), Ergodic S (ν : Measure X) :=
+    have herg : ∀ᵐ ν : ProbabilityMeasure X ∂(m' : Measure (ProbabilityMeasure X)), Ergodic S (ν : Measure X) :=
       ae_iff.2 h0'
     filter_upwards [herg] with ν hν
     have := ν.2
