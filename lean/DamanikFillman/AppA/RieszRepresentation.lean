@@ -253,7 +253,7 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       have hlsc := lowerSemicontinuous_logPotential hμ1 z b hb
       obtain ⟨ρ, hρ, hρs⟩ := Metric.eventually_nhds_iff.1 hlsc
       refine ⟨min (ρ / 2) r₀, lt_min (by positivity) hr₀, fun r hr hrρ => ?_⟩
-      refine le_integral_moll_of_le hr (hiΦ r hr (hrρ.trans (min_le_right _ _))) ?_
+      refine le_integral_moll_of_le (f := fun w => (logPotential μ w).toReal) hr (hiΦ r hr (hrρ.trans (min_le_right _ _))) ?_
       filter_upwards [hfinΦ] with y hy hyr
       have hlt : (b : EReal) < logPotential μ (z + y) := hρs (by
         rw [dist_eq_norm, add_sub_cancel_left]
@@ -276,7 +276,7 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       ⟨_, (EReal.coe_toReal hΦtop (logPotential_ne_bot μ z)).symm⟩
     -- `p = h z - u z`
     have hle : p ≤ h z - u z := by
-      refine le_of_forall_ge_of_dense fun b hb => ?_
+      refine le_of_forall_lt_imp_le_of_dense fun b hb => ?_
       obtain ⟨ρ, hρ, hρr⟩ := hE b (by rw [hp]; exact EReal.coe_lt_coe_iff.2 hb)
       set r := min ρ r₀ with hr
       have hr0 : 0 < r := lt_min hρ hr₀
@@ -285,7 +285,7 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       rw [hA r hr0 (min_le_right _ _)] at h2
       linarith
     have hge' : h z - p ≤ u z := by
-      refine le_of_forall_le_of_dense fun a ha => ?_
+      refine le_of_forall_gt_imp_ge_of_dense fun a ha => ?_
       obtain ⟨ρ, hρ, hρr⟩ := hD a ha
       set r := min ρ r₀ with hr
       have hr0 : 0 < r := lt_min hρ hr₀
