@@ -23,6 +23,8 @@ Proof.
   `U'` (`integral_harmonic_mul_laplacian`), hence `μ₁ = μ₂` (`measure_eq_of_integral_eq`).
 -/
 import DamanikFillman.AppA.RieszMeasure
+import DamanikFillman.AppA.RieszLaplacian
+import DamanikFillman.AppA.Weyl
 import DamanikFillman.AppA.FourierDecay
 
 noncomputable section
@@ -185,9 +187,13 @@ theorem rieszRepresentationStatement_holds : RieszRepresentationStatement := by
       intro r hr hrr
       obtain ⟨δ, hδ, hδs⟩ := (isCompact_closedBall z r).exists_thickening_subset_open hU'
         ((closedBall_subset_closedBall hrr).trans hr₀U')
-      have hhc : ContinuousOn h (ball z (r + δ)) := fun w hw =>
-        (hh w (hδs (by rw [thickening_closedBall hδ hr.le, mem_ball]; rw [mem_ball] at hw;
-          linarith))).1.continuousAt.continuousWithinAt
+      have hhc : ContinuousOn h (ball z (r + δ)) := by
+        intro w hw
+        have hw' : w ∈ thickening δ (closedBall z r) := by
+          rw [thickening_closedBall hδ hr.le, mem_ball]
+          rw [mem_ball] at hw
+          linarith
+        exact (hh w (hδs hw')).1.continuousAt.continuousWithinAt
       have hcont := continuous_mul_kernel (continuous_moll r) (fun y hy => moll_eq_zero hr hy.le)
         (show r < r + δ by linarith) hhc
       have hih : Integrable (fun y => h (z + y) * moll r y) :=
