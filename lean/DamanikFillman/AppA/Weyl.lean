@@ -88,7 +88,7 @@ lemma integral_mollify_mul_moll_eq {F : ℂ → ℝ} (hF : Integrable F) {r s : 
 
 lemma integral_moll_mul_moll_comm (r s : ℝ) (w : ℂ) :
     ∫ u, moll r u * moll s (w - u) = ∫ u, moll s u * moll r (w - u) := by
-  rw [← integral_sub_left_eq_self (fun u => moll s u * moll r (w - u)) w]
+  rw [← integral_sub_left_eq_self (fun u => moll s u * moll r (w - u)) (volume : Measure ℂ) w]
   refine integral_congr_ae (Eventually.of_forall fun u => ?_)
   simp only [sub_sub_cancel]
   ring
@@ -125,11 +125,11 @@ theorem tendsto_mollify {F : ℂ → ℝ} (hF : LocallyIntegrable F) :
   · exact Eventually.of_forall fun r => hF.integrableOn_isCompact (isCompact_closedBall _ _)
   · refine tendsto_const_nhds.congr' ?_
     filter_upwards [hpos] with r hr
-    rw [integral_sub_left_eq_self (fun y => moll r y) x, integral_moll hr]
+    rw [integral_sub_left_eq_self (fun y => moll r y) (volume : Measure ℂ) x, integral_moll hr]
   · filter_upwards [hpos] with r hr
     exact (subset_tsupport _).trans (support_moll_reflect_subset hr x)
   · filter_upwards [hpos] with r hr y
-    rw [abs_of_nonneg (moll_nonneg _), addHaar_real_closedBall' volume x hr.le,
+    rw [abs_of_nonneg (moll_nonneg _), Measure.addHaar_real_closedBall' volume x hr.le,
       Complex.finrank_real_complex, ← hc₁]
     calc moll r (x - y) ≤ (bumpMass * r ^ 2)⁻¹ := moll_le _
       _ = c₁ / bumpMass / (r ^ 2 * c₁) := by
