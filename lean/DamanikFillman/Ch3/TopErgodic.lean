@@ -35,7 +35,8 @@ Statements:
 * `DF.FurmanStatement` — Theorem 3.5.8 (Furman) in full generality; the version with the bound
   `|f_n| ≤ C n` is proved in `DamanikFillman.Ch3.Furman` (`DF.furman`), the general statement
   in `DamanikFillman.Ch3.FurmanGeneral` (`DF.furmanStatement`);
-* `DF.ErgodicDecompositionStatement` — Theorem 3.5.12 (ergodic decomposition), stated only.
+* `DF.ErgodicDecompositionStatement` — Theorem 3.5.12 (ergodic decomposition), proved in
+  `DamanikFillman.Ch3.ErgodicDecomp` as `DF.ergodicDecompositionStatement_holds`.
 -/
 import DamanikFillman.Ch3.Birkhoff
 
