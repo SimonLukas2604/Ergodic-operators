@@ -7,7 +7,8 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 * `DF.BoundaryUniq.eq_zero_of_tendsto` — a bounded holomorphic function on the upper half-plane
   whose vertical limits vanish on a set of positive Lebesgue measure vanishes identically;
 * `DF.boundaryUniquenessStatement_holds` — Theorem 1.9.4(e): two Borel transforms whose boundary
-  values agree on a set of positive Lebesgue measure coincide.
+  values agree on a set of positive Lebesgue measure coincide;
+* `DF.acPart_pos_of_reflectionless'` — Exercise 1.11.2, unconditionally.
 
 The book deduces (e) from the factorization theory of `H^∞`.  We give a direct proof: for a
 bounded holomorphic `H` which is small (`‖H‖ ≤ s`) at height `δ` above a compact set `J ⊂ ℝ`,
@@ -18,6 +19,7 @@ as `η ↓ 0`; by Phragmén–Lindelöf, `‖H(z + iδ)‖ ≤ (sup ‖H‖) exp
 applied to `H = (F_ν + i)⁻¹ - (F_μ + i)⁻¹`.
 -/
 import DamanikFillman.Ch1.BorelBoundary
+import DamanikFillman.Ch1.PoltoratskiRemling
 import Mathlib.Analysis.Complex.PhragmenLindelof
 
 noncomputable section
@@ -414,5 +416,12 @@ theorem boundaryUniquenessStatement_holds : BoundaryUniquenessStatement := by
   have h1 : (borelTransform ν z + I)⁻¹ = (borelTransform μ z + I)⁻¹ := sub_eq_zero.1 h0
   have h2 := add_right_cancel (inv_inj.1 h1)
   exact h2.symm
+
+/-- Exercise 1.11.2, unconditionally: a nonzero measure reflectionless on `Σ` has absolutely
+continuous part charging every subset of `Σ` of positive Lebesgue measure. -/
+theorem acPart_pos_of_reflectionless' (μ : Measure ℝ) [IsFiniteMeasure μ] (hμ : μ ≠ 0)
+    {S : Set ℝ} (hSm : MeasurableSet S) (hrefl : IsReflectionless μ S) {Q : Set ℝ} (hQ : Q ⊆ S)
+    (hQpos : 0 < volume Q) : 0 < volume.withDensity (μ.rnDeriv volume) Q :=
+  acPart_pos_of_reflectionless boundaryUniquenessStatement_holds μ hμ hSm hrefl hQ hQpos
 
 end DF

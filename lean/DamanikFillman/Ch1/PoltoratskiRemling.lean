@@ -12,7 +12,8 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 * `DF.mem_lambdaS_of_tendsto_im_zero` — the final step (1.11.15) of the proof of Theorem 1.11.2:
   if `Im Λ(E + iε) → 0`, where `Λ = F_{Leb|Σ}`, then `E ∈ Λ_s`;
 * `DF.acPart_pos_of_reflectionless` — Exercise 1.11.2, derived from the uniqueness statement
-  `DF.BoundaryUniquenessStatement` (Theorem 1.9.4(e)).
+  `DF.BoundaryUniquenessStatement` (Theorem 1.9.4(e)); the unconditional version is
+  `DF.acPart_pos_of_reflectionless'` in `DamanikFillman.Ch1.BoundaryUniqueness`.
 
 # Statements recorded but not proved (`Prop`s)
 

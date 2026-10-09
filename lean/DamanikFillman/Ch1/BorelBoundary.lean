@@ -29,8 +29,9 @@ transform is `F_μ / (1 + λ F_μ)` on the upper half-plane (this is (1.9.33), p
 * `DF.ReBoundaryValueStatement` — Theorem 1.9.4(d), Lebesgue part (proved later, in
   `DamanikFillman.Ch1.BorelHerglotz`, via the Herglotz representation of `√F_μ` and `i √F_μ`);
 * `DF.ReBoundaryValueMeasureStatement` — Theorem 1.9.4(d), `μ`-a.e. part (not proved);
-* `DF.BoundaryUniquenessStatement` — Theorem 1.9.4(e) (the book relies on the factorization
-  theory of `H^∞` functions).
+* `DF.BoundaryUniquenessStatement` — Theorem 1.9.4(e); proved in
+  `DamanikFillman.Ch1.BoundaryUniqueness` (`DF.boundaryUniquenessStatement_holds`) by a
+  Phragmén–Lindelöf argument instead of the factorization theory of `H^∞` used in the book.
 -/
 import DamanikFillman.Ch1.BorelDerivative
 
