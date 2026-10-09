@@ -28,7 +28,10 @@ transform is `F_μ / (1 + λ F_μ)` on the upper half-plane (this is (1.9.33), p
 
 * `DF.ReBoundaryValueStatement` — Theorem 1.9.4(d), Lebesgue part (proved later, in
   `DamanikFillman.Ch1.BorelHerglotz`, via the Herglotz representation of `√F_μ` and `i √F_μ`);
-* `DF.ReBoundaryValueMeasureStatement` — Theorem 1.9.4(d), `μ`-a.e. part (not proved);
+* `DF.ReBoundaryValueMeasureStatement` — a `μ`-a.e. version of Theorem 1.9.4(d) for the real
+  part.  As stated it is **false**: see `DF.not_reBoundaryValueMeasureStatement` in
+  `DamanikFillman.Ch1.ReBoundaryMeasure`, which also proves the correct form
+  `DF.borelBoundaryValueMeasureStatement_holds` (`F_μ(E + i0)` exists in `ℂ ∪ {∞}` `μ`-a.e.);
 * `DF.BoundaryUniquenessStatement` — Theorem 1.9.4(e); proved in
   `DamanikFillman.Ch1.BoundaryUniqueness` (`DF.boundaryUniquenessStatement_holds`) by a
   Phragmén–Lindelöf argument instead of the factorization theory of `H^∞` used in the book.
@@ -133,8 +136,9 @@ def ReBoundaryValueStatement : Prop :=
     ∀ᵐ (E : ℝ) ∂volume, ∃ y : ℝ,
       Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).re) (𝓝[>] 0) (𝓝 y)
 
-/-- Theorem 1.9.4(d), `μ` part, recorded as a statement: `Re F_μ(E + i0)` exists as an extended
-real number for `μ`-a.e. `E`. -/
+/-- A `μ`-a.e. version of Theorem 1.9.4(d), recorded as a statement: `Re F_μ(E + i0)` exists as
+an extended real number for `μ`-a.e. `E`.  This is **false** (an atom can see an oscillating
+real part); see `DF.not_reBoundaryValueMeasureStatement`. -/
 def ReBoundaryValueMeasureStatement : Prop :=
   ∀ μ : Measure ℝ, IsFiniteMeasure μ →
     ∀ᵐ (E : ℝ) ∂μ, (∃ y : ℝ,
