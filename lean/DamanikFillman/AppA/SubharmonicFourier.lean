@@ -421,6 +421,5 @@ theorem subharmonicFourierDecayStatement_holds : SubharmonicFourierDecayStatemen
                 (div_le_div_of_nonneg_right hm (by positivity))
           _ = (|C'| * K + |C'| / 2) * M / |(k : ℝ)| := by
               field_simp
-              ring
 
 end DF
