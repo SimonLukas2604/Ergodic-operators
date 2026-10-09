@@ -46,7 +46,8 @@ lemma abs_integral_le_of_bdd (ν : Measure X) [IsProbabilityMeasure ν] {g : X �
 /-- `ν ↦ ∫ g dν` is measurable on the space of probability measures, for bounded measurable `g`. -/
 lemma measurable_integral_P {g : X → ℝ} (hg : Measurable g) {c : ℝ} (hc : ∀ x, |g x| ≤ c) :
     Measurable fun ν : ProbabilityMeasure X => ∫ x, g x ∂(ν : Measure X) := by
-  have e : (fun ν : ProbabilityMeasure X => ∫ x, g x ∂(ν : Measure X)) = fun ν =>
+  have e : (fun ν : ProbabilityMeasure X => ∫ x, g x ∂(ν : Measure X)) =
+      fun ν : ProbabilityMeasure X =>
       (∫⁻ x, ENNReal.ofReal (g x) ∂(ν : Measure X)).toReal -
         (∫⁻ x, ENNReal.ofReal (-g x) ∂(ν : Measure X)).toReal := by
     funext ν
@@ -210,7 +211,7 @@ theorem ergodicDecompositionStatement_holds : ErgodicDecompositionStatement := b
       refine lintegral_congr fun ν => ?_
       have := ν.2
       exact (lintegral_nnreal_eq f _).symm
-    apply Subtype.ext
+    apply ProbabilityMeasure.toMeasure_injective
     refine Measure.ext fun B hB => ?_
     rw [hmc, Measure.map_apply hEm hB, ← hbind, Measure.bind_apply (hEm hB) hcoe.aemeasurable,
       ← lintegral_indicator_one hB]
