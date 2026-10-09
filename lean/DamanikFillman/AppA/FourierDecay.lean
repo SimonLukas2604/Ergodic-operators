@@ -18,13 +18,15 @@ I. General Theory*, GSM 221, AMS 2022.
   (The book's proof goes through the Hilbert transform; we compute the coefficients
   explicitly for `|ξ| ≠ 1` and pass to the limit `rξ → ξ` for `|ξ| = 1`.)
 
-## Statements (recorded, not proved)
+## Statements (proved in later files)
 
 * `RieszRepresentationStatement` — Theorem A.3.2 (cited by the book); proved as
   `DF.rieszRepresentationStatement_holds` in `DamanikFillman/AppA/RieszRepresentation.lean`;
-* `RieszMeasureBoundStatement` — Theorem A.3.4 (cited by the book);
-* `SubharmonicFourierDecayStatement` — Theorem A.3.1 (its proof combines A.3.2, A.3.4,
-  Lemma A.3.5 and Cauchy estimates for harmonic functions).
+* `RieszMeasureBoundStatement` — Theorem A.3.4 (cited by the book); proved as
+  `DF.rieszMeasureBoundStatement_holds` in `DamanikFillman/AppA/RieszBound.lean`;
+* `SubharmonicFourierDecayStatement` — Theorem A.3.1; proved as
+  `DF.subharmonicFourierDecayStatement_holds` in `DamanikFillman/AppA/SubharmonicFourier.lean`
+  (from A.3.2, A.3.4, Lemma A.3.5 and Cauchy estimates for harmonic functions).
 -/
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Fourier
