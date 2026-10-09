@@ -21,6 +21,7 @@ import DamanikFillman.AppA.RieszAux
 import DamanikFillman.AppA.RieszMeasure
 import DamanikFillman.AppA.RieszRepresentation
 import DamanikFillman.AppA.RieszBound
+import DamanikFillman.AppA.SubharmonicFourier
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Subharmonic
 import DamanikFillman.Basic
