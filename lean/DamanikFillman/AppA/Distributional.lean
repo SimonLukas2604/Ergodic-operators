@@ -146,7 +146,7 @@ lemma Dv_Lε {ε : ℝ} (hε : ε ≠ 0) (z v : ℂ) :
   simp only [Dv, (hasFDerivAt_Lε hε z).fderiv]
   simp only [ContinuousLinearMap.smul_apply, innerSL_apply_apply, smul_eq_mul, Complex.inner]
   field_simp
-  first | ring | (simp only [nsmul_eq_mul]; push_cast; ring)
+  ring
 
 lemma grad_Lε_dot {ε : ℝ} (hε : ε ≠ 0) (φ : ℂ → ℝ) (z : ℂ) :
     Dv (Lε ε) 1 z * Dv φ 1 z + Dv (Lε ε) I z * Dv φ I z =
@@ -287,7 +287,7 @@ lemma integral_fderiv_div_normSq {φ : ℂ → ℝ} (hφ : ContDiff ℝ 1 φ) (h
     have hz : ((r : ℂ) * ((Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I)) = r • e θ := by
       rw [Complex.real_smul]
     have hn : ‖r • e θ‖ = r := by rw [norm_smul, hne, Real.norm_eq_abs, abs_of_pos hr, mul_one]
-    rw [hz, hn, map_smul, smul_eq_mul, ← Complex.real_smul]
+    rw [hz, hn, map_smul, smul_eq_mul]
     field_simp
   have hint : ∫ z, fderiv ℝ φ z z / ‖z‖ ^ 2 = ∫ p in polarCoord.target, G p := by
     rw [← Complex.integral_comp_polarCoord_symm]
@@ -323,7 +323,9 @@ lemma integral_fderiv_div_normSq {φ : ℂ → ℝ} (hφ : ContDiff ℝ 1 φ) (h
       have h1 : HasDerivAt (fun r : ℝ => (r : ℂ) * e θ) ((1 : ℝ) * e θ) r :=
         (hasDerivAt_id r).ofReal_comp.mul_const (e θ)
       have h2 := (hd ((r : ℂ) * e θ)).hasFDerivAt.comp_hasDerivAt r h1
-      simpa [hG] using h2
+      have h3 : HasDerivAt (fun r : ℝ => φ ((r : ℂ) * e θ))
+          (fderiv ℝ φ ((r : ℂ) * e θ) (((1 : ℝ) : ℂ) * e θ)) r := h2
+      simpa [hG] using h3
     have hcont : ContinuousWithinAt (fun r : ℝ => φ ((r : ℂ) * e θ)) (Ici 0) 0 :=
       (hφ.continuous.comp (continuous_ofReal.mul continuous_const)).continuousWithinAt
     have hint' : IntegrableOn (fun r => G (r, θ)) (Ioi 0) := by
@@ -390,7 +392,9 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
         intro z hz
         exact hΔs (by simpa using hz)
       have h2 : Integrable (fun z => |(1 / 2) * Real.log (‖z‖ ^ 2 + 1)| * |Δ φ z|) := by
-        refine integrable_mul_of_hasCompactSupport (by fun_prop) hΔc.abs ?_
+        refine integrable_mul_of_hasCompactSupport
+          (continuous_const.mul (((continuous_norm.pow 2).add continuous_const).log
+            fun z => by positivity)).abs hΔc.abs ?_
         exact (HasCompactSupport.intro (isCompact_closedBall 0 R) fun z hz => by
           have : z ∉ Function.support (Δ φ) := fun h => hz (hΔs h)
           simpa using this)
@@ -441,7 +445,8 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
       exact hRs (support_fderiv_subset ℝ this)
     · filter_upwards [hae0] with z hz
       have hn : 0 < ‖z‖ := norm_pos_iff.2 hz
-      rw [Real.norm_eq_abs, abs_div, abs_of_pos (by have := hεpos n; positivity)]
+      rw [Real.norm_eq_abs, abs_div,
+        abs_of_pos (show 0 < ‖z‖ ^ 2 + ε n ^ 2 by have := hεpos n; positivity)]
       calc |fderiv ℝ φ z z| / (‖z‖ ^ 2 + ε n ^ 2) ≤ ‖fderiv ℝ φ z‖ * ‖z‖ / ‖z‖ ^ 2 := by
             refine div_le_div₀ (by positivity) ?_ (by positivity) (by nlinarith [sq_nonneg (ε n)])
             rw [← Real.norm_eq_abs]
