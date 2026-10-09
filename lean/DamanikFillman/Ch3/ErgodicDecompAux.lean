@@ -344,7 +344,7 @@ theorem ae_ae_fstar_eq {S : X → X} {μ : Measure X} [IsProbabilityMeasure μ]
     have i2 : Integrable (fun y => 2 * u x * u y) (E S x : Measure X) := hi1.const_mul _
     have i1 : Integrable (fun y => u y ^ 2 - 2 * u x * u y) (E S x : Measure X) := hi2.sub i2
     rw [e, integral_add i1 (integrable_const _), integral_sub hi2 i2, integral_const_mul, hx2, hx1]
-    simp only [integral_const, measureReal_univ_eq_one, one_smul]
+    simp only [integral_const, probReal_univ, one_smul]
     ring
   have hz := (integral_eq_zero_iff_of_nonneg (fun y => sq_nonneg (u y - u x))
     (hi2.sub (hi1.const_mul (2 * u x)) |>.add (integrable_const (u x ^ 2)) |>.congr
@@ -492,7 +492,9 @@ theorem ergodic_of_fstar_const {S : X → X} {ν : Measure X} [IsProbabilityMeas
               _ ≤ ε + |A.indicator (fun _ => (1 : ℝ)) y - g y| := by
                   rw [abs_sub_comm (g y)]; linarith
         _ = ε + ∫ y, ‖A.indicator (fun _ => (1 : ℝ)) y - g y‖ ∂ν := by
-            rw [integral_add (integrable_const ε) (hindi.sub (g.integrable ν)).norm]
+            have i3 : Integrable (fun y => ‖A.indicator (fun _ => (1 : ℝ)) y - g y‖) ν :=
+              (hindi.sub (g.integrable ν)).norm
+            rw [integral_add (integrable_const ε) i3]
             simp
         _ ≤ 2 * ε := by linarith
     have h4 : ∫ y, |fstar S (D i) y - A.indicator (fun _ => (1 : ℝ)) y| ∂ν =
@@ -503,10 +505,10 @@ theorem ergodic_of_fstar_const {S : X → X} {ν : Measure X} [IsProbabilityMeas
       have hA0 := measureReal_nonneg (μ := ν) (s := A)
       have hAc0 := measureReal_nonneg (μ := ν) (s := Aᶜ)
       have htri : 1 ≤ |c - 1| + |c| := by
-        have := abs_sub_abs_le_abs_sub c (c - 1)
-        rw [sub_sub_cancel] at this
-        have := abs_sub_comm c (c - 1)
-        linarith [abs_nonneg c, abs_nonneg (c - 1), abs_sub_le (1 : ℝ) c 0, abs_sub_comm (c - 1) 0]
+        have h := abs_add_le c (1 - c)
+        have e1 : c + (1 - c) = 1 := by ring
+        rw [e1, abs_one, abs_sub_comm] at h
+        linarith
       rcases le_total (ν.real A) (ν.real Aᶜ) with h | h
       · rw [min_eq_left h]; nlinarith [abs_nonneg c, abs_nonneg (c - 1)]
       · rw [min_eq_right h]; nlinarith [abs_nonneg c, abs_nonneg (c - 1)]
