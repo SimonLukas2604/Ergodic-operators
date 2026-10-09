@@ -103,7 +103,7 @@ theorem integral_harmonic_mul_laplacian {H : ℂ → ℝ} {V : Set ℂ} (hV : Is
         mem_cthickening_of_dist_le w z δ _ hz (mem_ball.1 hw).le
       simp only [hLdef, hχ1 w this, one_mul]
     have hΔ : Δ L z = 0 := by
-      rw [laplacian_congr_nhds hev]
+      rw [(laplacian_congr_nhds hev).self_of_nhds]
       exact (hH z (hψV hz)).2.self_of_nhds
     simp [hΔ]
   · simp [image_eq_zero_of_notMem_tsupport hz]
@@ -115,9 +115,10 @@ lemma measure_le_of_integral_eq {μ ν : Measure ℂ} [IsFiniteMeasure μ] [IsFi
     (h : ∀ ψ : ℂ → ℝ, ContDiff ℝ 2 ψ → HasCompactSupport ψ → tsupport ψ ⊆ V →
       ∫ z, ψ z ∂μ = ∫ z, ψ z ∂ν) {O : Set ℂ} (hO : IsOpen O) : μ O ≤ ν O := by
   have h1 : μ O ≤ μ (O ∩ V) := by
-    calc μ O ≤ μ (O ∩ V) + μ (O \ V) := measure_le_inter_add_sdiff μ O V
-      _ = μ (O ∩ V) := by
-        rw [measure_mono_null (fun x hx => hx.2) hμV, add_zero]
+    have h0 : μ (O \ V) = 0 := measure_mono_null (fun x hx => hx.2) hμV
+    calc μ O = μ ((O ∩ V) ∪ (O \ V)) := by rw [inter_union_diff]
+      _ ≤ μ (O ∩ V) + μ (O \ V) := measure_union_le _ _
+      _ = μ (O ∩ V) := by rw [h0, add_zero]
   refine h1.trans ?_
   rw [(hO.inter hV).measure_eq_iSup_isCompact μ]
   refine iSup₂_le fun K hK => iSup_le fun hKc => ?_
