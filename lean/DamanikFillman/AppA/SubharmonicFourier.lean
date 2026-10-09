@@ -288,7 +288,7 @@ theorem subharmonicFourierDecayStatement_holds : SubharmonicFourierDecayStatemen
   obtain ⟨C', hC'⟩ := rieszMeasureBoundStatement_holds ρ hρ hρ1
   set r : ℝ := ρ / 12 with hr_def
   have hr : 0 < r := by positivity
-  set K : ℝ := ∫ x, |Dv (moll r) 1 x| + ∫ x, |Dv (moll r) I x| with hK
+  set K : ℝ := (∫ x, |Dv (moll r) 1 x|) + ∫ x, |Dv (moll r) I x| with hK
   have hK0 : 0 ≤ K := by
     rw [hK]
     exact add_nonneg (integral_nonneg fun _ => abs_nonneg _)
