@@ -394,7 +394,7 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
       have h2 : Integrable (fun z => |(1 / 2) * Real.log (‖z‖ ^ 2 + 1)| * |Δ φ z|) := by
         refine integrable_mul_of_hasCompactSupport
           (continuous_const.mul (((continuous_norm.pow 2).add continuous_const).log
-            fun z => by positivity)).abs hΔc.abs ?_
+            fun z => (add_pos_of_nonneg_of_pos (sq_nonneg ‖z‖) one_pos).ne')).abs hΔc.abs ?_
         exact (HasCompactSupport.intro (isCompact_closedBall 0 R) fun z hz => by
           have : z ∉ Function.support (Δ φ) := fun h => hz (hΔs h)
           simpa using this)
