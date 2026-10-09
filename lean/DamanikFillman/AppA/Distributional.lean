@@ -32,10 +32,12 @@ import Mathlib.Analysis.SpecialFunctions.PolarCoord
 import Mathlib.Analysis.SpecialFunctions.Pow.Integral
 import Mathlib.MeasureTheory.Integral.IntegralEqImproper
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
+import Mathlib.LinearAlgebra.Complex.FiniteDimensional
 
 noncomputable section
 
 open Real Complex Metric Set Filter Topology MeasureTheory Laplacian InnerProductSpace
+open ComplexConjugate
 
 namespace DF
 
@@ -46,13 +48,13 @@ def Dv (f : ℂ → ℝ) (v : ℂ) : ℂ → ℝ := fun z => fderiv ℝ f z v
 
 lemma differentiable_fderiv_of_contDiff_two {f : ℂ → ℝ} (hf : ContDiff ℝ 2 f) :
     Differentiable ℝ (fderiv ℝ f) :=
-  (hf.fderiv_right (m := 1) (by norm_num)).differentiable le_rfl
+  (hf.fderiv_right (m := 1) (by norm_num)).differentiable one_ne_zero
 
 lemma differentiable_Dv {f : ℂ → ℝ} (hf : ContDiff ℝ 2 f) (v : ℂ) : Differentiable ℝ (Dv f v) :=
   fun z => ((differentiable_fderiv_of_contDiff_two hf) z).clm_apply (differentiableAt_const v)
 
 lemma continuous_Dv {f : ℂ → ℝ} (hf : ContDiff ℝ 1 f) (v : ℂ) : Continuous (Dv f v) :=
-  (hf.continuous_fderiv le_rfl).clm_apply continuous_const
+  (hf.continuous_fderiv one_ne_zero).clm_apply continuous_const
 
 lemma contDiff_one_Dv {f : ℂ → ℝ} (hf : ContDiff ℝ 2 f) (v : ℂ) : ContDiff ℝ 1 (Dv f v) :=
   (hf.fderiv_right (m := 1) (by norm_num)).clm_apply contDiff_const
@@ -67,7 +69,7 @@ lemma laplacian_eq_Dv {f : ℂ → ℝ} (hf : ContDiff ℝ 2 f) (z : ℂ) :
   have hd := differentiable_fderiv_of_contDiff_two hf
   have key : ∀ v, Dv (Dv f v) v z = fderiv ℝ (fderiv ℝ f) z v v := by
     intro v
-    simp only [Dv]
+    show fderiv ℝ (fun y => fderiv ℝ f y v) z v = _
     rw [fderiv_clm_apply (hd z) (differentiableAt_const v)]
     simp
   rw [key 1, key I]
@@ -91,7 +93,7 @@ theorem integral_mul_laplacian {L φ : ℂ → ℝ} (hL : ContDiff ℝ 1 L) (hφ
     (hφc : HasCompactSupport φ) :
     ∫ z, L z * Δ φ z = -∫ z, (Dv L 1 z * Dv φ 1 z + Dv L I z * Dv φ I z) := by
   have hLc : Continuous L := hL.continuous
-  have hLd : Differentiable ℝ L := hL.differentiable le_rfl
+  have hLd : Differentiable ℝ L := hL.differentiable one_ne_zero
   -- integration by parts in one direction
   have ibp : ∀ v : ℂ, ∫ z, L z * Dv (Dv φ v) v z = -∫ z, Dv L v z * Dv φ v z := by
     intro v
@@ -144,6 +146,7 @@ lemma Dv_Lε {ε : ℝ} (hε : ε ≠ 0) (z v : ℂ) :
   simp only [Dv, (hasFDerivAt_Lε hε z).fderiv]
   simp only [ContinuousLinearMap.smul_apply, innerSL_apply_apply, smul_eq_mul, Complex.inner]
   field_simp
+  first | ring | (simp only [nsmul_eq_mul]; push_cast; ring)
 
 lemma grad_Lε_dot {ε : ℝ} (hε : ε ≠ 0) (φ : ℂ → ℝ) (z : ℂ) :
     Dv (Lε ε) 1 z * Dv φ 1 z + Dv (Lε ε) I z * Dv φ I z =
@@ -186,7 +189,7 @@ lemma integrableOn_log_norm (R : ℝ) :
     IntegrableOn (fun z : ℂ => Real.log ‖z‖) (ball 0 R) := by
   refine integrableOn_ball_of_norm_le_rpow (by rw [finrank_complex]; norm_num)
     (C := max 1 (R ^ 2)) (α := 1) (by rw [finrank_complex]; norm_num) ?_
-    (by fun_prop)
+    (Real.measurable_log.comp measurable_norm).aestronglyMeasurable
   have h0 : ∀ᵐ z ∂(volume.restrict (ball (0 : ℂ) R)), z ≠ 0 := by
     refine ae_restrict_of_ae ?_
     rw [ae_iff]
@@ -204,7 +207,8 @@ lemma integrableOn_inv_norm (R : ℝ) :
 /-- Products of locally integrable-on-balls functions with compactly supported continuous
 functions are integrable. -/
 lemma integrable_mul_of_integrableOn_ball {f g : ℂ → ℝ} {R : ℝ}
-    (hf : IntegrableOn f (closedBall 0 R)) (hg : Continuous g) (hgs : support g ⊆ closedBall 0 R) :
+    (hf : IntegrableOn f (closedBall 0 R)) (hg : Continuous g)
+    (hgs : Function.support g ⊆ closedBall 0 R) :
     Integrable (fun z => f z * g z) := by
   have h := hf.mul_continuousOn hg.continuousOn (isCompact_closedBall 0 R)
   refine (integrableOn_iff_integrable_of_support_subset ?_).1 h
@@ -248,8 +252,8 @@ lemma norm_e (θ : ℝ) : ‖(Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I‖ = 
 lemma integral_fderiv_div_normSq {φ : ℂ → ℝ} (hφ : ContDiff ℝ 1 φ) (hφc : HasCompactSupport φ) :
     ∫ z, fderiv ℝ φ z z / ‖z‖ ^ 2 = -(2 * π * φ 0) := by
   obtain ⟨R, hR, hRs⟩ := exists_support_subset_closedBall hφc
-  have hd : Differentiable ℝ φ := hφ.differentiable le_rfl
-  have hcf : Continuous (fderiv ℝ φ) := hφ.continuous_fderiv le_rfl
+  have hd : Differentiable ℝ φ := hφ.differentiable one_ne_zero
+  have hcf : Continuous (fderiv ℝ φ) := hφ.continuous_fderiv one_ne_zero
   obtain ⟨C, hC⟩ := (hφc.fderiv (𝕜 := ℝ)).exists_bound_of_continuous hcf
   set e : ℝ → ℂ := fun θ => (Real.cos θ : ℂ) + (Real.sin θ : ℂ) * I with he
   have hne : ∀ θ, ‖e θ‖ = 1 := norm_e
@@ -361,7 +365,7 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
   have hε0 : Tendsto ε atTop (𝓝 0) := tendsto_one_div_add_atTop_nhds_zero_nat
   have hφ1 : ContDiff ℝ 1 φ := hφ.of_le (by norm_num)
   have hΔc := continuous_laplacian hφ
-  have hΔs : support (Δ φ) ⊆ closedBall 0 R := fun z hz =>
+  have hΔs : Function.support (Δ φ) ⊆ closedBall 0 R := fun z hz =>
     hRs (by by_contra h; exact hz (laplacian_eq_zero_of_notMem hφ h))
   have hae0 : ∀ᵐ z : ℂ ∂volume, z ≠ 0 := by
     have : ({0}ᶜ : Set ℂ) ∈ ae volume := compl_mem_ae_iff.2 (measure_singleton 0)
@@ -388,7 +392,7 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
       have h2 : Integrable (fun z => |(1 / 2) * Real.log (‖z‖ ^ 2 + 1)| * |Δ φ z|) := by
         refine integrable_mul_of_hasCompactSupport (by fun_prop) hΔc.abs ?_
         exact (HasCompactSupport.intro (isCompact_closedBall 0 R) fun z hz => by
-          have : z ∉ support (Δ φ) := fun h => hz (hΔs h)
+          have : z ∉ Function.support (Δ φ) := fun h => hz (hΔs h)
           simpa using this)
       refine (h1.add h2).congr (Eventually.of_forall fun z => ?_)
       simp only [Pi.add_apply]
@@ -425,7 +429,7 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
   -- the right-hand side converges
   have hRt : Tendsto (fun n => ∫ z, fderiv ℝ φ z z / (‖z‖ ^ 2 + ε n ^ 2)) atTop
       (𝓝 (∫ z, fderiv ℝ φ z z / ‖z‖ ^ 2)) := by
-    have hcf : Continuous (fderiv ℝ φ) := hφ1.continuous_fderiv le_rfl
+    have hcf : Continuous (fderiv ℝ φ) := hφ1.continuous_fderiv one_ne_zero
     refine tendsto_integral_of_dominated_convergence (fun z => ‖z‖⁻¹ * ‖fderiv ℝ φ z‖)
       (fun n => ?_) ?_ (fun n => ?_) ?_
     · exact ((hcf.clm_apply continuous_id).div (by fun_prop)
@@ -433,7 +437,7 @@ theorem integral_log_mul_laplacian {φ : ℂ → ℝ} (hφ : ContDiff ℝ 2 φ) 
     · refine integrable_mul_of_integrableOn_ball
         (integrableOn_closedBall_of_ball (integrableOn_inv_norm (R + 1))) hcf.norm ?_
       intro z hz
-      have : z ∈ support (fderiv ℝ φ) := by simpa using hz
+      have : z ∈ Function.support (fderiv ℝ φ) := by simpa using hz
       exact hRs (support_fderiv_subset ℝ this)
     · filter_upwards [hae0] with z hz
       have hn : 0 < ‖z‖ := norm_pos_iff.2 hz
