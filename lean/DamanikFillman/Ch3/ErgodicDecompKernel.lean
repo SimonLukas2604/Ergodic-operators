@@ -214,19 +214,29 @@ lemma E_of_not_mem {S : X → X} {x : X} (hx : x ∉ G S) :
   have : E S x = diracP x := dif_neg hx
   rw [this]; rfl
 
+/-- `g ↦ g` as a real-valued continuous function, for `g : X →ᵇ ℝ≥0`. -/
+def nnC (f : X →ᵇ ℝ≥0) : C(X, ℝ) := ⟨fun y => (f y : ℝ), NNReal.continuous_coe.comp f.continuous⟩
+
+lemma lintegral_nnreal_eq (f : X →ᵇ ℝ≥0) (ν : Measure X) [IsProbabilityMeasure ν] :
+    ∫⁻ y, (f y : ℝ≥0∞) ∂ν = ENNReal.ofReal (∫ y, nnC f y ∂ν) := by
+  rw [ofReal_integral_eq_lintegral_ofReal (integrable_cont ν (nnC f))
+    (Eventually.of_forall fun y => NNReal.coe_nonneg (f y))]
+  refine lintegral_congr fun y => ?_
+  simp [nnC]
+
 /-- `E` is measurable for the Giry σ-algebra. -/
 lemma measurable_E {S : X → X} (hS : Measurable S) : Measurable (E S) := by
   have hG := measurableSet_G (X := X) hS
   -- integrals of nonnegative bounded continuous functions
   have hlin : ∀ g : X →ᵇ ℝ≥0, Measurable fun x => ∫⁻ y, g y ∂(E S x : Measure X) := by
     intro g
-    set g' : C(X, ℝ) := ⟨fun y => (g y : ℝ), NNReal.continuous_coe.comp g.continuous⟩ with hg'
+    set g' : C(X, ℝ) := nnC g with hg'
     have heq : (fun x => ∫⁻ y, g y ∂(E S x : Measure X)) = fun x =>
         if x ∈ G S then ENNReal.ofReal (birkhoffLimit S g' x) else (g x : ℝ≥0∞) := by
       funext x
       split_ifs with hx
-      · rw [← integral_E hx g', ← BoundedContinuousFunction.toReal_lintegral_coe_eq_integral g,
-          ENNReal.ofReal_toReal (lintegral_lt_top_of_nnreal _ g).ne]
+      · have := (E S x).2
+        rw [← integral_E hx g', hg', lintegral_nnreal_eq]
       · rw [E_of_not_mem hx, lintegral_dirac]
     rw [heq]
     exact Measurable.ite hG (ENNReal.measurable_ofReal.comp
