@@ -46,7 +46,8 @@ lemma integrable_toReal_logPotential {μ ν : Measure ℂ} [IsFiniteMeasure μ] 
   refine hg.mono'
     (measurable_ereal_toReal.comp (lowerSemicontinuous_logPotential hμ).measurable).aestronglyMeasurable
     (Eventually.of_forall fun z => ?_)
-  rw [Real.norm_eq_abs, abs_le]
+  show |(logPotential μ z).toReal| ≤ |potT μ 0 z| + |A|
+  rw [abs_le]
   have hle : (logPotential μ z).toReal ≤ A := ereal_toReal_le (hA z) (logPotential_ne_bot μ z)
   have hge : potT μ 0 z ≤ (logPotential μ z).toReal :=
     ereal_le_toReal (le_iSup (fun N : ℕ => ((potT μ N z : ℝ) : EReal)) 0)
@@ -185,7 +186,7 @@ theorem capCompact_union_mul_inter_le {a : ℂ} {K₁ K₂ : Set ℂ} (h₁ : Is
     filter_upwards [measure_eq_zero_iff_ae_notMem.1 hρuu,
       hρ1.ae_notMem_exceptional h₁ hc1 hρua.2 hEu,
       hρ2.ae_notMem_exceptional h₂ hc2 hρua.2 hEu] with z hzu hz1 hz2
-    have hzu' : z ∈ K₁ ∪ K₂ := by simpa using hzu
+    have hzu' : z ∈ K₁ ∪ K₂ := by simpa only [mem_compl_iff, not_not] using hzu
     have hd2 := toReal_logPotential_le_of_subset h₂ hi inter_subset_right h₂a hci hρ2 hρi hz2
     have hd1 := toReal_logPotential_le_of_subset h₁ hi inter_subset_left h₁a hci hρ1 hρi hz1
     rw [hVi, hV2, EReal.toReal_coe, EReal.toReal_coe] at hd2
@@ -208,7 +209,9 @@ theorem capCompact_union_mul_inter_le {a : ℂ} {K₁ K₂ : Set ℂ} (h₁ : Is
   have hinti := integrable_toReal_logPotential hu hρiu hρuu hlei
   have hint12 : Integrable (fun z => (logPotential ρ1 z).toReal + (logPotential ρ2 z).toReal)
       ρu := hint1.add hint2
-  have hmono := integral_mono_ae hinti (hint12.add (integrable_const (Vi - V1 - V2))) ae3
+  have hint3 : Integrable (fun z => ((logPotential ρ1 z).toReal + (logPotential ρ2 z).toReal) +
+      (Vi - V1 - V2)) ρu := hint12.add (integrable_const _)
+  have hmono := integral_mono_ae hinti hint3 ae3
   rw [integral_add hint12 (integrable_const _), integral_add hint1 hint2] at hmono
   simp only [integral_const, probReal_univ, smul_eq_mul, one_mul] at hmono
   have key : V1 + V2 ≤ Vu + Vi := by linarith
