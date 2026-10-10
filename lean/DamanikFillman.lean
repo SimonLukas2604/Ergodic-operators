@@ -48,6 +48,7 @@ import DamanikFillman.Ch1.HausdorffDecomposition
 import DamanikFillman.Ch1.Localization
 import DamanikFillman.Ch1.Poltoratski
 import DamanikFillman.Ch1.BorelExt
+import DamanikFillman.Ch1.PoltoratskiProof
 import DamanikFillman.Ch1.PoltoratskiRemling
 import DamanikFillman.Ch1.RAGE
 import DamanikFillman.Ch1.SL2
