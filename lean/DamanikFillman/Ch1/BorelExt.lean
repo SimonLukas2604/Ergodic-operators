@@ -95,7 +95,7 @@ theorem tendsto_poisson_conv {f : ℝ → ℝ} (hf : Continuous f) {M : ℝ} (hM
   rw [integral_add (hP.const_mul _) (hind.const_mul _), integral_const_mul, integral_const_mul,
     integral_poissonKernel hε x, integral_indicator isOpen_ball.measurableSet.compl] at hint
   have hcompl : ∫ E in Bᶜ, poissonKernel ε (E - x) = 1 - 2 / Real.pi * Real.arctan (δ / ε) := by
-    have := integral_add_compl isOpen_ball.measurableSet hP
+    have := integral_add_compl (s := ball x δ) isOpen_ball.measurableSet hP
     rw [integral_poissonKernel hε x, hBdef, integral_poissonKernel_ball hε hδ x] at this
     rw [hBdef]; linarith
   rw [hcompl] at hint
