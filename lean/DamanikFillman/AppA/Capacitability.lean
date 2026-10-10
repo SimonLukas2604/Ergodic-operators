@@ -66,8 +66,12 @@ theorem capacity_union_mul_inter_le {a : ℂ} {O₁ O₂ : Set ℂ} (h₁ : IsOp
   rw [capacity_open_eq (h₁.union h₂) (hb (union_subset h₁a h₂a)),
     capacity_open_eq (h₁.inter h₂) (hb (inter_subset_left.trans h₁a))]
   simp only [ENNReal.iSup_mul, ENNReal.mul_iSup]
-  refine iSup_le fun K => iSup_le fun hK => iSup_le fun hKO => iSup_le fun M =>
-    iSup_le fun hM => iSup_le fun hMO => ?_
+  refine iSup_le fun M => iSup_le fun hM => iSup_le fun hMO => iSup_le fun K =>
+    iSup_le fun hK => iSup_le fun hKO => ?_
+  suffices key : capCompact K * capCompact M ≤ capacity O₁ * capacity O₂ by
+    first
+    | exact key
+    | (rw [mul_comm]; exact key)
   obtain ⟨K1, K2, hK1, hK2, hK1O, hK2O, rfl⟩ := hK.binary_compact_cover h₁ h₂ hKO
   have hM1 : M ⊆ O₁ := hMO.trans inter_subset_left
   have hM2 : M ⊆ O₂ := hMO.trans inter_subset_right
@@ -245,21 +249,23 @@ lemma exists_bounded_prefix_subset {N : ℕ → ℕ} {U : Set (ℕ → ℕ)} (hU
     ∃ k, {σ : ℕ → ℕ | ∀ i < k, σ i ≤ N i} ⊆ U := by
   have hT : IsCompact {σ : ℕ → ℕ | ∀ i, σ i ≤ N i} := by
     have : {σ : ℕ → ℕ | ∀ i, σ i ≤ N i} = Set.pi univ fun i => Iic (N i) := by
-      ext σ; simp
+      ext σ; simp [Pi.le_def]
     rw [this]
     exact isCompact_univ_pi fun i => (finite_Iic (N i)).isCompact
-  have hcyl : ∀ σ : ℕ → ℕ, ∃ n, σ ∈ U → PiNat.cylinder σ n ⊆ U := by
+  have hcyl : ∀ σ : ℕ → ℕ, ∃ n, σ ∈ U → PiNat.cylinder (E := fun _ : ℕ => ℕ) σ n ⊆ U := by
     intro σ
     by_cases hσ : σ ∈ U
     · obtain ⟨c, ⟨x, n, rfl⟩, hσc, hcU⟩ :=
-        PiNat.isTopologicalBasis_cylinders.exists_subset_of_mem_open hσ hU
+        (PiNat.isTopologicalBasis_cylinders (E := fun _ : ℕ => ℕ)).exists_subset_of_mem_open hσ hU
       refine ⟨n, fun _ => ?_⟩
       rw [PiNat.mem_cylinder_iff_eq.1 hσc]
       exact hcU
     · exact ⟨0, fun h => absurd h hσ⟩
   choose n hn using hcyl
-  obtain ⟨t, htT, hcover⟩ := hT.elim_nhds_subcover (fun σ => PiNat.cylinder σ (n σ))
-    (fun σ _ => (PiNat.isOpen_cylinder σ (n σ)).mem_nhds (PiNat.self_mem_cylinder σ (n σ)))
+  obtain ⟨t, htT, hcover⟩ := hT.elim_nhds_subcover
+    (fun σ : ℕ → ℕ => PiNat.cylinder (E := fun _ : ℕ => ℕ) σ (n σ))
+    (fun σ _ => (PiNat.isOpen_cylinder (E := fun _ : ℕ => ℕ) σ (n σ)).mem_nhds
+      (PiNat.self_mem_cylinder (E := fun _ : ℕ => ℕ) σ (n σ)))
   refine ⟨t.sup n, fun τ hτ => ?_⟩
   obtain ⟨τ', hτ'⟩ : ∃ τ' : ℕ → ℕ, ∀ i, τ' i = if i < t.sup n then τ i else 0 :=
     ⟨_, fun _ => rfl⟩
@@ -317,7 +323,7 @@ theorem exists_isCompact_le_capCompact {a : ℂ} {X : Set ℂ} (hXa : X ⊆ ball
     have hunion : ⋃ m : ℕ, f '' (S k N ∩ {σ | σ k ≤ m}) = f '' S k N := by
       rw [← image_iUnion, ← inter_iUnion,
         show (⋃ m : ℕ, {σ : ℕ → ℕ | σ k ≤ m}) = univ from
-          eq_univ_of_forall fun σ => mem_iUnion.2 ⟨σ k, le_rfl⟩, inter_univ]
+          eq_univ_of_forall fun σ => mem_iUnion.2 ⟨σ k, show σ k ≤ σ k from le_rfl⟩, inter_univ]
     have h := capacity_iUnion_le_iSup hmono fun m =>
       (image_mono inter_subset_left).trans (hSX k N)
     rw [hunion] at h
@@ -353,7 +359,7 @@ theorem exists_isCompact_le_capCompact {a : ℂ} {X : Set ℂ} (hXa : X ⊆ ball
   -- the compact set
   set T := {σ : ℕ → ℕ | ∀ i, σ i ≤ N i} with hTdef
   have hT : IsCompact T := by
-    have : T = Set.pi univ fun i => Iic (N i) := by ext σ; simp [hTdef]
+    have : T = Set.pi univ fun i => Iic (N i) := by ext σ; simp [hTdef, Pi.le_def]
     rw [this]
     exact isCompact_univ_pi fun i => (finite_Iic (N i)).isCompact
   have hK : IsCompact (f '' T) := hT.image hf
