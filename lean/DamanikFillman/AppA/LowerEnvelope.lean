@@ -14,9 +14,11 @@ I. General Theory*, GSM 221, AMS 2022.
 * `DF.CapacitabilityStatement` — Borel sets are capacitable (in the form needed here): a bounded
   Borel set of positive (outer) capacity contains a compact set of positive capacity.  This is
   Choquet's capacitability theorem for the logarithmic capacity, which the book uses implicitly.
+  Proved in `DamanikFillman/AppA/Capacitability.lean` (`DF.capacitabilityStatement_holds`).
 * `DF.continuousPotentialStatement_of_capacitability`,
   `DF.lowerEnvelopeStatement_of_capacitability` — `DF.ContinuousPotentialStatement`
-  (Lemma A.2.10) and `DF.LowerEnvelopeStatement` (Theorem A.2.9) follow from it.
+  (Lemma A.2.10) and `DF.LowerEnvelopeStatement` (Theorem A.2.9) follow from it.  The unconditional
+  versions are `DF.continuousPotentialStatement_holds` and `DF.lowerEnvelopeStatement_holds`.
 -/
 import DamanikFillman.AppA.ContinuousPotential
 
@@ -210,7 +212,7 @@ theorem capCompact_eq_zero_of_subset_exceptional {K : Set ℂ} (hK : IsCompact K
 positive capacity contains a compact set of positive capacity.  This is Choquet's
 capacitability theorem for the logarithmic capacity (the definitions (A.2.2)–(A.2.3) of the
 capacity of a general set agree with the inner capacity on Borel sets).  Recorded as a
-statement. -/
+statement; proved in `Capacitability.lean` (`DF.capacitabilityStatement_holds`). -/
 def CapacitabilityStatement : Prop :=
   ∀ X : Set ℂ, Bornology.IsBounded X → MeasurableSet X → capacity X ≠ 0 →
     ∃ K ⊆ X, IsCompact K ∧ capCompact K ≠ 0

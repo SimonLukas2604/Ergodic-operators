@@ -65,7 +65,9 @@ The measures considered are finite Borel measures on `ℂ` with finite first mom
   capacitability of Borel sets), via the inner forms proved there and in
   `ContinuousPotential.lean` (`capCompact_eq_zero_of_subset_exceptional`,
   `exists_continuous_potential_of_compact`, the continuity principle
-  `continuous_logPotential_of_carrier`);
+  `continuous_logPotential_of_carrier`).  `CapacitabilityStatement` is proved in
+  `Capacitability.lean` (`capacitabilityStatement_holds`), hence so are both statements
+  (`lowerEnvelopeStatement_holds`, `continuousPotentialStatement_holds`);
 * `CapacityZeroDimStatement` — Thm. A.2.11 (cited; proved in `CapacityDim.lean` via Frostman's lemma:
   `capacityZeroDimStatement_holds`).
 -/
