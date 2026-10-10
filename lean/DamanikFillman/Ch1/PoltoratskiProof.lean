@@ -727,7 +727,7 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
     simp only
     push_cast
     field_simp
-    rw [div_mul_cancel_left₀ hx', one_div]
+    try rw [div_mul_cancel_left₀ hx', one_div]
   filter_upwards [hsing.ae_le hBμ, hImμ] with E hE hIm
   -- `Im F_ν ≥ Im F_μ → ∞`
   have hImν : Tendsto (fun ε : ℝ => (borelTransform ν (E + ε * I)).im) (𝓝[>] 0) atTop := by
