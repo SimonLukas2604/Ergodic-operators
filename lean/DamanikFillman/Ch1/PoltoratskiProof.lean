@@ -105,6 +105,7 @@ lemma jlPhi_eq (μ : Measure ℝ) (f : ℝ → ℝ) (t : ℝ) {z : ℂ}
     (hz : 1 + borelTransform μ z ≠ 0) :
     jlPhi μ f t z = jlPhi μ f 0 z + 2 * t * jlG μ f z + t ^ 2 * jlPsi μ z := by
   unfold jlPhi jlG jlPsi
+  push_cast
   field_simp
   ring
 
@@ -139,11 +140,15 @@ lemma quad_im_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → ℝ} (
   have heq : ∫ x, (f x + s) ^ 2 * poissonKernel ε (x - E) ∂μ =
       ∫ x, f x ^ 2 * poissonKernel ε (x - E) ∂μ + 2 * s * ∫ x, f x * poissonKernel ε (x - E) ∂μ +
         s ^ 2 * ∫ x, poissonKernel ε (x - E) ∂μ := by
-    rw [← integral_const_mul, ← integral_const_mul, ← integral_add h2 (h1.const_mul _),
-      ← integral_add (h2.add (h1.const_mul _)) (hP.const_mul _)]
-    refine integral_congr_ae (Eventually.of_forall fun x => ?_)
-    simp only [Pi.add_apply]
-    ring
+    have hsum : ∫ x, (f x + s) ^ 2 * poissonKernel ε (x - E) ∂μ =
+        ∫ x, (f x ^ 2 * poissonKernel ε (x - E) + 2 * s * (f x * poissonKernel ε (x - E)) +
+          s ^ 2 * poissonKernel ε (x - E)) ∂μ :=
+      integral_congr_ae (Eventually.of_forall fun x => by simp only; ring)
+    have hB : Integrable (fun x => 2 * s * (f x * poissonKernel ε (x - E))) μ := h1.const_mul _
+    have hAB : Integrable (fun x => f x ^ 2 * poissonKernel ε (x - E) +
+        2 * s * (f x * poissonKernel ε (x - E))) μ := h2.add hB
+    have hC : Integrable (fun x => s ^ 2 * poissonKernel ε (x - E)) μ := hP.const_mul _
+    rw [hsum, integral_add hAB hC, integral_add h2 hB, integral_const_mul, integral_const_mul]
   have hnn : 0 ≤ ∫ x, (f x + s) ^ 2 * poissonKernel ε (x - E) ∂μ :=
     integral_nonneg fun x => mul_nonneg (sq_nonneg _) (poissonKernel_nonneg hε.le _)
   have := mul_nonneg Real.pi_pos.le hnn
@@ -270,21 +275,20 @@ theorem norm_jlPhi_add_le (μ : Measure ℝ) [IsFiniteMeasure μ] (hμ : μ ≠ 
           refine (norm_add_le _ _).trans (add_le_add (norm_add_le _ _) ?_)
           push_cast; exact le_rfl
       _ = ‖B2‖ + 2 * |t| * ‖B1‖ + t ^ 2 * ‖F‖ := by
-          rw [norm_mul, norm_mul, norm_mul, Complex.norm_real, Real.norm_eq_abs,
-            abs_of_nonneg (sq_nonneg t)]
+          rw [norm_mul, norm_mul, norm_mul, Complex.norm_real, Complex.norm_real,
+            Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (sq_nonneg t)]
           norm_num
       _ ≤ u + 2 * |t| * u + t ^ 2 * u := by
           gcongr
       _ = (1 + |t|) ^ 2 * u := by rw [← sq_abs t]; ring
   have hN2 : ‖(B1 + t * F) ^ 2 / (1 + F)‖ ≤ (1 + |t|) ^ 2 * u := by
     have h1 := norm_add_mul_le hB1 hF t
-    rw [norm_div, norm_pow, div_le_iff₀ hwpos]
-    calc ‖B1 + t * F‖ ^ 2 ≤ ((1 + |t|) * u) ^ 2 := by gcongr
-      _ = (1 + |t|) ^ 2 * u * (2 * u) / 2 := by ring
-      _ ≤ (1 + |t|) ^ 2 * u * 1 / 2 := by gcongr
-      _ ≤ (1 + |t|) ^ 2 * u * ‖1 + F‖ := by
-          rw [mul_one, mul_div_assoc]
-          exact mul_le_mul_of_nonneg_left (by linarith) (by positivity)
+    rw [norm_div, norm_pow]
+    calc ‖B1 + t * F‖ ^ 2 / ‖1 + F‖ ≤ ((1 + |t|) * u) ^ 2 / (1 / 2) :=
+          div_le_div₀ (by positivity) (pow_le_pow_left₀ (norm_nonneg _) h1 2) (by norm_num) hw
+      _ = 2 * (1 + |t|) ^ 2 * u * u := by ring
+      _ ≤ (1 + |t|) ^ 2 * u := by
+          nlinarith [mul_nonneg (sq_nonneg (1 + |t|)) hu0]
   have hN3 : ‖F / (1 + F)‖ ≤ 2 * u := by
     rw [norm_div, div_le_iff₀ hwpos]
     nlinarith
@@ -568,7 +572,7 @@ theorem jl_limit {Fz B1z Gz : ℝ → ℂ} {A : ℝ → ℝ} {c : ℝ}
 `Im F_μ(E + iε) → ∞`, `F_{fμ}(E + iε) / F_μ(E + iε) → f(E)`. -/
 theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → ℝ}
     (hfm : Measurable f) (hf0 : ∀ x, 0 ≤ f x) (hf1 : ∀ x, f x ≤ 1) :
-    ∀ᵐ E ∂μ, Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) atTop →
+    ∀ᵐ (E : ℝ) ∂μ, Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) atTop →
       Tendsto (fun ε : ℝ => borelTransformDensity μ f (E + ε * I) / borelTransform μ (E + ε * I))
         (𝓝[>] 0) (𝓝 (f E : ℂ)) := by
   rcases eq_or_ne μ 0 with rfl | hμ
@@ -601,7 +605,8 @@ theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ →
   have hTvol : volume T = 0 := by
     have h := ae_tendsto_im_volume μ
     rw [ae_iff] at h
-    refine measure_mono_null (fun E hE hlim => ?_) h
+    refine measure_mono_null ?_ h
+    intro E hE hlim
     exact not_tendsto_atTop_of_tendsto_nhds hlim hE
   have hμ₁T : μ₁ T = 0 := by
     rw [Measure.haveLebesgueDecomposition_add μ₁ volume, Measure.add_apply]
@@ -620,7 +625,7 @@ theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ →
     refine measure_mono_null hTT' ?_
     rw [Measure.restrict_apply hT'm, inter_compl_self, measure_empty]
   -- the singular comparison with `σ`
-  have hN : ∀ᵐ E ∂μ, E ∈ T → Tendsto (fun ε : ℝ => (borelTransform σ (E + ε * I)).im /
+  have hN : ∀ᵐ (E : ℝ) ∂μ, E ∈ T → Tendsto (fun ε : ℝ => (borelTransform σ (E + ε * I)).im /
       (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) (𝓝 0) := by
     have h := ae_singularPart_tendsto_im_ratio_zero μ σ
     rw [ae_iff] at h ⊢
@@ -662,7 +667,7 @@ lemma borelTransformDensity_sub (μ : Measure ℝ) [IsFiniteMeasure μ] {f g : �
 /-- Theorem 1.10.1 for nonnegative measurable `f ∈ L¹(μ)` (Jakšić–Last, via `1 / (1 + f)`). -/
 theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → ℝ}
     (hfm : Measurable f) (hf0 : ∀ x, 0 ≤ f x) (hf : Integrable f μ) :
-    ∀ᵐ E ∂(μ.singularPart volume),
+    ∀ᵐ (E : ℝ) ∂(μ.singularPart volume),
       Tendsto (fun ε : ℝ => borelTransformDensity μ f (E + ε * I) / borelTransform μ (E + ε * I))
         (𝓝[>] 0) (𝓝 (f E : ℂ)) := by
   set ν := μ.withDensity fun x => ENNReal.ofReal (1 + f x) with hνdef
@@ -685,12 +690,12 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
         rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal (by linarith [hf0 x])
     rw [h2, lintegral_const, one_mul, Measure.restrict_apply_univ, nonpos_iff_eq_zero] at h3
     exact h3
-  have hBμ : ∀ᵐ E ∂μ, Tendsto (fun ε : ℝ => (borelTransform ν (E + ε * I)).im) (𝓝[>] 0)
+  have hBμ : ∀ᵐ (E : ℝ) ∂μ, Tendsto (fun ε : ℝ => (borelTransform ν (E + ε * I)).im) (𝓝[>] 0)
       atTop → Tendsto (fun ε : ℝ => borelTransformDensity ν g (E + ε * I) /
         borelTransform ν (E + ε * I)) (𝓝[>] 0) (𝓝 (g E : ℂ)) := hμν.ae_le hB
   have hsing : μ.singularPart volume ≪ μ :=
     Measure.absolutelyContinuous_of_le (Measure.singularPart_le μ volume)
-  have hImμ : ∀ᵐ E ∂(μ.singularPart volume),
+  have hImμ : ∀ᵐ (E : ℝ) ∂(μ.singularPart volume),
       Tendsto (fun ε : ℝ => (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) atTop := by
     rw [ae_iff]; exact singularPart_not_tendsto_atTop μ
   -- identities for the Borel transforms
