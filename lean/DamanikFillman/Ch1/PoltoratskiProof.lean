@@ -746,17 +746,20 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
     ring
   rw [hval] at h3
   refine h3.congr' ?_
-  filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
+  filter_upwards [self_mem_nhdsWithin, hIm.eventually_gt_atTop 0] with ε (hε : 0 < ε) hpos
   have hz : ((E : ℂ) + ε * I).im ≠ 0 := by simpa using hε.ne'
-  have hz' : 0 < ((E : ℂ) + ε * I).im := by simpa using hε
   rw [hgν _ hz, hFν _ hz]
-  have hF0 : borelTransform μ (E + ε * I) ≠ 0 := by
-    intro h0
-    have := borelTransform_im_pos μ (fun h => by
-      rw [h] at hIm
-      exact absurd hIm (by simp [borelTransform])) hz'
-    rw [h0, Complex.zero_im] at this
-    exact lt_irrefl _ this
+  have hF0 : borelTransform μ (E + ε * I) ≠ 0 := fun h0 => by
+    rw [h0, Complex.zero_im] at hpos; exact lt_irrefl _ hpos
+  have hB0 : 0 ≤ (borelTransformDensity μ f (E + ε * I)).im := by
+    rw [borelTransformDensity_im μ hf E hε]
+    exact mul_nonneg Real.pi_pos.le
+      (integral_nonneg fun x => mul_nonneg (hf0 x) (poissonKernel_nonneg hε.le _))
+  have hFB0 : borelTransform μ (E + ε * I) + borelTransformDensity μ f (E + ε * I) ≠ 0 :=
+    fun h0 => by
+      have := congrArg Complex.im h0
+      rw [Complex.add_im, Complex.zero_im] at this
+      linarith
   field_simp
   ring
 
