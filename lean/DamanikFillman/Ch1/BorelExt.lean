@@ -68,7 +68,8 @@ theorem tendsto_poisson_conv {f : ℝ → ℝ} (hf : Continuous f) {M : ℝ} (hM
     have hPE := poissonKernel_nonneg hε.le (E - x)
     rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg hPE]
     by_cases hE : E ∈ B
-    · rw [indicator_of_notMem (fun h => h hE), mul_zero, add_zero, mul_comm (η / 2)]
+    · rw [indicator_of_notMem (show E ∉ Bᶜ from fun h => h hE), mul_zero, add_zero,
+        mul_comm (η / 2)]
       refine mul_le_mul_of_nonneg_left ?_ hPE
       have := hδf E hE
       rw [Real.dist_eq] at this
@@ -87,8 +88,10 @@ theorem tendsto_poisson_conv {f : ℝ → ℝ} (hf : Continuous f) {M : ℝ} (hM
         linarith [hM E, hM x]))
   have hind : Integrable (Bᶜ.indicator fun E => poissonKernel ε (E - x)) :=
     hP.indicator isOpen_ball.measurableSet.compl
-  have hint := norm_integral_le_of_norm_le ((hP.const_mul (η / 2)).add (hind.const_mul (2 * M)))
-    (Eventually.of_forall hbound)
+  have hsum : Integrable (fun E => η / 2 * poissonKernel ε (E - x) +
+      2 * M * Bᶜ.indicator (fun E => poissonKernel ε (E - x)) E) :=
+    (hP.const_mul (η / 2)).add (hind.const_mul (2 * M))
+  have hint := norm_integral_le_of_norm_le hsum (Eventually.of_forall hbound)
   rw [integral_add (hP.const_mul _) (hind.const_mul _), integral_const_mul, integral_const_mul,
     integral_poissonKernel hε x, integral_indicator isOpen_ball.measurableSet.compl] at hint
   have hcompl : ∫ E in Bᶜ, poissonKernel ε (E - x) = 1 - 2 / Real.pi * Real.arctan (δ / ε) := by
@@ -127,8 +130,8 @@ theorem tendsto_integral_im_borelTransform (ν : Measure ℝ) [IsFiniteMeasure �
       refine hb.mono' ?_ (Eventually.of_forall fun p => ?_)
       · exact (Continuous.mul (f.continuous.comp continuous_fst)
           ((continuous_poissonKernel hε).comp (continuous_snd.sub continuous_fst))).aestronglyMeasurable
-      · simp only [Function.uncurry_apply_pair, Real.norm_eq_abs, abs_mul]
-        rw [abs_of_nonneg (poissonKernel_nonneg hε.le _)]
+      · show ‖f p.1 * poissonKernel ε (p.2 - p.1)‖ ≤ |f p.1| * (1 / (Real.pi * ε))
+        rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (poissonKernel_nonneg hε.le _)]
         exact mul_le_mul_of_nonneg_left (poissonKernel_le hε _) (abs_nonneg _)
     rw [integral_integral_swap hint]
     refine integral_congr_ae (Eventually.of_forall fun y => ?_)
@@ -214,15 +217,15 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
     have h1 := im_herglotzRho a b ρ hz
     rw [← hrep _ hz] at h1
     have h2 : (Φ (y * I)).im ≤ C / y := (Complex.im_le_norm _).trans (hdec y hy hy0)
-    have h3 : ∫ x, (1 + x ^ 2) * ((y : ℂ) * I).im / Complex.normSq (x - y * I) ∂ρ =
-        ∫ x, (1 + x ^ 2) * y / (x ^ 2 + y ^ 2) ∂ρ := by
-      refine integral_congr_ae (Eventually.of_forall fun x => ?_)
-      simp only [Complex.mul_im, Complex.ofReal_re, Complex.I_im, Complex.ofReal_im,
-        Complex.I_re, mul_one, mul_zero, add_zero, Complex.normSq_apply, Complex.sub_re,
-        Complex.sub_im, Complex.mul_re, sub_zero, zero_sub]
-      ring_nf
     simp only [Complex.mul_im, Complex.ofReal_re, Complex.I_im, Complex.ofReal_im, Complex.I_re,
       mul_one, mul_zero, add_zero] at h1
+    have h3 : ∫ x, (1 + x ^ 2) * y / Complex.normSq ((x : ℂ) - y * I) ∂ρ =
+        ∫ x, (1 + x ^ 2) * y / (x ^ 2 + y ^ 2) ∂ρ := by
+      refine integral_congr_ae (Eventually.of_forall fun x => ?_)
+      have : Complex.normSq ((x : ℂ) - y * I) = x ^ 2 + y ^ 2 := by
+        simp [Complex.normSq_apply]; ring
+      simp only
+      rw [this]
     rw [h3] at h1
     linarith
   have hnn : ∀ y : ℝ, 0 < y → 0 ≤ ∫ x, (1 + x ^ 2) * y / (x ^ 2 + y ^ 2) ∂ρ := fun y hy =>
@@ -243,7 +246,9 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
     have h6 : |C| + 1 ≤ b * y := by
       rw [div_le_iff₀ hbpos] at hy2; linarith
     have h7 : 1 ≤ y := (le_max_right _ _).trans hy1
-    nlinarith [le_abs_self C]
+    have h8 : (|C| + 1) * 1 ≤ b * y * y :=
+      mul_le_mul h6 h7 zero_le_one (by positivity)
+    linarith [le_abs_self C]
   -- finiteness of `(1 + x²) ρ`
   have hfin : ∫⁻ x, ENNReal.ofReal (1 + x ^ 2) ∂ρ ≤ ENNReal.ofReal |C| := by
     set g : ℕ → ℝ → ℝ≥0∞ := fun n x =>
@@ -254,10 +259,8 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
       refine ENNReal.tendsto_ofReal ?_
       have hy : Tendsto (fun n : ℕ => (n : ℝ) + max y₀ 1) atTop atTop :=
         tendsto_atTop_add_const_right _ _ tendsto_natCast_atTop_atTop
-      have h1 : Tendsto (fun n : ℕ => x ^ 2 / ((n : ℝ) + max y₀ 1) ^ 2) atTop (𝓝 0) := by
-        have := (tendsto_pow_atTop (two_ne_zero)).comp hy
-        exact (this.inv_tendsto_atTop.const_mul (x ^ 2)).congr fun n => by
-          simp [div_eq_mul_inv]
+      have h1 : Tendsto (fun n : ℕ => x ^ 2 / ((n : ℝ) + max y₀ 1) ^ 2) atTop (𝓝 0) :=
+        tendsto_const_nhds.div_atTop ((tendsto_pow_atTop two_ne_zero).comp hy)
       have h2 : Tendsto (fun n : ℕ => (1 + x ^ 2) / (1 + x ^ 2 / ((n : ℝ) + max y₀ 1) ^ 2))
           atTop (𝓝 ((1 + x ^ 2) / (1 + 0))) :=
         tendsto_const_nhds.div (tendsto_const_nhds.add h1) (by norm_num)
@@ -265,6 +268,7 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
       refine h2.congr fun n => ?_
       have hpos : 0 < (n : ℝ) + max y₀ 1 := by positivity
       field_simp
+      ring
     have hmeas : ∀ n, Measurable (g n) := fun n => by
       refine ENNReal.measurable_ofReal.comp ?_
       fun_prop
@@ -272,16 +276,20 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
       intro n
       set y : ℝ := (n : ℝ) + max y₀ 1 with hydef
       have hy0 : 0 < y := by positivity
+      have hy1 : 1 ≤ y := by
+        have := le_max_right y₀ 1; have : (0 : ℝ) ≤ n := Nat.cast_nonneg n; linarith
       have hyy : y₀ ≤ y := by
         have := le_max_left y₀ 1; have : (0 : ℝ) ≤ n := Nat.cast_nonneg n; linarith
       have h := hIm y hyy hy0
       rw [hb0, zero_mul, zero_add] at h
       have hint : Integrable (fun x : ℝ => (1 + x ^ 2) * y / (x ^ 2 + y ^ 2)) ρ := by
         refine Integrable.of_bound (C := y) ?_ (Eventually.of_forall fun x => ?_)
-        · exact (by fun_prop : Continuous fun x : ℝ =>
-            (1 + x ^ 2) * y / (x ^ 2 + y ^ 2)).aestronglyMeasurable
+        · exact ((by fun_prop : Continuous fun x : ℝ => (1 + x ^ 2) * y).div
+            (by fun_prop : Continuous fun x : ℝ => x ^ 2 + y ^ 2)
+            (fun x => by positivity)).aestronglyMeasurable
         · rw [Real.norm_of_nonneg (by positivity), div_le_iff₀ (by positivity)]
-          nlinarith [sq_nonneg x, sq_nonneg y]
+          have h1 : 1 ≤ y ^ 2 := by nlinarith
+          nlinarith [mul_le_mul_of_nonneg_left h1 hy0.le]
       have h2 : ∫⁻ x, g n x ∂ρ = ENNReal.ofReal (y * ∫ x, (1 + x ^ 2) * y / (x ^ 2 + y ^ 2) ∂ρ) := by
         rw [← integral_const_mul, ofReal_integral_eq_lintegral_ofReal (hint.const_mul y)
           (Eventually.of_forall fun x => by positivity)]
@@ -323,11 +331,13 @@ theorem exists_measure_of_isHerglotz {Φ : ℂ → ℂ} (hΦ : IsHerglotz Φ) {C
       push_cast
       field_simp
       ring
+    have hI0 : Integrable (fun x : ℝ => ((1 + x ^ 2 : ℝ) : ℂ)) ρ := hint2.ofReal
     have hI1 : Integrable (fun x : ℝ => ((1 + x ^ 2 : ℝ) : ℂ) * ((x : ℂ) - z)⁻¹) ρ := by
-      refine (hint2.ofReal (𝕜 := ℂ)).mul_of_top_left ?_
+      refine hI0.mul_of_top_left ?_
       exact memLp_top_of_bound (continuous_inv_sub hz.ne').aestronglyMeasurable (1 / |z.im|)
         (Eventually.of_forall fun x => norm_inv_sub_le x hz.ne')
-    rw [integral_congr_ae (Eventually.of_forall hk), integral_sub hI1 (hintx.ofReal (𝕜 := ℂ))]
+    have hIx : Integrable (fun x : ℝ => ((x : ℝ) : ℂ)) ρ := hintx.ofReal
+    rw [integral_congr_ae (Eventually.of_forall hk), integral_sub hI1 hIx]
     have hB : ∫ x, ((1 + x ^ 2 : ℝ) : ℂ) * ((x : ℂ) - z)⁻¹ ∂ρ = borelTransform ν z := by
       rw [borelTransform, hνdef, integral_withDensity_eq_integral_toReal_smul
         (by fun_prop) (Eventually.of_forall fun x => ENNReal.ofReal_lt_top)]
