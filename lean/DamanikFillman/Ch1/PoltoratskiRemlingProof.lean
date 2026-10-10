@@ -621,7 +621,7 @@ theorem singularPart_lambdaS_compl_eq_zero (μ : Measure ℝ) [IsFiniteMeasure �
       rw [← Complex.ofReal_div]
       exact Complex.arg_ofReal_of_nonneg (div_pos hapos hbpos).le
     rw [harg0] at harg
-    have hargeq : ∀ᶠ ε in 𝓝[>] (0 : ℝ),
+    have hargeq : ∀ᶠ (ε : ℝ) in 𝓝[>] (0 : ℝ),
         arg (borelTransform μp (E + ε * I) / borelTransform (μ.singularPart volume) (E + ε * I) /
           (borelTransform μm (E + ε * I) / borelTransform (μ.singularPart volume) (E + ε * I))) =
         (borelTransform (volume.restrict S) (E + ε * I)).im / 2 := by
@@ -652,11 +652,12 @@ theorem singularPart_lambdaS_compl_eq_zero (μ : Measure ℝ) [IsFiniteMeasure �
 /-- If `Σ ∩ (E - δ, E + δ) ⊆ T` for small `δ` and `E ∈ Λ_s(T)`, then `E ∈ Λ_s(Σ)`. -/
 lemma mem_lambdaS_of_eventually_subset {S T : Set ℝ} {E : ℝ}
     (h : ∀ᶠ δ in 𝓝[>] (0 : ℝ), S ∩ ball E δ ⊆ T) (hT : E ∈ lambdaS T) : E ∈ lambdaS S := by
+  simp only [lambdaS, mem_setOf_eq] at hT ⊢
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hT
     (Eventually.of_forall fun _ => bot_le) ?_
-  simp only [lambdaS, mem_setOf_eq] at hT ⊢
   filter_upwards [h] with δ hδ
-  refine ENNReal.div_le_div_right (measure_mono fun x hx => ⟨hδ hx, hx.2⟩) _
+  exact ENNReal.div_le_div_right
+    (measure_mono (fun x hx => ⟨hδ hx, hx.2⟩ : S ∩ ball E δ ⊆ T ∩ ball E δ)) _
 
 /-- **Theorem 1.11.2** (Poltoratski–Remling). -/
 theorem poltoratskiRemlingStatement_holds : PoltoratskiRemlingStatement := by

@@ -930,7 +930,7 @@ theorem logPotential_le_of_real_support [IsFiniteMeasure μ] (hμ : Integrable (
   simpa using this
 
 
-/-! ### Further statements of Appendix A.2 (recorded, not proved) -/
+/-! ### Further statements of Appendix A.2 (recorded here; proved in the files listed above) -/
 
 /-- Prop. A.2.2(e) together with the consistency of (A.2.1) and (A.2.2)–(A.2.3) on compact sets:
 capacity is continuous along decreasing sequences of compact sets and increasing sequences of
