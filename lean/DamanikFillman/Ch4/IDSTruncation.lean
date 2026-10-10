@@ -184,7 +184,8 @@ at least `k` from the boundary. -/
 theorem truncMat_pow_diag (V : ℤ → ℝ) {N : ℕ} (i : Fin N) (k : ℕ) (hk1 : k ≤ (i : ℕ))
     (hk2 : (i : ℕ) + k + 1 ≤ N) :
     (truncMat V 0 N ^ k) i i = (hz V)^[k] (dltF ((i : ℤ) + 1)) ((i : ℤ) + 1) := by
-  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i, ← iext_coe_succ,
+  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i,
+    ← iext_coe_succ (truncMat V 0 N ^ k *ᵥ Pi.single i 1) i,
     iext_truncMat_pow_single V i ((i : ℤ) + 1) (by ring) k (by omega) (by omega)]
 
 lemma norm_iext_truncMat_pow_single_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n| ≤ M) {N : ℕ}
@@ -204,7 +205,8 @@ lemma norm_iext_truncMat_pow_single_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, 
 
 lemma norm_truncMat_pow_diag_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n| ≤ M) {N : ℕ}
     (i : Fin N) (k : ℕ) : ‖(truncMat V 0 N ^ k) i i‖ ≤ (2 + M) ^ k := by
-  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i, ← iext_coe_succ]
+  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i,
+    ← iext_coe_succ (truncMat V 0 N ^ k *ᵥ Pi.single i 1) i]
   exact norm_iext_truncMat_pow_single_le hM i k _
 
 /-- Trace comparison: `|Tr H_N^k - ∑_{n=1}^N ⟨δₙ, H^k δₙ⟩| ≤ 4k(2 + M)^k`. -/
@@ -292,6 +294,7 @@ lemma abs_eigenvalues_truncMat_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n|
     (i : Fin N) : |(truncMat_isHermitian V 0 N).eigenvalues i| ≤ 2 + M := by
   set hA := truncMat_isHermitian V 0 N
   have hAv := hA.mulVec_eigenvectorBasis i
+  have : Nonempty (Fin N) := ⟨i⟩
   obtain ⟨j, hj⟩ := Finite.exists_max (fun j => ‖(hA.eigenvectorBasis i) j‖)
   have hvj : 0 < ‖(hA.eigenvectorBasis i) j‖ := by
     by_contra h0
@@ -303,7 +306,8 @@ lemma abs_eigenvalues_truncMat_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n|
     simp [hall] at h1
   have key : ‖(truncMat V 0 N *ᵥ ⇑(hA.eigenvectorBasis i)) j‖ ≤
       (2 + M) * ‖(hA.eigenvectorBasis i) j‖ := by
-    rw [← iext_coe_succ, iext_truncMat_mulVec, if_pos (by have := j.isLt; omega)]
+    rw [← iext_coe_succ (truncMat V 0 N *ᵥ ⇑(hA.eigenvectorBasis i)) j, iext_truncMat_mulVec,
+      if_pos (by have := j.isLt; omega)]
     exact norm_hz_le hM (norm_iext_le (norm_nonneg _) hj) _
   rw [hAv, Pi.smul_apply, norm_smul, Real.norm_eq_abs] at key
   exact le_of_mul_le_mul_right key hvj
