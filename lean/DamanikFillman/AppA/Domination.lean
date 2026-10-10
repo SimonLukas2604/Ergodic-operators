@@ -124,7 +124,7 @@ theorem le_of_submean_compl {S : Set ℂ} (hS : IsClosed S) {f : ℂ → ℝ}
       have : g z < g z1 := hz1'
       linarith [hz2.2]
   have hAcpt : IsCompact A := (isCompact_closedBall 0 |R|).of_isClosed_subset hAclosed hAsub
-  obtain ⟨z2, hz2A, hmax⟩ := UpperSemicontinuousOn.exists_isMaxOn ⟨z1, hz1, le_rfl⟩ hAcpt
+  obtain ⟨z2, hz2A, hmax⟩ := UpperSemicontinuousOn.exists_isMaxOn (show A.Nonempty from ⟨z1, hz1, le_rfl⟩) hAcpt
     (hgusc.mono fun z hz => hz.1)
   have hle : ∀ z ∉ S, g z ≤ g z2 := by
     intro z hz
@@ -426,7 +426,7 @@ theorem toReal_logPotential_le_of_subset {a : ℂ} {K L : Set ℂ} (hK : IsCompa
   obtain ⟨hgusc, hgsub⟩ := submean_neg_toReal_logPotential hρma hρmle
   set f : ℂ → ℝ := fun w => (logPotential σS w).toReal + -(logPotential ρm w).toReal with hfdef
   have hfusc : UpperSemicontinuousOn f Sᶜ :=
-    hharm.continuousOn.upperSemicontinuousOn.add hgusc.upperSemicontinuousOn
+    hharm.continuousOn.upperSemicontinuousOn.add (hgusc.upperSemicontinuousOn _)
   have hfsub : ∀ w ∉ S, ∃ r0 > 0, ∀ r, 0 < r → r < r0 →
       CircleIntegrable f w r ∧ f w ≤ circleAverage f w r := by
     intro w hw
