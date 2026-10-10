@@ -24,6 +24,7 @@ import DamanikFillman.AppA.RieszBound
 import DamanikFillman.AppA.SubharmonicFourier
 import DamanikFillman.AppA.Domination
 import DamanikFillman.AppA.StrongSubadditivity
+import DamanikFillman.AppA.Capacitability
 import DamanikFillman.AppA.Potential
 import DamanikFillman.AppA.Subharmonic
 import DamanikFillman.Basic

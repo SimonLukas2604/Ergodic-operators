@@ -55,6 +55,7 @@ lemma integrable_toReal_logPotential {μ ν : Measure ℂ} [IsFiniteMeasure μ] 
   have h1 := neg_abs_le (potT μ 0 z)
   have h2 := le_abs_self A
   have h3 := abs_nonneg (potT μ 0 z)
+  have h4 := abs_nonneg A
   constructor <;> linarith
 
 /-- `∫ Φ_μ dν` is the limit of the truncated mutual energies. -/
