@@ -446,12 +446,12 @@ lemma exists_open_of_capacity_lt {B : Set ℂ} {ε : ℝ≥0∞} (h : capacity B
       ((le_iSup (fun _ : IsCompact C => ⨆ (_ : C ⊆ O), capCompact C) hC).trans
         (le_iSup (fun C' => ⨆ (_ : IsCompact C') (_ : C' ⊆ O), capCompact C') C))) hlt⟩
 
-/-- A countable union of compact sets of capacity zero (inside a fixed ball) has capacity zero.
+/-- A countable union of sets of capacity zero (inside a fixed ball) has capacity zero.
 (A probability measure on a compact `C ⊆ ⋃_{i ∈ t} Cᵢ` with energy `E` puts mass
 `mᵢ ≤ ((E + 2R)/aᵢ)^{1/2}` on `Cᵢ` if `Cap(Cᵢ) ≤ e^{-aᵢ}`; with `aᵢ = A 4^{i+1}` these masses
 cannot add up to `1` unless `E ≥ A - 2R`.) -/
-theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L n))
-    (h0 : ∀ n, capCompact (L n) = 0) {R0 : ℝ} (hsub : ∀ n, L n ⊆ ball 0 R0) :
+theorem capacity_iUnion_eq_zero' {L : ℕ → Set ℂ}
+    (h0 : ∀ n, capacity (L n) = 0) {R0 : ℝ} (hsub : ∀ n, L n ⊆ ball 0 R0) :
     capacity (⋃ n, L n) = 0 := by
   have key : ∀ A : ℝ, 0 < A →
       capacity (⋃ n, L n) ≤ ENNReal.ofReal (Real.exp (-(A - 2 * R0))) := by
@@ -462,7 +462,7 @@ theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L 
         ∀ C, IsCompact C → C ⊆ O → capCompact C < ENNReal.ofReal (Real.exp (-a n)) := by
       intro n
       refine exists_open_of_capacity_lt ?_
-      rw [capacity_eq_capCompact (hL n), h0 n]
+      rw [h0 n]
       exact ENNReal.ofReal_pos.2 (Real.exp_pos _)
     choose U hUo hUb hLU hUc using hU
     obtain ⟨V, hVdef⟩ : ∃ V : ℕ → Set ℂ, V = fun n => U n ∩ ball 0 R0 := ⟨_, rfl⟩
@@ -598,6 +598,12 @@ theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L 
       atTop (𝓝 0) := by
     simpa using ENNReal.tendsto_ofReal (Real.tendsto_exp_atBot.comp htend)
   exact le_antisymm (ge_of_tendsto' hlim fun n : ℕ => key ((n : ℝ) + 1) (by positivity)) zero_le
+
+/-- A countable union of compact sets of capacity zero (inside a fixed ball) has capacity zero. -/
+theorem capacity_iUnion_eq_zero {L : ℕ → Set ℂ} (hL : ∀ n, IsCompact (L n))
+    (h0 : ∀ n, capCompact (L n) = 0) {R0 : ℝ} (hsub : ∀ n, L n ⊆ ball 0 R0) :
+    capacity (⋃ n, L n) = 0 :=
+  capacity_iUnion_eq_zero' (fun n => by rw [capacity_eq_capCompact (hL n), h0 n]) hsub
 
 /-! ### Theorem A.2.8 (ii) -/
 
