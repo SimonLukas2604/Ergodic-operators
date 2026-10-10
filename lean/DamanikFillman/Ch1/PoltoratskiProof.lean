@@ -6,6 +6,7 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 
 * `DF.poltoratski_bounded` — Theorem 1.10.1 for densities `0 ≤ f ≤ 1`, in the form: for
   `μ`-a.e. `E` with `Im F_μ(E + iε) → ∞`, `F_{fμ}(E + iε) / F_μ(E + iε) → f(E)`.
+* `DF.poltoratski_general` — Theorem 1.10.1 for an arbitrary finite measure;
 * `DF.poltoratskiStatement_holds` — Theorem 1.10.1 (`DF.PoltoratskiStatement`).
 
 # Proof
@@ -632,13 +633,16 @@ theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ →
     refine measure_mono_null (t := T ∩ {E | ¬ Tendsto (fun ε : ℝ =>
       (borelTransform σ (E + ε * I)).im / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) (𝓝 0)})
       (fun E hE => ⟨(not_imp.1 hE).1, (not_imp.1 hE).2⟩) ?_
-    rw [Measure.haveLebesgueDecomposition_add μ σ, Measure.add_apply]
-    have h1 := measure_mono_null (inter_subset_right (s := T)) h
-    have h2 : (σ.withDensity (μ.rnDeriv σ)) (T ∩ {E | ¬ Tendsto (fun ε : ℝ =>
+    set A := T ∩ {E | ¬ Tendsto (fun ε : ℝ =>
         (borelTransform σ (E + ε * I)).im / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0)
-          (𝓝 0)}) = 0 :=
+          (𝓝 0)} with hA
+    have h1 : μ.singularPart σ A = 0 := measure_mono_null (inter_subset_right (s := T)) h
+    have h2 : (σ.withDensity (μ.rnDeriv σ)) A = 0 :=
       withDensity_absolutelyContinuous _ _ (measure_mono_null inter_subset_left hσT)
-    exact add_eq_zero.2 ⟨h1, h2⟩
+    have hle : μ A ≤ μ.singularPart σ A + σ.withDensity (μ.rnDeriv σ) A := by
+      rw [← Measure.add_apply, ← Measure.haveLebesgueDecomposition_add μ σ]
+    rw [h1, h2, add_zero] at hle
+    exact le_antisymm hle bot_le
   filter_upwards [ae_tendsto_im_ratio μ hf, hN] with E hb hc hE
   refine jl_limit (Gz := fun ε => jlG μ f (E + ε * I))
     (A := fun ε => (borelTransform σ (E + ε * I)).im) hE hb (hc hE) ?_ ?_
@@ -773,10 +777,13 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
   field_simp
   ring
 
-/-- **Theorem 1.10.1** (Poltoratski's theorem). -/
-theorem poltoratskiStatement_holds : PoltoratskiStatement := by
-  intro μ hμfin _ f hf
-  haveI := hμfin
+/-- **Theorem 1.10.1** (Poltoratski's theorem), for an arbitrary finite measure `μ` (compact
+support is not needed). -/
+theorem poltoratski_general (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → ℝ}
+    (hf : Integrable f μ) :
+    ∀ᵐ (E : ℝ) ∂(μ.singularPart volume),
+      Tendsto (fun ε : ℝ => borelTransformDensity μ f (E + ε * I) / borelTransform μ (E + ε * I))
+        (𝓝[>] 0) (𝓝 (f E : ℂ)) := by
   -- a measurable representative
   set f' := hf.1.mk f with hf'def
   have hf'm : Measurable f' := hf.1.stronglyMeasurable_mk.measurable
@@ -815,5 +822,9 @@ theorem poltoratskiStatement_holds : PoltoratskiStatement := by
     · rw [max_eq_left h0, max_eq_right (by linarith)]; ring
     · rw [max_eq_right h0, max_eq_left (by linarith)]; ring
   rw [hsplit, sub_div]
+
+/-- Theorem 1.10.1 (Poltoratski). -/
+theorem poltoratskiStatement_holds : PoltoratskiStatement :=
+  fun μ _ _ _ hf => poltoratski_general μ hf
 
 end DF
