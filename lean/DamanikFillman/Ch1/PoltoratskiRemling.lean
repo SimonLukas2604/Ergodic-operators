@@ -15,11 +15,11 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
   `DF.BoundaryUniquenessStatement` (Theorem 1.9.4(e)); the unconditional version is
   `DF.acPart_pos_of_reflectionless'` in `DamanikFillman.Ch1.BoundaryUniqueness`.
 
-# Statements recorded but not proved (`Prop`s)
+# Statements
 
-* `DF.PoltoratskiRemlingStatement` — Theorem 1.11.2.  Its proof in the book needs the Krein
-  spectral shift representation of Herglotz functions (Exercise 1.11.4) and Poltoratski's theorem
-  (`DF.PoltoratskiStatement`), neither of which is available here.
+* `DF.PoltoratskiRemlingStatement` — Theorem 1.11.2.  It is proved in
+  `DamanikFillman.Ch1.PoltoratskiRemlingProof` (`DF.poltoratskiRemlingStatement_holds`), using
+  the Krein representation of `arg F_μ` (Exercise 1.11.4) and Poltoratski's theorem.
 
 # Deviations
 

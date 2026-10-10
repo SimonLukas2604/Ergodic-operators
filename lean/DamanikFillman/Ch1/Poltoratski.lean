@@ -21,11 +21,11 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 * `DF.poltoratski_of_lipschitz` — Theorem 1.10.1 for Lipschitz `f` (proved);
 * `DF.poltoratski_corollary` — Theorem 1.10.4, derived from Theorem 1.10.1.
 
-# Statements recorded but not proved (`Prop`s)
+# Statements
 
-* `DF.PoltoratskiStatement` — Theorem 1.10.1 (Poltoratski's theorem) in general.  The book's
-  proof (due to Jakšić–Last) goes through the rank-one perturbation `M_id + ⟨𝟙, ·⟩𝟙` of the
-  multiplication operator on `L²(μ)` and its spectral measure, which is not available here.
+* `DF.PoltoratskiStatement` — Theorem 1.10.1 (Poltoratski's theorem) in general.  It is proved
+  in `DamanikFillman.Ch1.PoltoratskiProof` (`DF.poltoratskiStatement_holds`), following the
+  Jakšić–Last argument with the rank-one perturbation replaced by explicit Herglotz functions.
 
 # Deviation in the proof of Lemma 1.10.3
 
