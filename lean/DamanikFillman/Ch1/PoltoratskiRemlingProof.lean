@@ -4,7 +4,6 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
 
 # Main results
 
-* `DF.poltoratski_corollary_general` — Theorem 1.10.4 for arbitrary finite measures;
 * `DF.ae_tendsto_ratio_rnDeriv` — for `m ⟂ Leb` and any finite `ν`,
   `F_ν / F_m → dν/dm` `m`-almost everywhere;
 * `DF.exists_arg_rep` — the Krein representation of `arg F_μ` (cf. Exercise 1.11.4):
@@ -35,57 +34,6 @@ open MeasureTheory Filter Topology Set Metric Complex
 open scoped ENNReal
 
 namespace DF
-
-lemma borelTransform_ne_zero (μ : Measure ℝ) [IsFiniteMeasure μ] (hμ : μ ≠ 0) {z : ℂ}
-    (hz : 0 < z.im) : borelTransform μ z ≠ 0 := by
-  intro h0
-  have := borelTransform_im_pos μ hμ hz
-  rw [h0] at this
-  simp at this
-
-/-! ### Poltoratski's theorem without compact support -/
-
-/-- Theorem 1.10.4 for arbitrary finite measures: if `ρ` is singular with respect to both `σ`
-and Lebesgue measure, then `F_σ(E + iε) / F_ρ(E + iε) → 0` for `ρ`-a.e. `E`. -/
-theorem poltoratski_corollary_general (ρ σ : Measure ℝ) [IsFiniteMeasure ρ] [IsFiniteMeasure σ]
-    (hρσ : ρ ⟂ₘ σ) (hρL : ρ ⟂ₘ volume) :
-    ∀ᵐ (E : ℝ) ∂ρ, Tendsto (fun ε : ℝ => borelTransform σ (E + ε * I) / borelTransform ρ (E + ε * I))
-      (𝓝[>] 0) (𝓝 0) := by
-  obtain ⟨s, hsm, hρs, hσs⟩ := hρσ
-  set μ := ρ + σ
-  have hρle : ρ ≤ μ.singularPart volume := by
-    simp only [μ]
-    rw [Measure.singularPart_add, Measure.singularPart_eq_self.2 hρL]
-    exact Measure.le_add_right le_rfl
-  have hac : ρ ≪ μ.singularPart volume := Measure.absolutelyContinuous_of_le hρle
-  have hT := poltoratski_general μ (f := sᶜ.indicator 1)
-    ((integrable_const (1 : ℝ)).indicator hsm.compl)
-  have hS := poltoratski_general μ (f := s.indicator 1)
-    ((integrable_const (1 : ℝ)).indicator hsm)
-  have hmem : ∀ᵐ (E : ℝ) ∂ρ, E ∈ sᶜ := by rw [ae_iff]; simpa using hρs
-  by_cases hμ0 : μ = 0
-  · have : ρ = 0 := by
-      have h1 : ρ ≤ μ := Measure.le_add_right le_rfl
-      rw [hμ0] at h1
-      exact le_antisymm h1 (Measure.zero_le _)
-    rw [this]; simp
-  filter_upwards [hac.ae_le hT, hac.ae_le hS, hmem] with E hET hES hEs
-  rw [indicator_of_mem hEs] at hET
-  rw [indicator_of_notMem (by simpa using hEs)] at hES
-  have h := hES.div hET (by simp)
-  simp only [Pi.one_apply, Complex.ofReal_one, Complex.ofReal_zero, zero_div] at h
-  refine h.congr' ?_
-  filter_upwards [self_mem_nhdsWithin] with ε (hε : 0 < ε)
-  have hz : (E + ε * I : ℂ).im ≠ 0 := by simpa using hε.ne'
-  have hzpos : 0 < (E + ε * I : ℂ).im := by simpa using hε
-  have hρT : borelTransformDensity μ (sᶜ.indicator 1) (E + ε * I) = borelTransform ρ (E + ε * I) :=
-    borelTransformDensity_indicator hsm.compl (by simpa using hρs) hσs hz
-  have hσS : borelTransformDensity μ (s.indicator 1) (E + ε * I) = borelTransform σ (E + ε * I) := by
-    have := borelTransformDensity_indicator (ρ := σ) (σ := ρ) hsm (by simpa using hσs) hρs hz
-    rwa [add_comm] at this
-  have hFμ : borelTransform μ (E + ε * I) ≠ 0 := borelTransform_ne_zero μ hμ0 hzpos
-  simp only [Pi.div_apply]
-  rw [hρT, hσS, div_div_div_cancel_right₀ hFμ]
 
 /-- If `m` is a finite measure singular with respect to Lebesgue measure and `ν` is any finite
 measure, then `F_ν(E + iε) / F_m(E + iε) → (dν/dm)(E)` for `m`-a.e. `E`. -/

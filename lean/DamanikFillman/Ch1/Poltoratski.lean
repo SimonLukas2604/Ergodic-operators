@@ -19,7 +19,9 @@ Formalization of D. Damanik, J. Fillman, *One-Dimensional Ergodic Schrödinger O
   `ε F_{fμ}(E + iε) → i f(E) μ({E})` and `F_{fμ}/F_μ → f(E)` at every atom `E`;
 * `DF.poltoratski_of_pure_point` — Theorem 1.10.1 when `μ_s` is pure point (proved);
 * `DF.poltoratski_of_lipschitz` — Theorem 1.10.1 for Lipschitz `f` (proved);
-* `DF.poltoratski_corollary` — Theorem 1.10.4, derived from Theorem 1.10.1.
+* `DF.poltoratski_corollary` — Theorem 1.10.4, derived from Theorem 1.10.1 (the unconditional
+  version for arbitrary finite measures is `DF.poltoratski_corollary_general` in
+  `DamanikFillman.Ch1.PoltoratskiProof`).
 
 # Statements
 
