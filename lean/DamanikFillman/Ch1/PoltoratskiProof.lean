@@ -26,6 +26,7 @@ of `μ`, the Cauchy–Schwarz inequality `(Im G)² ≤ Im F_σ · Im Ψ` with a 
 singular to `μ_s`, which is all that is used in Jakšić–Last's argument.
 -/
 import DamanikFillman.Ch1.BorelExt
+import DamanikFillman.Ch1.Poltoratski
 
 noncomputable section
 
@@ -405,7 +406,6 @@ lemma jl_quad (hμ : μ ≠ 0)
   rcases le_total 0 t with ht | ht
   · have h := congrArg (fun ν => (borelTransform (ν.restrict S) z).im)
       (jl_identity_nonneg hμ hτ hμ₁ ht)
-    simp only at h
     haveI := (τ (-1)).smul_finite (ENNReal.ofReal_ne_top (r := t / 2))
     haveI := (τ 1).smul_finite (ENNReal.ofReal_ne_top (r := t / 2))
     rw [him _ _ _ ENNReal.ofReal_ne_top, him _ _ _ ENNReal.ofReal_ne_top,
@@ -416,7 +416,6 @@ lemma jl_quad (hμ : μ ≠ 0)
     linarith
   · have h := congrArg (fun ν => (borelTransform (ν.restrict S) z).im)
       (jl_identity_nonpos hμ hτ hμ₁ ht)
-    simp only at h
     haveI := (τ (-1)).smul_finite (ENNReal.ofReal_ne_top (r := -t / 2))
     haveI := (τ 1).smul_finite (ENNReal.ofReal_ne_top (r := -t / 2))
     have ht' : 0 ≤ -t / 2 := by linarith
