@@ -633,7 +633,7 @@ theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ →
       (borelTransform σ (E + ε * I)).im / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0) (𝓝 0)})
       (fun E hE => ⟨(not_imp.1 hE).1, (not_imp.1 hE).2⟩) ?_
     rw [Measure.haveLebesgueDecomposition_add μ σ, Measure.add_apply]
-    have h1 := measure_mono_null inter_subset_right h
+    have h1 := measure_mono_null (inter_subset_right (s := T)) h
     have h2 : (σ.withDensity (μ.rnDeriv σ)) (T ∩ {E | ¬ Tendsto (fun ε : ℝ =>
         (borelTransform σ (E + ε * I)).im / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0)
           (𝓝 0)}) = 0 :=
@@ -704,7 +704,9 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
     intro z hz
     unfold borelTransform borelTransformDensity
     rw [hνdef, integral_withDensity_eq_integral_toReal_smul
-      (measurable_const.add hfm).ennreal_ofReal (Eventually.of_forall fun x => ENNReal.ofReal_lt_top),
+      (show Measurable (fun x => ENNReal.ofReal (1 + f x)) from
+        (measurable_const.add hfm).ennreal_ofReal)
+      (Eventually.of_forall fun x => ENNReal.ofReal_lt_top),
       ← integral_add (integrable_inv_sub μ hz) (integrable_density_inv_sub μ hf hz)]
     refine integral_congr_ae (Eventually.of_forall fun x => ?_)
     simp only [Complex.real_smul]
@@ -714,7 +716,9 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
     intro z hz
     unfold borelTransform borelTransformDensity
     rw [hνdef, integral_withDensity_eq_integral_toReal_smul
-      (measurable_const.add hfm).ennreal_ofReal (Eventually.of_forall fun x => ENNReal.ofReal_lt_top)]
+      (show Measurable (fun x => ENNReal.ofReal (1 + f x)) from
+        (measurable_const.add hfm).ennreal_ofReal)
+      (Eventually.of_forall fun x => ENNReal.ofReal_lt_top)]
     refine integral_congr_ae (Eventually.of_forall fun x => ?_)
     simp only [Complex.real_smul]
     have hx : 0 < 1 + f x := by linarith [hf0 x]
