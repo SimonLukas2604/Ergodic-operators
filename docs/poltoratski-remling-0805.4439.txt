@@ -1,0 +1,1607 @@
+                                             REFLECTIONLESS HERGLOTZ FUNCTIONS AND
+                                                GENERALIZED LYAPUNOV EXPONENTS
+arXiv:0805.4439v1 [math.SP] 28 May 2008
+
+
+
+
+                                                      ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+                                                  Abstract. We study several related aspects of reflectionless Ja-
+                                                  cobi matrices. Our first set of results deals with the singular part of
+                                                  reflectionless measures. We then introduce and discuss Lyapunov
+                                                  exponents, density of states measures, and other related quantities
+                                                  in a general setting. This is related to the previous material be-
+                                                  cause the density of states measures are reflectionless on certain
+                                                  sets.
+
+
+
+                                                                         1. Introduction
+                                            We study several aspects of reflectionless Jacobi matrices and Her-
+                                          glotz functions in this paper. This is part of a larger program; the
+                                          (perhaps too ambitious) goal is to reach a systematic understanding of
+                                          the absolutely continuous spectrum of Jacobi operators J on ℓ2 (Z+ ),
+                                                  (Ju)(n) = a(n)u(n + 1) + a(n − 1)u(n − 1) + b(n)u(n).
+                                          We will always assume that the coefficients a, b satisfy bounds of the
+                                          form
+                                                          (C + 1)−1 ≤ a(n) ≤ C + 1, |b(n)| ≤ C,
+                                          for some C > 0. Note that if J has some absolutely continuous spec-
+                                          trum, then, by the decoupling argument of Dombrowski and Simon-
+                                          Spencer [8, 21], it actually suffices to assume that a(n) is bounded
+                                          above; the other two inequalities follow automatically.
+                                             Let us recall some definitions. A Herglotz function is a holomorphic
+                                          mapping of C+ = {z ∈ C : Im z > 0} to itself. We denote the set
+                                          of Herglotz functions by H. If F ∈ H, then F (t) ≡ limy→0+ F (t + iy)
+                                          exists for (Lebesgue) almost every t ∈ R. We call F reflectionless (on
+                                          E ⊂ R) if
+                                          (1.1)              Re F (t) = 0 for almost every t ∈ E.
+                                            Date: May 28, 2008.
+                                            Key words and phrases. Jacobi matrix, Herglotz function, reflectionless measure,
+                                          equilibrium measure, density of states, Lyapunov exponent.
+                                            2000 Mathematics Subject Classification. Primary 31A20 34L40 47B39 81Q10;
+                                          Secondary 30C85 31A15.
+                                                                                    1
+2           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+We will also use the notation
+               N (E) = {F ∈ H : F reflectionless on E}.
+Herglotz functions have unique representations of the form
+                                      Z ∞                 
+                                              1     t
+(1.2)     F (z) = Fµ (z) = a + bz +             − 2            dµ(t),
+                                      −∞     t−z t +1
+                                                         R
+with a ∈ R, b ≥ 0, and a (positive) Borel measure µ on R, R dµ(t)
+                                                            t2 +1
+                                                                  < ∞.
+We will call such a measure µ reflectionless (on E) if Fµ ∈ N (E)
+for some choice of a ∈ R, b ≥ 0; for easier reference, it will also be
+convenient to introduce the notation
+                   R(E) = {µ : µ reflectionless on E}.
+                                           R
+We emphasize again that in particular R dµ(t) t2 +1
+                                                     < ∞ for all µ ∈ R(E).
+Also, if µ ∈ R(E), then Fµ will refer to the unique Herglotz function
+Fµ ∈ N (E) that is associated with µ as in (1.2).
+   There are several reasons for being interested in the class N (E);
+here, our main motivation is provided by the following fact: Call a
+(whole line) Jacobi matrix J reflectionless (on E) if gn ∈ N (E) for all
+n ∈ Z, where
+                        gn (z) = hδn , (J − z)−1 δn i
+is the nth diagonal element of the resolvent of J (also known as the
+Green function). Then [17, Theorem 1.4] says that all ω limit points
+of a Jacobi matrix J with some absolutely continuous spectrum are
+reflectionless on E = Σac ; here, Σac denotes an essential support of
+the absolutely continuous part of the spectral measure ρ of J. This is
+defined up to sets of Lebesgue measure zero; we can obtain a represen-
+tative as Σac = {t : dρ/dt > 0}. Please see [17] for the details.
+   In particular, we see that the class N (E) (for a bounded, essentially
+closed set E ⊂ R) is an important object in the study of the asymptotic
+behavior of the coefficients of Jacobi matrices J with σess = Σac =
+E. Statements addressing these issues are sometimes referred to as
+Denisov-Rakhmanov Theorems (after [6, 7, 15]); at present, only the
+cases where E is a finite union of closed intervals [4, 17] or, more
+generally, a so-called homogenous set [17, 22] are well understood.
+   If µ ∈ R(E), then χE dt ≪ dµac . Indeed, this follows immediately
+from (1.1) because dµac (t) = (1/π)Im F (t) dt and the boundary value
+of a Herglotz function can not be zero on a set of positive measure.
+However, it is not so clear in general if µ can also have a singular
+part on E. We have the following criterion. We say that a (positive)
+measure ν is supported by a (measurable) set S if ν(S c ) = 0; unless
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                        3
+
+explicitly stated otherwise, supports are not assumed to be closed in
+this paper.
+Theorem 1.1. Let µ ∈ R(E). Then:
+(a) µs , the singular part of µ, is supported by
+                                                     
+                               |E ∩ (x − h, x + h)|
+                  x ∈ R : lim                       =0 .
+                          h→0+          2h
+(b) Let θ ∈ L∞ (E) be an arbitrary bounded measurable function. Then
+µs is also supported by
+                                 e E θ)(x) exists}.
+                       {x ∈ R : (H
+  Here, we define He E f as
+                           Z                          
+         e                           t−x           t
+        (HE f )(x) = lim                2    2
+                                               − 2         f (t) dt,
+                     y→0+   E    (t − x) + y    t +1
+if the limit exists. This is closely related to the Hilbert transform
+                                       Z
+                                               f (t)
+                     (Hf )(x) = lim                  dt.
+                                 y→0+ |t−x|>y t − x
+
+
+For instance, if f ∈ L1 (R), then both H e E f and HχE f exist (Lebesgue)
+almost everywhere and define the same function (almost everywhere),
+up to an additive constant. Here, we are interested in the singular
+part of µ, so sets of Lebesgue measure zero do matter, and we distin-
+guish between the two transforms. However, for a bounded, integrable
+function, the difference between the integrals defining H  e E and H stays
+bounded, so we also obtain the following variant of Theorem 1.1(b):
+(c) Let θ ∈ L∞ (E). Then µs is supported by
+                            Z                               
+                                         θ(t)
+             x ∈ R : sup                       χE (t) dt < ∞ .
+                      0<y≤1   y<|t−x|≤1 t − x
+
+   It is tempting to compare Theorem 1.1(a) with the results of Sodin-
+Yuditskii [22] on reflectionless Jacobi matrices with homogeneous spec-
+trum. Sodin and Yuditskii prove that these operators are almost pe-
+riodic and have purely absolutely continuous spectra. We can obtain
+this latter conclusion for the much larger class of weakly homogeneous
+spectra (to be defined in Section 2) directly from Theorem 1.1(a); see
+Definition 2.1 and Corollary 2.3 below. However, this will not give any
+additional information on the structure of the associated Jacobi matri-
+ces. Perhaps Theorem 1.1 can actually be used as the starting point
+for such a refined analysis, but at present, this is only a hope for the
+future.
+4           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+  It is easier to keep track of the pure point part of a reflectionless
+measure, and in fact Theorem 1.1(c) gives a sharp criterion in this
+case.
+Theorem 1.2. Let E ⊂ R be a Borel set, and fix x ∈ R. Then the
+following are equivalent:
+(a) µ({x}) = 0 for all µ ∈ R(E).
+(b)
+                          Z x+1
+                                χE (t)
+                                       dt = ∞
+                           x−1 |t − x|
+
+  Our final result on the singular part of reflectionless measures is of
+a conditional nature. It says that if µ is also non-zero outside E, then
+this will only make it more difficult to produce a singular part on E.
+To be able to formulate this concisely, we introduce
+                  R0 (E) = {µ ∈ R(E) : µ(E c ) = 0} .
+Theorem 1.3. Let E ⊂ R be a closed set. Suppose that µs (E) = 0 for
+µ ∈ R0 (E). Then νs (E) = 0 for all ν ∈ R(E).
+   As our next topic, we would like to address the following question:
+Given a set E, how can we produce examples of measures that are
+reflectionless on E? Two quick answers are immediately available: As
+already mentioned above, [17, Theorem 1.4] says that if we start out
+with a Jacobi matrix with Σac ⊃ E and then take ω limit points, then
+we can be sure that these will be reflectionless on E. A different answer
+to our question was obtained in [12, Theorem 5.4] (see also [13]): the
+potential theoretic equilibrium measure is reflectionless on its support.
+   These two results are not totally unrelated. More precisely, the equi-
+librium measure frequently arises as the density of states measure of
+Jacobi matrices with some absolutely continuous spectrum. Observa-
+tions of this type are not new; see [20] for a recent survey on the use of
+potential theoretic notions. We will develop this and related material
+quite systematically in the last three sections of this paper.
+   This discussion will begin in Section 3. We will introduce Lyapunov
+exponents, density of states measures and other related objects in a
+general setting; these quantities, of course, are in common use, but
+only for ergodic operators. We will do this in the obvious way by
+taking limits on subsequences.
+   The following general result on the Lyapunov exponent γ, which will
+be established in Section 4, is the main reason why these quantities
+are of interest to us here. We will make use of the function g(z) =
+R dk(t)
+   t−z
+        , where dk is a density of states measure. Please see Section
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                         5
+
+3 for the precise definitions. Also recall that since g ∈ H, the limit
+g(x) ≡ limy→0+ g(x + iy) exists for almost every x ∈ R.
+  We will need the following definition.
+Definition 1.1. Let f : R → R be a (Lebesgue) measurable function.
+We say that f is approximately differentiable at x ∈ R if there exists
+d ∈ R so that
+                                                       
+            1                  f (x + y) − f (x)
+       lim       y ∈ (−h, h) :                   −d ≥ǫ =0
+      h→0+ 2h                          y
+for all ǫ > 0. In this case, we call d the approximative derivative of f
+at x, and we write (Dap f )(x) = d.
+  Please see [1, 19, 25] for much more on this and related topics.
+Theorem 1.4. For almost all x ∈ R, we have that
+(1.3)                    (Dap γ)(x) = −Re g(x).
+In particular, γ is approximately differentiable almost everywhere.
+   This is a development of [12, Theorem 5.4]. See also [13] for subse-
+quent work inspired by the same result. Theorem 1.4 may be viewed as
+a result on interchanging limits because, as we will discuss in Section
+3, Re g(x + iy) = −∂x γ(x + iy) for y > 0, so, for almost every x ∈ R,
+Re g(x) = − limy→0+ ∂x γ(x + iy). This raises the question of whether
+it is possible to perform these operations in the opposite order; in other
+words, can we first take the boundary value of γ to obtain γ(x) and
+then take the derivative? Theorem 1.4 provides an affirmative answer
+if the derivative is taken in the approximate sense.
+   However, for us here, Theorem 1.4 is significant mainly because it
+identifies sets on which g is reflectionless; in particular, this set will
+contain the points of constancy of γ. More precisely, we obtain the
+following:
+Corollary 1.5. Let
+              
+         K = c ∈ R : γ −1 ({c}) > 0 ;            C = γ −1 (K).
+Then g ∈ N (C).
+  In particular, this will imply that
+                               g ∈ N (Σac );
+equivalently, density of states measures are always reflectionless on Σac .
+See Theorem 4.2 below for this conclusion.
+6           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Proof. K is countable and thus C is an at most countable union of sets
+Cj of the form Cj = γ −1 ({cj }). Almost every point of Cj is a point of
+density, and at such points, clearly Dap γ = 0. Theorem 1.4 now gives
+the Corollary.                                                        
+  The method that we will use to prove Theorem 1.4 also gives the fol-
+lowing companion result on the regularity of γ. In analogy to Definition
+1.1, introduce
+               A(x, ǫ; f ) = {y ∈ R : |f (y) − f (x)| ≥ ǫ},
+and call a (measurable) function f approximately continuous at x ∈ R
+if
+             1
+               |A(x, ǫ; f ) ∩ (x − h, x + h)| → 0    (h → 0+)
+            2h
+for all ǫ > 0. See again [1, 19, 25] for background information. We will
+show that γ satisfies the following related, but considerably stronger
+condition.
+Theorem 1.6. For every x ∈ R,
+        cap [A(x, ǫ; γ) ∩ (x − h, x + h)] = o(hN )     (h → 0+)
+for arbitrary N ≥ 1, ǫ > 0.
+   Here, cap(S) denotes the logarithmic capacity of a set S; please
+consult [16] for the definition and basic properties.
+   In fact, Theorem 1.6 is not really new: γ is subharmonic and thus
+continuous in the fine topology, so A(x, ǫ; γ) cannot have a fine accumu-
+lation point at x, and now Wiener’s criterion for thinness [16, Theorem
+5.4.1] can be used to deduce Theorem 1.6. Our treatment is direct and
+does not depend on any machinery, so perhaps it is of some interest
+also.
+   If S ⊂ R is a Borel set, then |S| ≤ 4 cap(S) (see [16, Theorem
+5.3.2(c)]), so Theorem 1.6 implies that
+          |A(x, ǫ; γ) ∩ (x − h, x + h)| = o(hN )     (h → 0+)
+for arbitrary N ≥ 1, ǫ > 0. In particular, γ(x) is approximately
+continuous at all points x ∈ R.
+   To round off our discussion, we will also gather a few applications
+of potential theoretic notions (capacities, equilibrium measures) in the
+final section of this paper. While these applications are straightforward
+and also very similar (or identical) to previous work (see [20, 23] for
+more systematic expositions of this), they do seem to illuminate our
+earlier discussions. In particular, we hope that the material from Sec-
+tion 5 will reinforce a point we are trying to make in Sections 3 and 4,
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                          7
+
+namely, that Lyapunov exponents and density of states measures can
+be very useful tools for general Jacobi matrices.
+   Among other things, we will point out that the equilibrium measure
+frequently occurs as the (unique) density of states measure, and this
+measure is reflectionless on its support. We also collect some general
+inequalities and inclusions involving the support of the density of states
+and the sets Σac , {t ∈ R : γ(t) = 0}. Please see Section 5 for the details.
+   Acknowledgment: We thank David Damanik for illuminating discus-
+sions on the theory of ergodic operators.
+
+      2. The singular part of reflectionless measures
+   Please recall the notation Fµ introduced in (1.2). Also, if f ≥ 0
+is a Borel function,
+             R        then, as expected, f µ will denote the measure
+(f µ)(A) = A f dµ. The following result from [14] will be our main
+tool in this section.
+Theorem 2.1 ([14]).
+                             Ff µ (x + iy)
+                         lim               = f (x)
+                        y→0+ Fµ (x + iy)
+
+for µs -almost every x ∈ R.
+   A clarifying comment is in order: Given ν, the function Fν is of course
+not completely determined yet (we don’t know a, b). This, however, is
+not an issue here; the statement from the Theorem holds for all such
+functions. This follows because |Fµ (x + iy)| → ∞ as y → 0+ for µs -
+almost every x ∈ R. In Theorem 2.1, we of course implicitly assume
+that 1/(t2 + 1) is integrable for all measures involved here. See also
+[2, 9] for further discussion of this theorem.
+   We will also use the following consequence of Theorem 2.1.
+Proposition 2.2. Suppose that ρ = ρs and σ ⊥ ρ. Then
+                              Fσ (x + iy)
+                          lim             =0
+                        y→0+ Fρ (x + iy)
+
+for ρ-almost every x ∈ R.
+Proof. Pick a Borel set T ⊂ R with ρ(T c ) = σ(T ) = 0, and abbreviate
+ρ + σ = µ. Then
+                        Fσ     Fχ c µ   Fχ c µ Fµ
+                            = T = T               ,
+                        Fρ     FχT µ     Fµ FχT µ
+and FχT c µ /Fµ → χT c µs -almost everywhere by Theorem 2.1. In partic-
+ular, this ratio goes to zero ρ-almost everywhere. Similarly, FχT µ /Fµ →
+1 ρ-almost everywhere, so the Proposition follows.                      
+8            ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Proof of Theorem 1.1. Let µ ∈ R(E). Write Fµ for the associated
+Herglotz function Fµ ∈ N (E), as in (1.2), and let ξ be the Krein
+function of Fµ , that is,
+                              1
+                     ξ(x) =      lim Im ln Fµ (x + iy),
+                              π y→0+
+where we take the logarithm with 0 < Im ln w < π for w ∈ C+ .
+Since ln Fµ is a Herglotz function, the limit defining ξ exists almost
+everywhere and 0 ≤ ξ(x) ≤ 1.
+  If, conversely, a measurable function ζ with values in [0, 1] is given,
+then ζ is the Krein function of some Herglotz function G. We can
+in fact recover ln G, up to an additive real constant, from ζ, using
+the Herglotz representation of ln G. Here, we make use of the fact
+that since ln G has bounded imaginary part, the associated measure is
+purely absolutely continuous.
+  The condition that Fµ ∈ N (E) means that ξ = 1/2 (almost every-
+where) on E. Given an arbitrary function θ ∈ L∞ (R), with −1 ≤ θ ≤ 1
+and θ = 0 on E c , we can therefore introduce two new Krein functions
+ξ± , as follows:
+                                           1
+                            ξ± (x) = ξ(x) ± θ(x)
+                                           2
+As just explained, this also defines two new Herglotz functions F± , up
+to multiplicative constants. We fix these constants by demanding that
+|F± (i)| = |Fµ (i)|. Call the measures associated with these functions µ+
+and µ− , respectively. Since ξ = (ξ+ + ξ− )/2, we then have that
+                                     p
+(2.1)                          Fµ = Fµ+ Fµ− .
+    Our first aim is to show that
+(2.2)                            µs ≪ µ± .
+Suppose this were wrong and write
+                              µs = gµ+,s + ν,
+with ν ⊥ µ+,s , ν 6= 0. We can then find a Borel set T so that ν(T ) > 0,
+µ+,s (T ) = ν(T c ) = |T | = 0. Theorem 2.1 now shows that
+                    Fν (x + iy)   Fχ µ (x + iy)
+                                 = T s          →1
+                    Fµs (x + iy)   Fµs (x + iy)
+for µs -almost every x ∈ T , and, similarly,
+                  Fν (x + iy)     Fχ (µ +ν) (x + iy)
+                                 = T +               →1
+                 Fµ+ +ν (x + iy)   Fµ+ +ν (x + iy)
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                        9
+
+for (µ+,s + ν)-almost every x ∈ T and thus also for µs -almost every
+x ∈ T . Put differently, this means that
+                             Fµ+ (x + iy)
+                                          →0
+                              Fν (x + iy)
+for µs -almost every x ∈ T . So on a set of positive µs -measure,
+                      Fµ+ (x + iy)     Fµ Fν
+(2.3)                               = +        → 0.
+                      Fµs (x + iy)      Fν Fµs
+We also have that for µs -almost every x ∈ R,
+                               Fµ− (x + iy)
+(2.4)                    sup                 < ∞.
+                        0<y≤1 Fµs (x + iy)
+
+This follows quickly from Proposition 2.2 with ρ = µs if we write
+µ− = hµs + σ, with σ ⊥ µs . Indeed, Fµ− /Fµs → h at µs -almost every
+point by the Proposition and Theorem 2.1, and h < ∞ µs -almost
+everywhere.
+  Finally, Theorem 2.1 also implies that
+                             Fµs (x + iy)
+                         lim              =1
+                        y→0+ Fµ (x + iy)
+
+for µs -almost every x ∈ R, and if this is combined with (2.3), (2.4), we
+obtain that                  p
+                               Fµ+ Fµ−
+                                         →0
+                                Fµ
+on a set of positive µs -measure, but by (2.1), this ratio is identically
+equal to one, so we reach a contradiction if (2.2) fails.
+   Thus we can write
+                         µs = f± µ± = f± µ±,s ,
+with f± ≥ 0 and in fact 0 < f± < ∞ at µs -almost all points. By
+Theorem 2.1,
+                           Fµs (x + iy)
+                      lim               → f± (x + iy)
+                     y→0+ Fµ± (x + iy)
+
+for µ±,s -almost every x ∈ R and thus also µs -almost everywhere. It
+follows that for µs -almost every x,
+                      Fµ+ (x + iy)
+(2.5)            lim                 exists and is positive;
+                y→0+ Fµ− (x + iy)
+
+in fact, this limit is equal to f− (x)/f+ (x) µs -almost everywhere.
+   By definition of ξ± , we have that ξ+ − ξ− = θ, so, if we introduce
+                           Z                   
+                                   1        t
+                   L(z) =              −           θ(t) dt,
+                             E   t − z t2 + 1
+10           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+then Fµ+ /Fµ− = eL . Since −1 ≤ θ ≤ 1, we have that Im L(z) ∈ (−π, π)
+on C+ , and thus (2.5) implies that for µs -almost every x ∈ R,
+             L(x) ≡ lim L(x + iy) exists, Im L(x) = 0.
+                     y→0+
+
+In particular, if we take θ = χE , then
+                      Z
+                                y             1
+    Im L(x + iy) =               2    2
+                                        dt ≥    |E ∩ (x − y, x + y)| ,
+                        E (t − x) + y        2y
+so part (a) of the Theorem follows. Part (b) is now also immediate,
+from the fact that Re L(x+iy) approaches a finite limit as y → 0+. 
+                                                           c
+   The set from part (a) of Theorem 1.1 contains E , so this result
+really addresses the question of whether µ can have a singular part on
+E. In particular, it says that no such singular part can be present for
+closed sets of the following type.
+Definition 2.1. Call a Borel set E ⊂ R weakly homogeneous if
+                              1
+                   lim sup      |E ∩ (x − h, x + h)| > 0
+                    h→0+     2h
+for all x ∈ E.
+  This condition is much weaker than the following, which is used to
+define homogeneous sets:
+                            1
+                 inf inf      |E ∩ (x − h, x + h)| > 0.
+                 x∈E 0<h≤1 2h
+
+From the work of Sodin-Yuditskii [22] it was previously known that
+if E is a compact (strongly) homogeneous set and µ ∈ R0 (E), then
+µs = 0. By using Theorem 1.1, we can go considerably beyond this:
+Corollary 2.3. Suppose that E is a weakly homogeneous set. If µ ∈
+R(E), then µs (E) = 0.
+   This is more general in two respects: E is only assumed to be weakly
+homogeneous (rather than homogeneous), and we can treat measures
+from R(E), not just from R0 (E). This latter improvement, of course,
+can also be obtained from the general principle that we formulated as
+Theorem 1.3.
+   We now move on to proving Theorem 1.2. This will follow quickly
+from the following known characterization of the point part of µ in
+terms of the Krein function ξ of Fµ . See, for example, [11, pg. 201].
+We include a proof for the reader’s convenience.
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                         11
+
+Lemma 2.4. µ({x}) > 0 if and only if
+               Z x+1
+                     |ξ(t) − χ(x,∞) (t)|
+(2.6)                                    dt < ∞.
+                 x−1       |t − x|
+Proof. First of all, we can recover the point part as
+                    µ({x}) = −i lim yFµ (x + iy);
+                                  y→0+
+
+this is well known and follows quickly from the dominated convergence
+theorem. So µ({x}) > 0 if and only if
+(2.7)           lim sup (Re ln Fµ (x + iy) + ln y) > −∞.
+                 y→0+
+
+To slightly simplify the notation, we will now assume that x = 0. In
+terms of the Krein function ξ, the expression from (2.7) equals
+           Z 1                   Z 1
+                  t                  dt
+                2    2
+                       ξ(t) dt −        + O(1)   (y → 0+).
+            −1 t + y              y  t
+By monotone convergence,
+                 Z 0                   Z 0
+                        t                  ξ(t)
+                      2    2
+                             ξ(t) dt →          dt
+                  −1 t + y              −1 t
+
+(and, of course, this limit could equal −∞). Also,
+  Z 1                   Z 1       Z 1                   Z 1
+          t                  dt       t(ξ(t) − 1)               y2
+       2    2
+              ξ(t) dt −         =                  dt −              dt
+   0 t +y                y   t     y    t2 + y 2              2    2
+                                                         y t(t + y )
+                                       Z y
+                                            tξ(t)
+                                    +       2     2
+                                                    dt
+                                        0 t +y
+                                  Z 1
+                                      t(ξ(t) − 1)
+                                =                  dt + O(1),
+                                   y    t2 + y 2
+and, by monotone convergence again,
+            Z 1                  Z 1
+                t(ξ(t) − 1)          ξ(t) − 1
+                   2    2
+                            dt →              dt ≥ −∞.
+             y    t +y            0      t
+These calculations have shown that (2.7), for x = 0, holds if and only
+if                Z 0           Z 1
+                      ξ(t)          1 − ξ(t)
+                           dt +              dt < ∞,
+                    −1 |t|       0     t
+as asserted by the Lemma.                                           
+Proof of Theorem 1.2. Suppose that condition (b) from Theorem 1.2
+fails. Put
+                          1
+                   ξ(t) = χE (t) + χE c ∩(x,∞) (t).
+                          2
+12           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Let F ∈ H be the corresponding Herglotz function. Since ξ = 1/2 on
+E, we have that F ∈ N (E), but it is also clear that (2.6) holds, so the
+corresponding measure has a point mass at x.
+  The converse is an immediate consequence of Theorem 1.1(c), with
+θ(t) = sgn(t − x). Furthermore, we can also obtain this statement
+conveniently from Lemma 2.4, as follows: If Fµ ∈ N (E), then ξ = 1/2
+almost everywhere on E, so the integrand from (2.6) equals 1/(2|t−x|)
+on E ∩ (x − 1, x + 1) and thus (2.6) can not hold if we have condition
+(b) from Theorem 1.2.                                                 
+Proof of Theorem 1.3. Let ν ∈ R(E). We claim that if µ ∈ R0 (E),
+then we must have that
+                             Fµ (x + iy)
+(2.8)                    lim             =0
+                        y→0+ Fν (x + iy)
+
+for νs -almost every x ∈ R. Indeed, µs = 0, µ(E c ) = 0 by assumption,
+and, as discussed above, the condition that ν ∈ R(E) forces the abso-
+lutely continuous part of ν to be equivalent to χE dt on E. So µ ≪ ν,
+µs = 0, and thus (2.8) follows immediately from Theorem 2.1.
+   Starting from ν, we will now construct a measure µ ∈ R0 (E) for
+which (2.8) cannot hold at any point x ∈ E. This will prove that
+νs (E) = 0, as claimed.
+   We will again work with the Krein functions; the following simple
+monotonicity property is at the heart of the matter.
+Lemma 2.5. For ξ ∈ L∞ (a, b), 0 ≤ ξ ≤ 1, and x ∈     / [a, b], define
+                                   Z b
+                                       ξ(t) dt
+                          Ix (ξ) =             .
+                                     a t−x
+       Rb
+Let c = a ξ(t) dt. Then
+                                    
+               Ix (ξ) ≤ Ix χ(a,a+c)     for all x ∈
+                                                  / [a, b].
+Proof. It suffices to prove this for Pstep  functions ξ because these are
+                                        N
+dense in L1 . So assume that ξ = j=1 sj χIj , with disjoint intervals Ij .
+If (c, c + h) is such an interval of constancy of ξ and ξ = s on (c, c + h),
+with 0 < s < 1, then, as an elementary argument shows, Ix (ξ) will go
+up if we redefine ξ on (c, c + h) as χ(c,c+sh). Use this procedure on all
+intervals of constancy. Since Ix (ξ) clearly also increases if we pass to
+the non-increasing rearrangement of ξ, we obtain the Lemma.               
+  Let ξ be the Krein function of Fν , and, motivated by Lemma 2.5,
+define ξ0 as follows: ξ0 = 1/2 on E, and if (a, b) is one of the bounded
+components of the open set E c , set ξ0 = χ(a,a+c) on (a, b), where c =
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                        13
+Rb
+ a
+   ξ dt, as in the Lemma. If E c has unbounded components, put ξ0 = 1
+(say) on these. Notice that ξ0 is the Krein function of a Herglotz
+function Fµ whose associated measure satisfies µ ∈ R0 (E). Indeed, µ
+is reflectionless on E because this property is equivalent to ξ0 = 1/2
+on E, and µ(E c ) = 0 because Fµ (x) ≡ limy→0+ Fµ (x + iy) exists and is
+real at all points of E c , except possibly at the jumps of ξ0 . However,
+these can’t be discrete points of µ either because in order for this to
+happen, ξ0 would have to jump from 0 to 1, not the other way around,
+by Lemma 2.4.
+   Now fix x ∈ E and look at ln |Fµ /Fν |. As y → 0+,
+                                         Z
+                                                     ξ0 (t) − ξ(t)
+(2.9) ln |Fµ (x+iy)|−ln |Fν (x+iy)| =                              dt+O(1).
+                                           y<|t−x|≤1     t−x
+Since ξ = ξ0 = 1/2 on E, this set doesn’t contribute to the integral.
+Moreover, by Lemma 2.5 and construction of ξ0 , those components of
+E c that are contained in the region of integration make non-negative
+contributions. This more or less finishes the proof except that there
+might also be up to four truncated components of E c contributing to
+the integral. Suppose for example that (a, b) is such a component and
+x ≤ a < x + y < b ≤ x + 1. Suppose also, for simplicity, that x = 0.
+We claim that then
+                       Z b
+                           ξ0 (t) − ξ(t)
+                                         dt ≥ −1.
+                        y         t
+This follows because Lemma 2.5 says that this integral will only become
+smaller if we replace the actual ξ on (y, b) by χ(y,y+h) , where again h is
+chosen so that the integral of ξ over (y, b) is left unchanged. A similar
+process was used to construct ξ0 , so after this replacement, ξ0 and ξ
+are both characteristic functions of an interval, and the interval of ξ0 is
+not smaller than the one corresponding to ξ, so the difference ξ0 − ξ is
+zero, except perhaps on an interval of at most the size of the truncated
+piece (a, y), and this is obviously ≤ y.
+  Similar discussions of course apply to the other cases, so (2.9) is
+bounded below as y → 0+ and (2.8) cannot hold.                           
+
+     3. General Lyapunov exponents and density of states
+                           measures
+   In this section, we define basic objects such as the density of states,
+Lyapunov exponents etc. in a general setting. Usually, these quantities
+are considered only for Jacobi matrices that come from an ergodic dy-
+namical system, but pretty much the same setup also works in a general
+situation, provided the limits are taken on suitable subsequences.
+14           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+   Let us make this precise. We are given a half line Jacobi matrix J on
+ℓ2 (Z+ ), where Z+ = {1, 2, . . .}. It will be convenient to define a(0) = 1.
+For z ∈ C+ , let f± (n, z) be the solutions of
+(3.1)       a(n)f (n + 1) + a(n − 1)f (n − 1) + b(n)f (n) = zf (n)
+that satisfy the initial conditions:
+              f− (0, z) = 0                    f+ (0, z) = 1
+              f− (1, z) = 1               f+ (1, z) = −m+ (z)
+Here, m+ (z) = hδ1 , (J − z)−1 δ1 i denotes the Titchmarsh-Weyl m func-
+tion of J. Notice that f+ ∈ ℓ2 (Z+ ); put differently, f± are in the domain
+of J near +∞ and 1, respectively. Of course, f− can be defined in this
+way for all z ∈ C, and we will in fact use this function for z = t ∈ R
+later on. Also, recall that if z ∈ C+ , then f± (n, z) 6= 0 for all n ≥ 1.
+   We write f± in polar coordinates:
+                       f± (n, z) = R± (n, z)e∓iϕ± (n,z)
+Here, we demand that R± > 0 and
+(3.2)               0 < ϕ± (n + 1, z) − ϕ± (n, z) < π.
+Moreover, the initial values are
+        R− (1, z) = 1, ϕ− (1, z) = 0,   R+ (0, z) = 1, ϕ+ (0, z) = 0.
+These conditions can be satisfied because the functions
+(3.3)
+                  f± (n + 1, z)    R± (n + 1, z) ∓i(ϕ± (n+1,z)−ϕ± (n,z))
+   m± (n, z) := ∓               =∓               e
+                  a(n)f± (n, z)    a(n)R± (n, z)
+are Herglotz functions (see [24]).
+  We are now ready to give the basic definitions. Define Herglotz
+           (N )
+functions w± , gN and (probability) measures dνN , dkN , as follows:
+                                    N
+                     (N )       1 X
+                    w± (z) =          ln [a(n)m± (n, z)]
+                                N n=1
+More precisely, we again use the logarithm with Im(ln ζ) ∈ (0, π) for
+ζ ∈ C+ here. It follows from (3.2), (3.3) that
+                                                                
+           (N )       1                            ϕ+ (N + 1, z)
+(3.4)    w+ (z) =        ln R+ (N + 1, z) + i π −
+                      N                                  N
+                            1               i
+                        − ln R+ (1, z) + ϕ+ (1, z),
+                           N               N
+           (N )       1                       ϕ− (N + 1, z)
+(3.5)    w− (z) =        ln R− (N + 1, z) + i               .
+                      N                            N
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                        15
+
+Next, let
+                         N                          Z ∞
+                     1 X                              dνN (t)
+            gN (z) =       hδn , (J − z)−1 δn i =             ,
+                     N n=1                          −∞ t − z
+
+where
+                                     N
+                                  1 X
+                      dνN (t) =         dkE(t)δn k2 .
+                                  N n=1
+                                                                  (N )
+Here, E denotes the spectral resolution of J. Finally, let λn (n =
+1, . . . , N) be the eigenvalues of J on ℓ2 ({1, . . . , N}) with boundary
+conditions u(0) = u(N + 1) = 0, and put
+                                         N
+                                   1 X
+                         dkN (t) =      δ (N) .
+                                   N n=1 λn
+The following pair of theorems describes basic properties of these quan-
+tities; of course, Theorem 3.2 below is an analog of similar results for
+ergodic operators, and the proof also proceeds along these well trod-
+den paths. Analogs of other familiar basic results (such as Thouless
+formula, support of the density of states etc.) will be discussed later
+in this section.
+Theorem 3.1. Fix a sequence Nj → ∞, and consider the following
+statements:
+        (N )
+(WP) w+ j (z) → w+ (z) uniformly on compact subsets of C+ , for some
+w+ ∈ H.
+         (N )
+(WM) w− j (z) → w− (z) uniformly on compact subsets of C+ , for some
+w− ∈ H.
+(G) gNj (z) → g(z) uniformly on compact subsets of C+ , for some
+g ∈ H.
+(N) dνNj → dν in weak ∗ sense, for some probability (Borel) measure
+ν on R.
+(K) dkNj → de    k in weak ∗ sense, for some probability (Borel) measure
+de
+ k on R.
+(A) (a(1) · · · a(Nj ))1/Nj → A, for some A > 0.
+
+  Then (WP) ⇐⇒ (WM) and (G) ⇐⇒ (N) ⇐⇒ (K). Moreover, (WP)
+or (WM) implies (G), (N), (K) and also (A). Conversely, if (A) holds,
+then each of (G), (N), (K) implies (WP), (WM).
+  Note that we will always be able to achieve convergence on suitable
+subsequences; for example, we can use the Banach-Alaoglu Theorem
+16              ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+in conditions (N), (K) if we also observe that the measures dνN , dkN
+have supports contained in a fixed compact set.
+   It is natural to ask if perhaps the first five conditions are all equiv-
+alent to each other; unfortunately, we have not been able to clarify
+this.
+Theorem 3.2. Let Nj be a sequence so that the conditions from The-
+orem 3.1 hold. Introduce γ, k : C+ → R by writing w+ as
+                             w+ (z) = −γ(z) + iπk(z).
+Then k(t) ≡ limy→0+ k(t + iy) exists for every t ∈ R, k(t) is an in-
+                           ′
+creasing function, −iw+ , w+ ∈ H, and the following identities hold:
+            w+ (z) + w− (z) ≡ iπ,            ′
+                                     g(z) = w+ (z), de k = dν = dk
+                                       Z ∞
+                                           dk(t)
+                               g(z) =
+                                            t−z
+                                       Z−∞
+                                         ∞
+                       w+ (z) = ln A −     ln(t − z) dk(t)
+                                           −∞
+
+Proof. The following proof will establish both Theorem 3.1 and The-
+orem 3.2. First of all, notice that if a sequence Nj is given, we can
+always pass to a subsequence Nj′ so that all the limits from Theorem
+3.1 exist on that subsequence. Indeed, as already pointed out above,
+this follows from the Banach-Alaoglu Theorem in parts (N), (K), and
+in parts (WP), (WM), (G), we can use a normal families argument.
+Note that in this latter case, the limiting function could in principle
+be identically equal to a constant c ∈ R ∪ {∞} (rather than lie in
+H). However, this does not actually happen here; we will rule out this
+possibility in a moment.
+  Now fix a sequence Nj → ∞ for which all limits from Theorem 3.1
+exist. As anticipated in the statement of Theorem 3.2, define γ, k by
+writing
+                 w+ (z) = −γ(z) + iπk(z)      (z ∈ C+ ).
+Since R+ ∈ ℓ2 , (3.4) shows that γ(z) ≥ 0. Moreover, 0 ≤ k(z) ≤ 1
+and in fact both inequalities are strict unless w+ is a constant. The
+Wronskian of two functions u, v on Z+ is defined as
+                W (u, v) = a(n) (u(n)v(n + 1) − u(n + 1)v(n)) .
+If u, v both solve the same equation (3.1), then W (u, v) is independent
+of n. From (3.3), we obtain that
+     W (f+ , f− ) = a(n)2 R+ (n, z)R− (n, z)ei(ϕ− (n,z)−ϕ+ (n,z))
+                                                    × (m+ (n, z) + m− (n, z)).
+                  REFLECTIONLESS HERGLOTZ FUNCTIONS                        17
+
+On a suitable subsequence Nj′ , the coefficients a(Nj′ ) as well as the
+Herglotz functions m± (Nj′ , ·) will also converge, and these latter limits
+have to be genuine Herglotz functions (not real constants) because the
+associated measures are finite measures whose supports are contained
+in a fixed compact set. It follows that
+                     R+ (Nj′ , z)R− (Nj′ , z) → α(z) > 0
+as j → ∞, and thus, by (3.4), (3.5), Re w+ (z) = −Re w− (z). In other
+words, w+ + w− is a Herglotz function whose real part is identically
+equal to zero. Hence w+ + w− ≡ iBπ for some B ≥ 0, or, equivalently,
+(3.6)                  w− (z) = γ(z) + iπ(B − k(z)).
+We will now use oscillation theory to prove that B = 1 here.
+  Write k(t) ≡ limy→0+ k(t+ iy) and ϕ− (N, t) ≡ limy→0+ ϕ− (N, t+ iy);
+by general facts about Herglotz functions, these limits exist for almost
+every t ∈ R. Moreover, by combining (3.6) with (3.5), we see that
+                                       ϕ− (Nj + 1, t)
+(3.7)              (B − k(t)) dt = lim                dt;
+                                   j→∞     πNj
+the limit is in weak ∗ sense, and we are also using the fact that, since
+the Herglotz functions we are currently discussing have bounded imagi-
+nary parts, their associated measures are purely absolutely continuous.
+Similarly, (3.4) implies that
+                                       ϕ+ (Nj + 1, t)
+(3.8)              (1 − k(t)) dt = lim                dt.
+                                   j→∞     πNj
+   Suppose now that f− (n, t) 6= 0 for n = 1, 2, . . . , N + 1. Notice that
+for fixed N, this will fail only at finitely many t ∈ R. So R− (n, t) > 0,
+and the continuity of f− (n, ·) together with the normalization ϕ− (n +
+1, z) − ϕ− (n, z) ∈ (0, π) (for z ∈ C+ ) now imply the following:
+           ϕ− (n, t) = lim ϕ− (n, t + iy) exists,    ϕ− (1, t) = 0,
+                       y→0+
+
+and
+                                    (
+                                     0   if f− (n + 1, t)f− (n, t) > 0
+        ϕ− (n + 1, t) − ϕ− (n, t) =                                    .
+                                     π   if f− (n + 1, t)f− (n, t) < 0
+
+In particular, (1/π)ϕ− (N + 1, t) equals the number of sign changes of
+f− (·, t) on {1, 2, . . . , N + 1}.
+  By oscillation theory [24, Chapter 4], ϕ− (N + 1, ·) is a decreasing
+function; the jumps occur at the zeros of f− (N + 1, t), but these are
+18           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+                            (N )
+precisely the eigenvalues λj       of the problem on {1, 2, . . . , N}. There-
+fore,
+                     1
+(3.9)                  d(−ϕ− (N + 1, t)) = dkN (t).
+                    πN
+   Similar reasoning may be applied to f+ . If m+ (t) ≡ limy→0+ m(t +
+iy) exists and f+ (n, t) 6= 0 for n = 1, 2, . . . , N + 1, then ϕ+ (n, t) ≡
+limy→0+ ϕ+ (n, t + iy) exists, too, and ϕ+ (N + 1, t) again essentially
+counts sign changes. More precisely, (1/π)ϕ+ (N + 1, t) differs by at
+most 2 from the number of sign changes of Re f+ (·, t) on {1, 2, . . . , N}.
+   By oscillation theory again, any two non-trivial solutions to the same
+equation have essentially the same number of sign changes; more pre-
+cisely, the difference is at most 1 in absolute value. Thus
+
+                 ϕ− (N + 1, t)      ϕ+ (N + 1, t)
+                               dt −               dt → 0
+                     πN                 πN
+as N → ∞, in the weak ∗ topology. By taking the limits on the
+sequence Nj and recalling (3.7), (3.8), we now see that indeed B = 1
+in (3.6). We have established the first identity from Theorem 3.2.
+   Let ψ ∈ C0∞ (R). Then, by (3.9),
+      Z ∞                              Z ∞
+  1                      ′          1
+          ϕ− (Nj + 1, t)ψ (t) dt =          ψ(t) d(−ϕ− (Nj + 1, t))
+ πNj −∞                            πNj −∞
+                                   Z ∞                 Z ∞
+                                 →            e
+                                        ψ(t) dk(t) = −     ψ ′ (t)e
+                                                                  k(t) dt.
+                                        −∞                   −∞
+
+
+Here, we define the measure de  k as the limit from part (K) of Theorem
+3.1; we then also obtain a corresponding increasing (and, let’s say:
+                                    R
+right-continuous) function e k(t) = (−∞,t] de
+                                            k(s).
+   On the other hand, we see from (3.7) that this integral also converges
+   R∞
+to −∞ ψ ′ (t)(1 − k(t)) dt, so we deduce that e k(t) = k(t) + c, for some
+constant c ∈ R. In fact, it would be more cautious to say that we
+obtain this relation off a set of Lebesgue measure zero (at this point,
+the only thing we can say for sure is that k(t) ≡ limy→0+ k(t + iy) has
+been defined almost everywhere, and k, e   k might have discontinuities).
+We will see later that these precautions are actually unnecessary: c = 0
+and k(t) exists everywhere and is continuous. In any event, we now
+know that dk = de  k.
+   Next, we analyze the Herglotz representation of w+ . Recall again
+that Im w+ is bounded, so the associated measure is purely absolutely
+                 REFLECTIONLESS HERGLOTZ FUNCTIONS                         19
+
+continuous and the Herglotz representation reads
+                          Z ∞                 
+                                   1        t
+            w+ (z) = C0 +             −          k(t) dt.
+                           −∞    t − z t2 + 1
+An integration by parts shows that
+                      Z ∞                            
+                            ∂                1    2
+       w+ (z) = C0 +            ln(t − z) − ln(t + 1) k(t) dt
+                       −∞ ∂t                 2
+                                     t − z t=R
+              = C0 + lim k(t) ln √
+                      R→∞             t2 + 1 t=−R
+                    Z ∞                            
+                                         1     2
+                  −        ln(t − z) − ln(t + 1) dk(t)
+                      −∞                 2
+                     Z ∞
+              =C−         ln(t − z) dk(t).
+                         −∞
+
+Some comments on this calculation are in order: As we saw above,
+dk is a compactly supported finite measure on R. This also implies
+that the function k(t) approaches finite limits as t → ±∞. Finally,
+as usual, Im(ln ζ) ∈ (0, π) for ζ ∈ C+ , and if ζ ∈ C− , we interpret
+ln ζ = − ln ζ −1.
+   We in particular obtain the following pair of formulae:
+                            Z ∞
+                    ′            dk(t)
+                  w+ (z) =             ,
+                             −∞ t − z
+                                   Z ∞
+                    γ(z) = −C +          ln |t − z| dk(t)
+                                      −∞
+
+This latter identity also lets us identify the constant C: Since dkNj →
+dk in the weak ∗ topology and these (probability) measures have sup-
+ports contained in a fixed compact set, we see that for z ∈ C+ ,
+                             Z ∞
+         γ(z) = −C + lim          ln |t − z| dkNj (t)
+                        j→∞   −∞
+                                Nj
+                         1     Y
+              = −C + lim    ln     z − λn(Nj )
+                     j→∞ Nj
+                               n=1
+                            1
+              = −C + lim       ln |a(1) · · · a(Nj )f− (Nj + 1, z)| .
+                        j→∞ Nj
+
+To pass to the second line, we just used the definition of dkNj , and the
+last equality follows because f− (Nj + 1, z) is a polynomial of degree Nj ,
+                                                                        (N )
+with leading term z Nj /(a(1) · · · a(Nj )) and zeros precisely at the λn j .
+20            ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Now
+                 1
+                    ln |f− (Nj + 1, z)| → Re w− (z) = γ(z),
+                 Nj
+so it follows that lim(1/Nj ) ln(a(1) · · · a(Nj )) exists and equals C. Thus
+                                      Z ∞
+(3.10)               γ(z) = − ln A +          ln |t − z| dk(t),
+                                         −∞
+                                   Z ∞
+                  w+ (z) = ln A −          ln(t − z) dk(t),
+                                        −∞
+
+where we have defined
+                       A = lim (a(1) · · · a(Nj ))1/Nj .
+                                j→∞
+
+  Identity (3.10) (the Thouless formula; see also Corollary 3.3 below)
+has a number of consequences, which we now develop. First of all,
+(3.11)                      γ(t) ≡ lim γ(t + iy)
+                                      y→0+
+
+exists for all t ∈ R. Indeed, since dk is a finite measure of compact
+support,
+                        Z
+                    lim          ln |s − t − iy| dk(s)
+                     y→0+   |s−t|>1/2
+
+exists by dominated convergence. Moreover, monotone convergence
+shows that the integrals over |s − t| ≤ 1/2 also converge, and
+       Z                               Z
+  lim          ln |s − t − iy| dk(s) =          ln |s − t| dk(s) ≥ −∞.
+ y→0+    |s−t|≤1/2                           |s−t|≤1/2
+
+Since γ(t + iy) ≥ 0, the limit cannot be equal to −∞, and
+                       Z
+                           ln |s − t| dk(s) > −∞.
+                            R
+
+Our claim follows, and we have also shown that (3.10) in fact holds for
+z ∈ C+ ∪ R, if γ(t) for t ∈ R is defined by (3.11). Also, k(t) must be
+continuous. (It is well known that we actually obtain the somewhat
+stronger conclusion that k is log Hölder continuous; see again Corollary
+3.3 below.) The Poisson integral representation for the harmonic ex-
+tension k(z) to C+ now shows that k is actually continuous on C+ ∪ R;
+in particular, k(t) = limy→0+ k(t + iy) exists everywhere, as claimed.
+   Our next goal is to show that dν = dk; recall that we have already
+proved that dk = de k. Since the supports of dkN , dνN are contained in
+a fixed compact set and since every continuous function on a compact
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                         21
+
+subset of R can be uniformly approximated by polynomials, it suffices
+to show that
+                     Z                   Z
+                         n
+(3.12)           lim    t dkNj (t) = lim   tn dνNj (t)
+                  j→∞   R              j→∞    R
+
+for all n ≥ 0. Now
+     Z
+                     1 X  (N ) n
+                        N                         N
+          n                          1     n   1 X
+         t dkN (t) =       λj      =   tr JN =       hδj , JNn δj i;
+       R             N j=1
+                                     N         N j=1
+
+here JN denotes the restriction of J to ℓ2 ({1, . . . , N}). In other words,
+if PN denotes the projection onto this subspace, then JN = PN JPN .
+On the other hand,
+                   Z                   N
+                       n            1 X
+                      t dνN (t) =         hδj , J n δj i,
+                    R              N  j=1
+
+and since J n δj = JNn δj if n + j ≤ N, (3.12) indeed follows.
+  It follows that                     Z
+                                         dk(t)
+                               g(z) =          .
+                                       R t−z
+                          ′
+This also shows that g = w+ , and we have now established all identities
+from Theorem 3.2. In particular, this implies that each of the quantities
+g, dk, dν determines the other two from this list, and also w± , up to a
+constant, and this constant, in turn, is determined by A. Also, w+ or
+w− clearly determines everything else.
+   As pointed out above, existence of each of the limits from Theorem
+3.1 can always be achieved by passing to a suitable subsequence (of a
+given sequence), so the relations between these conditions that were
+spelled out in Theorem 3.1 follow now.                                 
+   The Thouless formula (3.10) will play a particularly important role
+in our subsequent discussion, so we state this again, for emphasis, and
+add a well known consequence.
+Corollary 3.3. For z ∈ C+ ∪ R, we have that
+                               Z
+                γ(z) = − ln A + ln |t − z| dk(t).
+                                      R
+
+The function k(t) is log Hölder continuous:
+                                    C
+              k(t + h) − k(t) ≤               (0 < h ≤ 1/2)
+                                  − ln h
+22           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+   For the proof of the log Hölder continuity from the Thouless formula,
+see [3].
+   The Thouless formula displays the Lyapunov exponent γ as the loga-
+rithmic potential of the density of states measure dk, so we may expect
+potential theoretic notions to be useful here. This will be a recurring
+theme in the sequel. For now, we need these tools to give a precise
+bound on the support of dk. A very accessible source for general infor-
+mation about potential theory is [16].
+   In [20], Simon proposes the following refinement of the familiar de-
+composition of the spectrum into essential and discrete spectrum: De-
+note the (logarithmic) capacity of a set E by cap(E), and define, for
+Borel sets S ⊂ R,
+(3.13)   Scap = {x ∈ R : cap(S ∩ (x − h, x + h)) > 0 for all h > 0} .
+It is clear from the definition and basic properties of capacities (as
+discussed in Chapter 5 of [16]) that this set is closed and cap(S \Scap ) =
+0. We will use this definition mainly for S = σ, the spectrum of the
+Jacobi matrix J. Note that then σcap ⊂ σess , and the inclusion can be
+strict.
+Proposition 3.4. If E ⊂ R is a Borel set with cap(E) = 0, then
+k(E) = 0. Moreover, dk is supported by σcap .
+Proof. The assumption that cap(E) = 0 means that
+                 ZZ
+                      ln |s − t| dµ(s) dµ(t) = −∞
+
+for all positive Borel measures µ that are supported by a compact
+subset of E. If we had k(E) > 0, then also k(C) > 0 for some compact
+C ⊂ E by regularity, but it follows from the Thouless formula that
+                   Z Z
+                        ln |s − t| dk(s) dk(t) > −∞.
+                    C   C
+
+Thus k(E) = 0. To prove the second claim, it now suffices to show
+that dk is supported by σ, because we only split off a capacity zero set
+when passing to σcap . This, however, is clear from oscillation theory:
+If [s, t] ∩ σ = ∅, then ϕ− (N, t) − ϕ− (N, s) = O(1) as N → ∞, so, by
+(3.9), kN ([s, t]) → 0 and thus k((s, t)) = 0.                        
+  In the theory of ergodic operators, one has that almost surely, σ =
+σcap and the topological support of dk (which is defined as the small-
+est closed support) is exactly this set. Of course, this in no longer
+true in the general setting of this section, where we just take limits on
+subsequences. For example, if there are sufficiently long intervals with
+                 REFLECTIONLESS HERGLOTZ FUNCTIONS                          23
+
+a(n) = 1, b(n) = 0, then on suitable subsequences, the operator will
+approximately look like the free Jacobi matrix (a = 1, b = 0 identi-
+cally). In particular, supp dk = [−2, 2] for these limits, but of course
+σ can be much larger, depending on what happens on the complement
+of these intervals.
+
+4. Further properties of generalized Lyapunov exponents
+   We continue our discussion of the quantities introduced in the pre-
+ceding section. Throughout this section and the next, we fix a sequence
+Nj → ∞ for which the limits from Theorem 3.1 exist. Note, however,
+that this sequence is otherwise arbitrary, so our results will apply to
+all such limits.
+   We have defined γ(t) for t ∈ R as a limit of Lyapunov exponents
+γ(t + iy). It is natural to ask if we can also obtain γ(t) directly from
+the solutions to the Jacobi difference equation (3.1) for z = t.
+Proposition 4.1. Let Nj → ∞ be a sequence for which the conditions
+from Theorem 3.1 hold. Then
+                               1
+                γ(t) = lim sup   ln R− (Nj + 1, t)
+                         j→∞ Nj
+
+for quasi every t ∈ R.
+   A property is said to hold quasi everywhere if it holds off a Borel set
+of capacity zero.
+Proof. This is an immediate consequence of the upper envelope theorem
+[20, Theorem A.7] because, as discussed in the proof of Theorem 3.2,
+we have the identity
+                                                       Z ∞
+  1                                             1/Nj
+    ln R− (Nj + 1, t) = − ln(a(1) · · · a(Nj ))      +     ln |s − t| dkNj (s),
+ Nj                                                     −∞
+
+and (a(1) · · · a(Nj ))1/Nj → A, dkNj → dk in weak ∗ sense as j →
+∞.                                                              
+  Let dρ(t) = dkE(t)δ1 k2 be the usual spectral measure of J. Then
+(4.1)                   R− (n, t) ≤ Ct n      (n ≥ 1)
+for ρ-almost every t ∈ R. This type of statement is well known and
+sometimes referredR to as Schnol’s Theorem. Here, (4.1) follows quickly
+                       2
+from the identity R R−   (n, t) dρ(t) = 1. See [10] for a detailed discus-
+sion of these topics.
+   We need one more piece of notation: put
+                          Z = {t ∈ R : γ(t) = 0}.
+24           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Theorem 4.2. There exists a Borel set N ⊂ R, with cap(N) = 0, so
+that ρ is supported by Z ∪ N. In particular, w± , g ∈ N (Σac ).
+  The statement on the support of ρ is a deterministic version of [20,
+Theorem 1.16].
+Proof. By (4.1) and Proposition 4.1, γ(t) = 0 for ρ-almost every t ∈ R,
+except perhaps on the capacity zero set where the Proposition doesn’t
+apply. This gives the first claim. Clearly w± ∈ N (Z), but also g ∈
+N (Z) by Corollary 1.5 (we haven’t proved this yet, but the proof of
+Theorem 1.4 is the very next item on the agenda). Since the capacity
+zero set N cannot support absolutely continuous measures, we have
+that Σac ⊂ Z.                                                        
+   Our next goal is to prove Theorems 1.4 and 1.6. For a more stream-
+lined presentation, we isolate the following simple (but key) calculation.
+Lemma 4.3. If 0 < |t| ≤ 2y, then
+             Z y                                 
+                         h                     y
+                 ln 1 −       dh ≤ 12y ln 1 +       .
+              0          t                    |t|
+Proof. We will treat explicitly only the case 0 < t ≤ 2y here; the case
+where t < 0 is similar, but easier. In the former case,
+                Z y                      Z 1
+                             h
+(4.2)                ln 1 −      dh = t         |ln |s|| ds.
+                 0           t            1−y/t
+
+If y/t ≤ 2, then
+                                    Z 1
+                       (4.2) ≤ 2t         |ln s| ds = 2t ≤ 4y.
+                                     0
+Similarly, if y/t > 2, then
+                  Z y/t−1
+  (4.2) = 2t + t          ln s ds ≤ 2t + y ln(1 + y/t) ≤ 12y ln(1 + y/t).
+                   1
+                                                                            
+Proof of Theorem 1.4. We will prove here that the one-sided right ap-
+                         +
+proximate derivative Dap   γ exists almost everywhere and (1.3) holds.
+The same argument can then be used to establish the corresponding
+statement about the left derivative, and these two statements together
+will give the full claim. Here, one-sided derivatives are defined in the
+                                            +
+obvious way; for example, we say that (Dap     f )(x) = d if for all ǫ > 0,
+                                                          
+              1                 f (x + y) − f (x)
+          lim      y ∈ (0, h) :                    − d ≥ ǫ = 0.
+         h→0+ h                         y
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                      25
+
+   Our basic strategy is modelled on the proof of [12, Theorem 5.4]. The
+following statements hold at (Lebesgue) almost every point x ∈ R:
+      • x is a Lebesgue point of k ′ (t);
+      • limy→0+ g(x + iy) exists;
+      • limy→0+ ks ([x − y, x + y])/y = 0, where ks is the singular part
+        of dk;                                      R
+      • limy→0+ Im gs (x + iy) = 0, where gs (z) = R dkt−z
+                                                         s (t)
+                                                               .
+                                                                +
+We will now show that if x has all these properties, then (Dap    γ)(x)
+exists and (1.3) holds.
+  So fix such an x. To simplify the notation, we will again assume that
+x = 0. The basic idea is to look at averages of
+                                     γ(y) − γ(0)
+                    F (y) ≡ Re g(iy) +           .
+                                          y
+                                          R
+By the formulae from Theorem 3.2, F (y) = R φy (t) dk(t), where
+                                    t       1
+(4.3)                  φ(t) =       + ln 1 − ,
+                                t2 + 1      t
+                                  
+                              1   t
+                      φy (t) = φ      .
+                              y   y
+Note that since φ(t) = O(t−2) for large |t|, we have that φ, φy ∈ L1 (R).
+For later use, we also observe that
+                            Z ∞
+(4.4)                            φ(t) dt = 0.
+                               −∞
+                       RR
+To prove this, look at −R φ. Clearly, the first term from (4.3) is odd
+and thus doesn’t contribute to this integral, and
+  Z R                 Z R
+              1               t−1
+      ln 1 −     dt =     ln           dt
+   −R         t        −R        t
+                      Z −R               Z R
+                    =        ln |t| dt −     ln |t| dt → 0 (R → ∞),
+                        −R−1               R−1
+
+so we obtain (4.4).
+  Suppose now that By is a family of Borel sets with the following
+properties:
+(4.5)                  By ⊂ [δy, y],     |By | ≥ δy,
+for some fixed (but arbitrary) 0 < δ < 1/2. Define
+                                    Z
+                                 1
+                      ψy (t) =          φh (t) dh.
+                               |By | By
+26               ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+We now claim that
+                                (
+                                 y −1 ln(1 + y/|t|) 0 < |t| ≤ 2y
+(4.6)                |ψy (t)| .                                  .
+                                 y/t2               |t| > 2y
+The constant implicit in (4.6) only depends on δ. Indeed, for |t| ≤
+2y this follows immediately from Lemma 4.3 and the obvious bound
+|t|/(t2 + y 2) ≤ 2/y (if |t| ≤ 2y). If, on the other hand, h ≤ y < |t|/2,
+then Taylor’s theorem shows that
+                                         h2                  y
+                       |φh (t)| =        2   2
+                                                + O(h/t2 ) . 2 ,
+                                    |t|(t + h )              t
+and the second bound from (4.6) follows.
+  Next, (4.4) and the Fubini-Tonelli Theorem imply that
+                          Z ∞
+(4.7)                         ψy (t) dt = 0.
+                                     −∞
+
+Our next goal is to show that
+                           Z ∞
+                       lim     ψy (t) dk(t) = 0.
+                              y→0+    −∞
+
+We rewrite this as
+          Z                  Z                    Z
+(4.8)         ψy (t) dk(t) ≤   |ψy (t)| dks (t) +   ψy (t)k ′ (t) dt .
+                 R                     R                       R
+
+Our first step will be to show that the first integral on the right-hand
+side of (4.8) goes to zero as y → 0. Start by considering the contribu-
+tions coming from |t| > 2y: By (4.6),
+       Z                           Z
+                                          y
+                |ψy (t)| dks (t) .      2   2
+                                              dks (t) = Im gs (iy) → 0,
+         |t|>2y                      R t +y
+
+by our choice of x (= 0). Next, if ǫ > 0 is given, we can find η > 0 so
+that if h ≤ η, then ks ([−h, h]) ≤ ǫh. If 2y < η, then this, (4.6), and
+the monotone convergence theorem imply that
+    Z                        ∞ Z
+                             X
+          |ψy (t)| dks (t) =                   |ψy (t)| dks (t)
+        |t|≤2y                              −n y<|t|≤2−n+1 y
+                                    n=0 2
+                                      X∞
+                                    1                       
+                               .          ks −2−n+1 y, 2−n+1y ln (1 + 2n )
+                                    y n=0
+                                     ∞
+                                     X
+                               .ǫ          (n + 1)2−n = Cǫ.
+                                     n=0
+                REFLECTIONLESS HERGLOTZ FUNCTIONS                        27
+                R
+So lim supy→0+ R |ψy | dks ≤ Cǫ, but ǫ > 0 is arbitrary here, so the first
+integral from the right-hand side of (4.8) goes to zero.
+   As for second integral, we recall (4.7) to estimate this as follows:
+              Z                   Z
+                        ′
+                 ψy (t)k (t) dt ≤    |ψy (t)| |k ′ (t) − k ′ (0)| dt
+               R                   R
+
+Now a very similar argument works, so we will just give a sketch of
+this. First of all, for |t| > 2y, ψy (t) is dominated by the Poisson kernel
+y/(t2 + y 2 ), so this part goes to zero because x = 0 is a Lebesgue
+point of k ′ . For small |t|, on the other hand, we again have that the
+contributions coming from |t| ≈ 2−n y will be . ǫn2−n , and the sum
+over n is still . ǫ.
+  Let us summarize: We have shown that
+                                Z
+                            lim ψy (t) dk(t) = 0.
+                         y→0
+
+By unwrapping the definitions, we see that this means that
+              Z                           Z              !
+           1      γ(h) − γ(0)          1
+     lim                       dh +           Re g(ih) dh = 0.
+     y→0 |By | By       h            |By | By
+
+Since g(ih) converges, to g(0), by the choice of x = 0 again, the second
+term converges to Re g(0), so we can also say that
+                     Z                            
+                 1         γ(h) − γ(0)
+(4.9)       lim                         + Re g(0) dh = 0,
+            y→0 |By | B          h
+                        y
+
+
+and this holds for any choice of sets By as in (4.5). This implies that
+the (right) approximate derivative of γ at x = 0 exists and (1.3) holds.
+Indeed, if this were not true, then we could find δ, ǫ > 0 and a sequence
+of sets An ⊂ [0, yn ], with yn → 0, such that |An | ≥ 3δyn and
+                       γ(h) − γ(0)
+                                   + Re g(0) ≥ ǫ
+                            h
+for all h ∈ An . But then we can also construct sets Bn ⊂ [δyn , yn ],
+|Bn | ≥ δyn , so that either
+                       γ(h) − γ(0)
+                                   + Re g(0) ≥ ǫ
+                            h
+for all h ∈ Bn or . . . ≤ −ǫ for all h ∈ Bn . However, then (4.9) with
+Byn = Bn leads to a contradiction, so we have to admit that the (one-
+sided) approximate derivative exists and (1.3) holds, as claimed.   
+28           ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+Proof of Theorem 1.6. This is similar to the previous proof. Again, we
+will explicitly discuss only the point x = 0, to simplify the notation.
+  We now define
+                                          1
+                            φ(t) = ln 1 − .
+                                          t
+Then, by the Thouless formula (3.10),
+                                    Z ∞
+                     γ(y) − γ(0) =      φ(t/y) dk(t).
+                                         −∞
+
+We will again consider averages of this, but will have to set things up
+differently now. Suppose the claim of the Theorem were wrong, that
+is,
+(4.10)                          cap(Bn ) ≥ δynN
+for some δ > 0, N ≥ 1, and a sequence yn → 0 with 0 < yn ≤ 1/4 (say)
+and sets of the form
+                Bn = {t ∈ (−yn , yn ) : γ(t) ≤ γ(0) − ǫ}.
+We are also using the fact that γ is upper semicontinuous here, that
+is, γ(0) ≥ lim supx→0 γ(x), and thus for fixed ǫ > 0 and small t, we can
+never have that γ(t) ≥ γ(0) + ǫ.
+   By (4.10), the definition of the capacity of a set, and Frostman’s
+Theorem [16, Theorem 3.3.4(a)], we can now find compact sets Kn ⊂
+Bn and probability measures µn on Kn (more precisely, these will be
+the equilibrium measures of the sets Kn ), such that
+                      Z
+                         ln |s − t| dµn (s) ≥ C ln yn
+                       R
+for all t ∈ R and n ∈ N. Now define
+                               Z  
+                                    t
+                      ψn (t) =    φ   dµn (h).
+                                R   h
+Then, if 0 < |t| ≤ 2yn (recall also that 2yn ≤ 1/2),
+                        Z
+           |ψn (t)| ≤ − ln |t − h| dµn (h) − ln |t| . − ln |t|.
+                           R
+
+Recall that ln |t| ∈ L1 (dk); indeed, this is part of what Corollary 3.3
+asserts. Therefore, by dominated convergence,
+                           Z
+                      lim         |ψn (t)| dk(t) = 0.
+                     n→∞       |t|≤2yn
+
+On the other hand, if |t| > 2yn and 0 < h ≤ yn , then |φ(t/h)| ≤ ln 2,
+and thus also |ψn (t)| ≤ ln 2 for these t. Moreover, φ(t/h) → 0 as
+                    REFLECTIONLESS HERGLOTZ FUNCTIONS                   29
+
+h → 0+ for fixed t 6= 0, so limn→∞ ψn (t) = 0. Therefore, the dominated
+convergence theorem now shows that
+                           Z
+                      lim        |ψn (t)| dk(t) = 0,
+                        n→∞   |t|>2yn
+          R
+too. So   R
+              ψn dk → 0, but
+               Z                Z
+                  ψn (t) dk(t) = (γ(h) − γ(0)) dµn(h) ≤ −ǫ
+                R                 R
+by construction of µn . It turns out that (4.10) is not tenable.        
+
+                       5. Some potential theory
+   The Thouless formula says that γ is essentially the logarithmic po-
+tential of dk, so it’s not surprising that notions from potential theory
+become relevant here. In this section, we collect some results that can
+be obtained quite easily in this way. While very little here is really
+new, we do feel that these facts complement and illuminate the previ-
+ous discussion. In particular, we will see that quite often, the density
+of states will be the equilibrium measure of its support.
+   As mentioned above, the use of potential theoretic notions in spectral
+theory is also the subject of a recent survey by Simon [20]. This paper in
+fact motivated most of what we do in this section and may be consulted
+for further information. Other useful references are [18, 23].
+   As before, we fix a sequence Nj → ∞ for which the limits from The-
+orem 3.1 exist. Since this sequence is otherwise arbitrary, our results
+will again apply to all possible limit points.
+   We introduce some notation: K = σ(dk) will denote the topological
+support of dk, that is, the smallest closed support of dk. From its
+definition and Proposition 3.4, we see that K is compact and potentially
+perfect in the sense that Kcap = K. If E ⊂ R is compact and of
+positive capacity, we will denote its equilibrium measure by ωE . This
+is defined as the (unique) probability (Borel) measure supported by E
+that maximizes
+                             ZZ
+                     I(ν) ≡        ln |s − t| dν(s) dν(t)
+
+among all such measures. See [16, Section 3.3]. Alternatively, ωE may
+also be described as the harmonic measure for the region C∞ \ E and
+the point ∞. Also, by definition, for a compact set E ⊂ R, we have
+that cap(E) = eI(ωE ) .
+Theorem 5.1. The following conditions are equivalent:
+(a) γ(t) = α for quasi every t ∈ K = σ(dk);
+30             ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+(b) γ(t) = α for ωK -almost every t;
+(c) dk = dωK
+  In this case, α = ln(cap(K)/A).
+Proof. Obviously, (a) implies (b). If (b) holds, then we may integrate
+the Thouless formula (see Corollary 3.3) with respect to dωK and use
+the Fubini-Tonelli Theorem to obtain that
+                    Z         Z
+     α = − ln A +       dk(t)    dωK (s) ln |s − t| = ln(cap(K)/A).
+                      K        K
+                                   R
+The last equality follows because K ln |s − t| dωK (t) = ln cap(K) quasi
+everywhere on K by Frostman’s Theorem [16, Theorem 3.3.4(b)], and
+k doesn’t charge capacity zero sets by Proposition 3.4.
+  On the other hand, by integrating with respect to dk, we find that
+         Z         Z                            Z
+ I(dk) ≡    dk(s) dk(t) ln |s − t| = ln A + γ(t) dk(t) ≥ ln A + α.
+           R         R                            R
+The inequality follows because γ ≥ α on K, and this can be seen as
+follows: First of all, cap(K ∩I) > 0 for all open intervals I that intersect
+K, and thus also ωK (K ∩ I) > 0 for all such I. Now γ on K is different
+from α only on an ωK -null set, so lim supt→x γ(t) ≥ α for all x ∈ K and
+now upper semicontinuity implies that γ(x) ≥ α on K, as claimed.
+   So I(dk) ≥ ln cap(K), and thus we must have equality here, and (c)
+holds and α has the asserted value.
+   Finally, if (c) holds, then, by Frostman’s Theorem and the Thouless
+formula,
+                         γ(t) = − ln A + ln cap(K)
+quasi everywhere on K.                                                    
+Theorem 5.2. Let E = σcap (J), and let ρ be the spectral measure of
+J. If dωE ≪ dρ, then the limits from Theorem 3.1 exist as N → ∞
+(without passing to a subsequence). In particular, they are unique, and
+in fact dk = dωE , and γ = 0 quasi everywhere on E.
+Proof. Since ωE ≪ ρ and ωE doesn’t give weight to capacity zero sets,
+Theorem 4.2 implies that ωE is supported by Z = {γ = 0}. Thus
+integration of the Thouless formula with respect to dωE gives
+                  Z      Z
+    0 = − ln A + dk(t) dωE (s) ln |s − t| = − ln A + ln cap(E),
+                    R       R
+by Frostman’s Theorem and Proposition 3.4 again. On the other hand,
+integration with respect to dk shows that
+                           Z
+           I(dk) = ln A + γ(t) dk(t) ≥ ln A = ln cap(E),
+                                R
+                     REFLECTIONLESS HERGLOTZ FUNCTIONS                    31
+
+so dk = dωE . Theorem 5.1 now shows that γ = 0 quasi everywhere on
+E.                                                               
+  Theorem 5.2 in particular says that equilibrium measures arise as the
+unique density of states measures in many situations, and ωE ∈ R0 (E)
+by Corollary 1.5.
+  Next, we briefly touch the subject of Denisov-Rakhmanov type the-
+orems. For a compact, essentially closed set E ⊂ R, define DR(E) as
+the set of bounded half line Jacobi matrices J that satisfy
+                             σess (J) = Σac (J) = E.
+A set E is called essentially closed if it is equal to its essential closure
+            ess
+        E         = {x ∈ R : |E ∩ (x − h, x + h)| > 0 for all h > 0} .
+                                                                         ess
+This terminology is common but somewhat unfortunate because E
+really is the set of accumulation points of E with respect to the topology
+with basis (a, b) \ N, |N| = 0. Also, note the formal analogy to (3.13).
+  At present, Denisov-Rakhmanov Theorems are available only for
+rather special sets E (for finite unions of closed intervals and homoge-
+neous compact sets). These results give rather detailed information on
+the asymptotic behavior of the coefficients of an arbitrary J ∈ DR(E).
+See [4, 7, 17]. The case of more general sets E is quite unclear and ac-
+tually the subject of current research. As pointed out in [20], potential
+theoretic tools are ideal to produce poor man’s versions of Denisov-
+Rakhmanov Theorems, which have much less detailed conclusions, but,
+on the plus side, work very generally. Here is such a result; see also the
+very similar discussion of Widom’s Theorem [26] in [20, Section 4].
+Theorem 5.3. Suppose that E is an essentially closed, bounded subset
+of R, and suppose that (ωE )s = 0. If J ∈ DR(E), then the limits
+from Theorem 3.2 exist as N → ∞, and dk = dωE and γ = 0 quasi
+everywhere on E.
+   In particular, this will hold if E is a compact, weakly homogeneous
+subset of R and J ∈ DR(E).
+  As the following proof will show, we may actually replace the as-
+sumption that J ∈ DR(E) by the slightly weaker condition
+                             σcap (J) = Σac (J) = E.
+Proof. E = Ecap since E is essentially closed, and we are assuming that
+dρac (t) ∼ χE (t) dt, so we are clearly in the situation of Theorem 5.2.
+The last part follows from Corollay 2.3 because ωE is reflectionless on
+E.                                                                    
+32          ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+   Finally, we collect some general inclusions and inequalities; most of
+these were already obtained above, but it seems useful to have them
+readily available. Recall that we defined K as the topological support
+of dk and Z = {t ∈ R : γ(t) = 0}, A = limj→∞ (a(1) · · · a(Nj ))1/Nj .
+The absolutely continuous spectrum, σac , can be obtained from Σac as
+          ess
+σac = Σac .
+                                                        ess
+Theorem 5.4. We have that Z ⊃ Σac (J) and Z                   ⊃ σac (J), and
+               ess
+           Z         ⊂ K ⊂ σcap (J),        cap(Z) ≤ A ≤ cap(K).
+Proof. We already observed in the proof of Theorem 4.2 that Σac ⊂ Z,
+             ess    ess
+so σac = Σac ⊂ Z . Proposition 3.4 informs us that K ⊂ σcap . By
+                                                    ess
+Corollary 1.5, g ∈ N (Z), so χZ dt ≪ dk and hence Z ⊂ K. If B ⊂ Z
+is compact, cap(B) > 0, then integration of the Thouless formula yields
+                  Z       Z
+     0 = − ln A + dk(t) dωB (s) ln |s − t| ≥ − ln A + ln cap(B),
+                       R        R
+
+so cap(Z) ≤ A. On the other hand,
+                              Z
+                I(dk) = ln A + γ(t) dk(t) ≥ ln A,
+                                        R
+
+and dk is supported by K, so cap(K) ≥ A.                                       
+
+   Since the limits from Theorem 3.1 can be taken on sub-subsequences
+of arbitrary subsequences, this in particular says the following:
+Corollary 5.5. Let
+
+                      A− = lim inf (a(1)a(2) · · · a(N))1/N ,
+                             N →∞
+
+                      A+ = lim sup (a(1)a(2) · · · a(N))1/N .
+                             N →∞
+
+Then cap(Σac ) ≤ A− and cap(σ(J)) ≥ A+ ; also, |Σac | ≤ 4A− .
+   The bound on cap(Σac ) must be interpreted carefully because Σac
+is only defined up to sets of Lebesgue measure zero. From the proof
+of Theorem 5.4, however, it is clear how to proceed: we have that
+cap(S) ≤ A− for some set S with |S△Σac | = 0, and in fact it suffices
+to take S ⊂ Z to make sure that this inequality holds.
+   The last part Corollary 5.5 follows because |S| ≤ 4 cap(S) for Borel
+sets S ⊂ R [16, Theorem 5.3.2(c)]. In the ergodic setting, this result
+was obtained (much) earlier in [5].
+                 REFLECTIONLESS HERGLOTZ FUNCTIONS                              33
+
+                                References
+ [1] A.M. Bruckner, Differentiation of Real Functions, Lecture Notes in Mathe-
+     matics, 659, Springer, Berlin, 1978.
+ [2] J.A. Cima, A.L. Matheson, and W.T. Ross, The Cauchy Transform, Mathe-
+     matical Surveys and Monographs, 125, American Mathematical Society, Prov-
+     idence, RI, 2006.
+ [3] W. Craig and B. Simon, Subharmonicity of the Lyapunov index, Duke Math.
+     J. 50 (1983), 551–560.
+ [4] D. Damanik, R. Killip, and B. Simon, Perturbations of orthogo-
+     nal polynomials with periodic recursion coefficients,                preprint,
+     http://arxiv.org/abs/math/0702388.
+ [5] P. Deift and B. Simon, Almost periodic Schrödinger operators. III. The abso-
+     lutely continuous spectrum in one dimension, Comm. Math. Phys. 90 (1983),
+     389–411.
+ [6] S. Denisov, On the continuous analog of Rakhmanov’s theorem for orthogonal
+     polynomials, J. Funct. Anal. 198 (2003), 465–480.
+ [7] S. Denisov, On Rakhmanov’s theorem for Jacobi matrices, Proc. Amer. Math.
+     Soc. 132 (2004), 847–852.
+ [8] J. Dombrowski, Quasitriangular matrices, Proc. Amer. Math. Soc. 69 (1978),
+     95–96.
+ [9] V. Jaksic and Y. Last, A new proof of Poltoratski’s theorem, J. Funct. Anal.
+     215 (2004), 103–110.
+[10] Y. Last and B. Simon, Eigenfunctions, transfer matrices, and absolutely con-
+     tinuous spectrum of one-dimensional Schrödinger operators, Invent. Math.
+     135 (1999), 329–367.
+[11] M. Martin and M. Putinar, Lectures on Hyponormal Operators, Operator
+     Theory: Advances and Applications, 39, Birkhäuser Verlag, Basel, 1989.
+[12] M. Melnikov, A. Poltoratski, and A. Volberg, Uniqueness theorems for Cauchy
+     integrals, preprint, http://arxiv.org/abs/0704.0621
+[13] F. Nazarov, A. Volberg, and P. Yuditskii, Reflectionless measures
+     with a point mass and singular continuous component, preprint,
+     http://arxiv.org/abs/0711.0948
+[14] A. Poltoratski, Boundary behavior of pseudocontinuable functions, St. Pe-
+     tersburg Math. J. 5 (1994), 389–406.
+[15] E.A. Rakhmanov, The asymptotic behavior of the ratio of orthogonal poly-
+     nomials II (Russian), Mat. Sb. (N.S.) 118(160) (1982), 104–117.
+[16] T. Ransford, Potential Theory in the Complex Plane, London Mathematical
+     Society Student Texts, 28, Cambridge University Press, Cambridge, 1995.
+[17] C. Remling, The absolutely continuous spectrum of Jacobi matrices, preprint,
+     http://arxiv.org/abs/0706.1101
+[18] E.B. Saff and V. Totik, Logarithmic Potentials with External Fields,
+     Grundlehren der Mathematischen Wissenschaften, 316, Springer-Verlag,
+     Berlin, 1997.
+[19] S. Saks, Theory of the Integral, second revised edition, Dover Publications,
+     New York, 1964.
+[20] B. Simon, Equilibrium measures and capacities in spectral theory, Inverse
+     Probl. Imaging 1 (2007), 713–772.
+34            ALEXEI POLTORATSKI AND CHRISTIAN REMLING
+
+ [21] B. Simon and T. Spencer, Trace class perturbations and the absence of abso-
+      lutely continuous spectra, Comm. Math. Phys. 125 (1989), 113–125.
+ [22] M. Sodin and P. Yuditskii, Almost periodic Jacobi matrices with homoge-
+      neous spectrum, infinite-dimensional Jacobi inversion, and Hardy spaces of
+      character-automorphic functions, J. Geom. Anal. 7 (1997), 387–435.
+ [23] H. Stahl and V. Totik, General Orthogonal Polynomials, Encyclopedia of
+      Mathematics and its Applications, 43, Cambridge University Press, Cam-
+      bridge, 1992.
+ [24] G. Teschl, Jacobi Operators and Completely Integrable Nonlinear Lattices,
+      Mathematical Monographs and Surveys, 72, American Mathematical Society,
+      Providence, 2000.
+ [25] B.S. Thomson, Real Functions, Lecture Notes in Mathematics, 1170,
+      Springer-Verlag, Berlin, 1985.
+ [26] H. Widom, Polynomials associated with measures in the complex plane, J.
+      Math. Mech. 16 (1967), 997–1013.
+
+  Mathematics Department, Texas A&M University, College Station,
+TX 77843
+  E-mail address: alexei@math.tamu.edu
+  URL: www.math.tamu.edu/∼alexei.poltoratski/
+
+  Mathematics Department, University of Oklahoma, Norman, OK
+73019
+  E-mail address: cremling@math.ou.edu
+  URL: www.math.ou.edu/∼cremling
+
