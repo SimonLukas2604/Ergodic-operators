@@ -117,5 +117,6 @@ import DamanikFillman.Ch4.MeasurableFamily
 import DamanikFillman.Ch4.Nonrandom
 import DamanikFillman.Ch4.Setting
 import DamanikFillman.Ch4.ThoulessPotential
+import DamanikFillman.Ch4.Thouless
 import DamanikFillman.Ch4.UniformSpectrum
 -- Root of the Damanik–Fillman formalization (work in progress, not a default target).

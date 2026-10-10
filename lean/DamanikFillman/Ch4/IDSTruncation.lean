@@ -97,7 +97,8 @@ lemma iterate_hz_dltF_eq_zero (V : ℤ → ℝ) (n : ℤ) (j : ℕ) (m : ℤ)
     rw [if_neg]; push_cast at hm; omega
   | succ j ih =>
     rw [Function.iterate_succ_apply']
-    unfold hz
+    show (hz V)^[j] (dltF n) (m + 1) + (hz V)^[j] (dltF n) (m - 1) +
+      (V m : ℂ) * (hz V)^[j] (dltF n) m = 0
     push_cast at hm
     rw [ih (m + 1) (by omega), ih (m - 1) (by omega), ih m (by omega)]
     ring
@@ -116,7 +117,7 @@ lemma iext_truncMat_mulVec (V : ℤ → ℝ) {N : ℕ} (v : Fin N → ℂ) (n : 
     set i : Fin N := ⟨(n - 1).toNat, by omega⟩ with hidef
     have hi' : ((i : ℕ) : ℤ) = n - 1 := by simp only [hidef]; omega
     rw [truncMat_mulVec V 0 v i, ← vext_coe v i, hi']
-    unfold hz
+    simp only [hz]
     rw [show (0 : ℤ) + 1 + (n - 1) = n by ring, show n - 1 + 1 = n by ring,
       show n + 1 - 1 = n by ring]
     ring
@@ -183,7 +184,7 @@ at least `k` from the boundary. -/
 theorem truncMat_pow_diag (V : ℤ → ℝ) {N : ℕ} (i : Fin N) (k : ℕ) (hk1 : k ≤ (i : ℕ))
     (hk2 : (i : ℕ) + k + 1 ≤ N) :
     (truncMat V 0 N ^ k) i i = (hz V)^[k] (dltF ((i : ℤ) + 1)) ((i : ℤ) + 1) := by
-  rw [← mulVec_single_apply_self, ← iext_coe_succ,
+  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i, ← iext_coe_succ,
     iext_truncMat_pow_single V i ((i : ℤ) + 1) (by ring) k (by omega) (by omega)]
 
 lemma norm_iext_truncMat_pow_single_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n| ≤ M) {N : ℕ}
@@ -203,7 +204,7 @@ lemma norm_iext_truncMat_pow_single_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, 
 
 lemma norm_truncMat_pow_diag_le {V : ℤ → ℝ} {M : ℝ} (hM : ∀ n, |V n| ≤ M) {N : ℕ}
     (i : Fin N) (k : ℕ) : ‖(truncMat V 0 N ^ k) i i‖ ≤ (2 + M) ^ k := by
-  rw [← mulVec_single_apply_self, ← iext_coe_succ]
+  rw [← mulVec_single_apply_self (truncMat V 0 N ^ k) i, ← iext_coe_succ]
   exact norm_iext_truncMat_pow_single_le hM i k _
 
 /-- Trace comparison: `|Tr H_N^k - ∑_{n=1}^N ⟨δₙ, H^k δₙ⟩| ≤ 4k(2 + M)^k`. -/
@@ -279,10 +280,9 @@ lemma trace_pow_eq_sum_eigenvalues (hA : A.IsHermitian) (k : ℕ) :
 
 lemma det_sub_eq_prod_eigenvalues (hA : A.IsHermitian) (z : ℂ) :
     (z • (1 : Matrix (Fin N) (Fin N) ℂ) - A).det = ∏ i, (z - (hA.eigenvalues i : ℂ)) := by
-  have h := Matrix.eval_charpoly A z
-  rw [hA.charpoly_eq, Polynomial.eval_prod] at h
-  simp only [Polynomial.eval_sub, Polynomial.eval_X, Polynomial.eval_C] at h
-  rw [← h, Matrix.scalar_apply, smul_one_eq_diagonal]
+  rw [smul_one_eq_diagonal, ← Matrix.scalar_apply, ← Matrix.eval_charpoly, hA.charpoly_eq,
+    Polynomial.eval_prod]
+  simp
 
 end Hermitian
 
@@ -316,11 +316,15 @@ section EigMeasure
 
 variable {N : ℕ} {A : Matrix (Fin N) (Fin N) ℂ} (hA : A.IsHermitian)
 
-instance : IsFiniteMeasure (eigMeasure hA) := by
+lemma eigMeasure_univ_le : eigMeasure hA univ ≤ 1 := by
   unfold eigMeasure
-  rcases N.eq_zero_or_pos with rfl | hN
-  · simp only [Finset.univ_eq_empty, Finset.sum_empty, smul_zero]; infer_instance
-  · exact Measure.smul_finite _ (ENNReal.inv_ne_top.2 (by exact_mod_cast hN.ne'))
+  rw [Measure.smul_apply, Measure.coe_finset_sum, Finset.sum_apply]
+  simp only [measure_univ, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
+    mul_one, smul_eq_mul]
+  exact ENNReal.inv_mul_le_one _
+
+instance : IsFiniteMeasure (eigMeasure hA) :=
+  ⟨lt_of_le_of_lt (eigMeasure_univ_le hA) ENNReal.one_lt_top⟩
 
 lemma integral_eigMeasure (g : ℝ → ℝ) :
     ∫ x, g x ∂(eigMeasure hA) = (N : ℝ)⁻¹ * ∑ i, g (hA.eigenvalues i) := by
@@ -329,12 +333,7 @@ lemma integral_eigMeasure (g : ℝ → ℝ) :
   simp only [integral_dirac, ENNReal.toReal_inv, ENNReal.toReal_natCast, smul_eq_mul]
 
 lemma eigMeasure_real_univ_le : (eigMeasure hA).real univ ≤ 1 := by
-  have h : eigMeasure hA univ ≤ 1 := by
-    unfold eigMeasure
-    rw [Measure.smul_apply, Measure.coe_finset_sum, Finset.sum_apply]
-    simp only [measure_univ, Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul,
-      mul_one, smul_eq_mul]
-    exact ENNReal.inv_mul_le_one _
+  have h := eigMeasure_univ_le hA
   rw [measureReal_def]
   exact ENNReal.toReal_le_of_le_ofReal zero_le_one (by simpa using h)
 
@@ -398,12 +397,12 @@ theorem ae_tendsto_dkT :
     ∀ᵐ ω ∂E.μ, ∀ g : ℝ → ℝ, Continuous g →
       Tendsto (fun N : ℕ => ∫ x, g x ∂(E.dkT ω N)) atTop (𝓝 (∫ x, g x ∂E.dosm)) := by
   filter_upwards [E.ae_tendsto_dkN] with ω hω g hg
-  refine tendsto_integral_of_moments (R := 2 + E.fBound) (fun N => ?_) E.ae_mem_Icc_dosm
+  refine tendsto_integral_of_moments (ν := E.dkT ω) (R := 2 + E.fBound) (fun N => ?_) E.ae_mem_Icc_dosm
     (fun N => eigMeasure_real_univ_le _) (by simp) (fun k => ?_) hg
   · exact ae_eigMeasure _ fun i => abs_le.1 (abs_eigenvalues_truncMat_le (E.abs_V_le ω) i)
   · have h1 := hω (fun x => x ^ k) (continuous_pow k)
     have hb : Tendsto (fun N : ℕ => (N : ℝ)⁻¹ * (4 * k * (2 + E.fBound) ^ k)) atTop (𝓝 0) := by
-      simpa using tendsto_inverse_atTop_nhds_zero_nat.mul_const (4 * k * (2 + E.fBound) ^ k)
+      simpa using (tendsto_inv_atTop_nhds_zero_nat (𝕜 := ℝ)).mul_const (4 * k * (2 + E.fBound) ^ k)
     have h2 : Tendsto (fun N : ℕ => ∫ x, x ^ k ∂(E.dkT ω N) - ∫ x, x ^ k ∂(E.dkN ω N))
         atTop (𝓝 0) :=
       squeeze_zero_norm (fun N => by rw [Real.norm_eq_abs]; exact E.abs_moment_sub_le ω N k) hb
