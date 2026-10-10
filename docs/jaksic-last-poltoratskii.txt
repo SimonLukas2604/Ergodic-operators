@@ -1,0 +1,432 @@
+                                                                                                       July 14, 2003
+
+
+
+                A New Proof of Poltoratskii's Theorem
+
+
+
+
+                                                   Vojkan Jaksi
+                              Department of Mathemati s and Statisti s, M Gill University,
+
+                              805 Sherbrooke Street West, Montreal, QC, H3A 2K6, Canada
+
+                                             e-mail: jaksi math.m gill. a
+
+
+
+                                                          and
+
+                                                     Yoram Last
+                                   Institute of Mathemati s, The Hebrew University,
+
+                                                91904 Jerusalem, Israel
+
+                                              e-mail: ylastmath.huji.a .il
+
+
+
+
+Abstra t.       We provide a new simple proof to the elebrated theorem of Poltoratskii
+ on erning ratios of Borel transforms of measures. That is, we show that for any omplex
+Borel measure  on R and any f 2 L1 (R ; d), lim!0 (Ff  (E + i)=F (E + i)) = f (E )
+a.e. w.r.t. sing , where sing is the part of  whi h is singular with respe t to Lebesgue
+                                                                                  R
+measure and F denotes a Borel transform, namely, Ff  (z ) = (x                              z)   1
+                                                                                                      f (x) d(x) and
+            R
+F (z ) =       (x   z)   1
+                              d(x).
+
+
+
+
+                                                           1
+1. Introdu tion
+
+
+Let  be a omplex Borel measure on R . Given f 2 L1 (R ; d), we denote by f  the
+                                                                    R
+ omplex measure obtained by multiplying f and , namely, (f )(S ) = S f (x) d(x) for
+any Borel set S  R . We denote by sing the part of  whi h is singular with respe t
+to the Lebesgue measure on R . Given any omplex measure  on R , we de ne its Borel
+(a.k.a. Stieltjes or Borel-Stieltjes) transform, for z 2 C n R , by
+                                                    Z
+                                                        d (x)
+                                        F (z ) =                :                      (1:1)
+                                                     Rx     z
+
+
+F (z ) is a well de ned analyti fun tion of z on C n R .
+    The purpose of this paper is to provide a new simple proof to the following theorem
+of Poltoratskii (essentially, Theorem 2.7 of [4℄):
+
+Theorem 1.1.      For any omplex valued Borel measure  on R and for any f 2 L1 (R ; d),
+
+                                          Ff  (E + i)
+                                   lim                    = f (E )                      (1:2)
+                                      !0 F (E + i)
+
+for a.e. E 2 R with respe t to sing .
+
+Remarks. 1. Poltoratskii a tually onsiders measures on the unit ir le (rather than on
+R ). The transition between his setting and ours is elementary and standard.
+     2. Poltoratskii onsiders the general nontangential limits of approa hing E . We prefer
+to onsider only the \radial" limits here (approa hing E from above at an angle of 90
+degrees, so that our 's are positive) sin e we nd them more transparent and sin e this is
+what one usually ares about in appli ations to spe tral theory. Our proof is nevertheless
+fully valid for the more general nontangential limits (one essentially just needs to repla e
+the various limits of  ! 0 by some appropriate notation for nontangential limits).
+     3. It is easy to see that in Theorem 1.1 one annot repla e sing by . This is be ause
+F and Ff  have nite limits a.e. with respe t to the absolutely ontinuous part of  and
+ nite limits of the form lim!0 Ff  (E + i) depend on values of f away from the point E .
+     4. Theorem 1.1 is obvious for the spe ial ase where sing is a pure point measure, sin e
+one an easily see by dominated onvergen e that for every E 2 R , lim!0  Ff  (E + i) =
+if (E )(fE g) and thus (1.2) learly holds whenever E is a point mass of . The main point
+of the theorem is thus in showing that the result also extends to the singular ontinuous
+part of .
+
+                                                    2
+      Poltoratskii's proof of the above Theorem 1.1 is somewhat ompli ated, partly sin e
+it is done in the framework of a theory that is also on erned with other questions. In
+light of re ent appli ations to the spe tral theory of random operators [2,3℄, there is natural
+interest in having a short self- ontained proof that would be, in parti ular, easily a essible
+to spe tral analysts. The proof below aims to a hieve this goal.
+
+
+2. Proof of Theorem 1.1
+
+
+We rst need to re all some well known elementary fa ts.
+
+Proposition 2.1.   For any positive Borel measure  on R , sing is supported on
+fE : lim!0 jF (E + i)j = 1g.
+Proof. We have
+
+                                                 Z
+                                                             d(x)
+            jF (E + i)j  jIm F (E + i)j =                                 ( E   ; E + )
+                                                                                                   ;   (2:1)
+                                                     R (x       E)
+                                                                 2   +   2            2
+
+so the result follows from the theorem of de la Vallee Poussin [7℄ (also see Theorem 7.15
+of [6℄). xpyq
+
+Proposition 2.2.      For any nite positive Borel measure  on R and for any real valued
+f   2 L1 (R ; d),
+                                      Im Ff  (E + i)
+                                  lim                  = f (E )                                        (2:2)
+                                  !0 Im F (E + i)
+
+
+for a.e. E 2 R with respe t to . Moreover, for any two nite positive Borel measures ,
+on R ,
+                                        Im F (E + i)
+                                     lim               =0                                              (2:3)
+                                    !0 Im F (E + i)
+
+
+for a.e. E 2 R with respe t to the part of  that is singular with respe t to  .
+
+Proof. Sin e  is positive and f is real valued, we have
+
+                                                     Z
+                                                             f (x) d(x)
+                              Im Ff  (E + i) =
+                                                         R (x    E )2 + 2
+
+                                                     3
+(and similarly for F and F ), namely, the imaginary parts of the Borel transforms oin ide
+with Poisson integrals of the orresponding measures. It is thus obvious that (2.2) is
+equivalent to
+                                           Z
+                                   1           (f (x) f (E )) d(x)
+                    lim sup                                          = 0;             (2:4)
+                       !0  Im F (E + i) R       (x E )2 + 2
+and that it holds a.e. w.r.t.  if f happens to be ontinuous. Sin e the ontinuous fun tions
+                                                                      R
+are dense in L1 (R ; d), we an always nd a ontinuous g su h that jf g j d  kf g k1
+is arbitrarily small. Let h = f g , then by writing f = g + h, we see that a.e. w.r.t. ,
+the upper limit in (2.4) is bounded by
+
+                                         Im Fjhj (E + i)
+                              lim sup                      + jhj(E ) :
+                                   !0    Im F (E + i)
+De ning the maximal fun tion
+
+                              Mh (E )     sup (jhj(E)(E ; E; E+ +) )
+                                            >0
+
+                                           R      2               p 1                    p 1           
+and noting that  1 Im F (E + i) = 01= dt  E                   t          2 ; E +    t       2       (and sim-
+ilarly for jhj), we see that Mh (E )  Im Fjhj (E + i)=Im F (E + i) for any  > 0, at any
+E . Thus, (2.4) would follow a.e. w.r.t.  if we  an show that by making khk1 small we an
+make Mh (E ) arbitrarily small outside sets of arbitrarily small measure . To see this, note
+that for any t > 0, ea h point of the set fE : Mh (E ) > tg is the enter of a losed interval
+I for whi h (jhj)(I ) > t (I ). Therefore, for every 1 < a < b < 1, we an apply the
+Besi ovit h overing theorem (see, e.g., se tion 1.5.2 of [1℄) to extra t a ountable overing
+                                                                                        SN      S1
+of [a; b℄ \ fE : Mh (E ) > tg by su h intervals that has the form                        k =1    j =1 Ijk   , where
+for ea h k 2 f1; :::; N g, the intervals Ijk , j = 1; 2; :::, are disjoint, and where N is some
+universal integer. Thus,
+                                            1                       1 ( h )(I )
+                                                                               jj              N khtk1 ;
+                                          N X
+                                          X                       N X
+                                                                  X
+      ([a; b℄   \ fE : Mh(E ) > tg)                 (Ijk ) <
+                                                                              jk
+                                                                                    t
+                                          k =1 j =1               k =1 j =1
+
+
+and we obtain the desired result. Finally, given two nite positive Borel measures , on
+R , we note that  = f ( +  ) for some f 2 L1 (R ; d( +  )) obeying f (E ) = 0 a.e. with
+respe t to the part of  that is singular with respe t to  . Sin e
+
+                  Im F (E + i) Im Ff (+ ) (E + i) Im Ff (+ ) (E + i)
+                  Im F (E + i)
+                                 =
+                                   Im F (E + i)
+                                                       Im F (E + i) ;
+                                                             +
+
+
+                                                      4
+we thus see that (2.3) holds for the appropriate set of E 's. pq
+                                                              xy
+
+Remarks. 1. While Proposition 2.2 is very well known, we are not familiar with a referen e
+that really has its proof, whi h is why we in luded a full proof here. We note, however,
+that this proof is just a variant of a proof of the more ommonly en ountered fa t that
+lim!0 ((f )(E ; E + )=(E ; E + )) = f (E ) a.e. w.r.t. .
+     2. To prove Proposition 2.2 for the more general ase of nontangential limits, see the
+proof of Lemma 1.2 in [4℄. Alternatively, one an also use hapter 11 of [6℄, who proves a
+variant of Proposition 2.2 for nontangential limits and the spe ial ase where  is Lebesgue
+measure on the ir le (but the ase of a general  is similar).
+
+We an now prove the main theorem:
+
+Proof of Theorem 1.1. We rst onsider the ase of a positive ( nite) measure  and a real
+valued f 2 L2 (R ; d). Without loss, we assume that  is ompa tly supported (this is just a
+ onvenien e to avoid unbounded operators below). Let A be the operator of multipli ation
+by the parameter on L2 (R ; d), namely, (Ag )(x) = xg (x) for any g 2 L2 (R ; d), let 1
+denote the onstant fun tion 1(x) = 1 8x 2 R , and let h  ;  i denote the s alar produ t in
+L2 (R ; d). We note that 1 is a y li ve tor for A and that  is the spe tral measure for 1
+                                                                        R
+and A, namely, the unique Borel measure on R obeying h1; g (A)1i = g (x) d(x) for any
+ ontinuous fun tion g on the spe trum of A.
+     We de ne the operator A1 on L2 (R ; d) by
+
+                                               A1 = A +          h1;  i1 ;                                      (2:5)
+
+and denote by 1 the spe tral measure for 1 and A1 . Sin e 1 is easily seen to also be a y li
+ve tor for A1 , it follows from the spe tral theorem [5℄ that there exists a unitary operator
+U : L2 (R ; d) ! L2 (R ; d1 ), so that U A1 U 1 is the operator of multipli ation by the
+parameter on L2 (R ; d1 ) and U 1 = 1. Moreover, sin e U xn = U An 1 = U AU 1 U xn 1 =
+xU xn 1 h1; xn 1 i1, one easily sees (by indu tion on the degree) that U takes polynomials
+with real oeÆ ients to polynomials with real oeÆ ients and thus it takes real valued
+fun tions to real valued fun tions. In parti ular, U f is a real valued element of L2 (R ; d1 ).
+    Note that we have the following equalities between Borel transforms and resolvent
+matrix elements in L2 (R ; d): F (z ) = h1; (A z ) 1 1i, Ff  (z ) = h1; (A z ) 1 f i, and
+F(U f )1 (z ) =   h1; (A1   z)  i By the resolvent formula (namely, by the basi operator
+                                     1
+                                         f .
+
+formula A 1         B 1 = A 1 (B   A)B 1 ), we have for any two elements h; g 2 L2 (R ; d),
+
+
+            hg; (A1     z)
+                             1
+                                 i = hg; (A
+                                 h              z)
+                                                     1
+                                                         i hg; (A
+                                                         h                    z)
+                                                                                   1
+                                                                                       ih1; (A1
+                                                                                       1          z)
+                                                                                                       1
+                                                                                                            i
+                                                                                                           h :   (2:6)
+
+                                                             5
+By setting g = h = 1 in (2.6), we have F1 (z ) = F (z )                  F (z )F1 (z ) from whi h we get
+
+
+                                                            F (z )
+                                          F1 (z ) =                   :                                      (2:7)
+                                                        1 + F (z )
+
+Equation (2.7) is the entral starting formula for developing the theory of rank one per-
+turbations [8℄. In parti ular, we see from (2.7) and Proposition 2.1 that sing and 1;sing
+are mutually singular and thus that sing is singular w.r.t. 1 . From (2.7) we also get
+
+                                                           Im F (z )
+                                       Im F1 (z ) =                                                          (2:8)
+                                                        j 1 + F (z )j 2 :
+
+Going ba k to (2.6) and setting g = 1, h = f , we get
+
+                                   Ff  (z ) = (1 + F (z ))F(U f )1 (z ) :                                  (2:9)
+
+By taking imaginary parts of the two sides of (2.9) and dividing by Im F (z ), we have
+
+                                  Im Ff  (z )
+                                               = Re F(U f )1 (z ) + L(z )                                   (2:10)
+                                   Im F (z )
+
+with
+                                         Re (1 + F (z ))
+                              L (z ) =                    Im F(U f )1 (z ) :                                (2:11)
+                                           Im F (z )
+
+Applying the Cau hy-S hwartz inequality we get
+
+                              Z
+                                    (U f )(x) d1(x)
+  jIm F(U f )1 (E + i)j =
+                                  R (x      E )2 + 2
+                              s Z                           Z                              
+                                             d1 (x)                  (U f )2 (x) d1 (x)
+                         
+                                     R (x     E )2 + 2           R     (x    E )2 + 2
+                                                                                                             (2:12)
+                              q
+                         =        Im F1 (E + i) Im F(U f )2 1 (E + i)
+                                                                             s
+                              q                                                  Im F(U f )2 1 (E + i)
+                         =        Im F1 (E + i) Im F (E + i)                                         ;
+                                                                                   Im F (E + i)
+
+                                                        6
+where the last equality is just multiplying and dividing by Im F (E + i). Sin e sing is
+singular w.r.t. 1 , it is also singular w.r.t. (U f )21 and we thus have by Proposition 2.2,
+
+                                          Im F(U f )2 1 (E + i)
+                                     lim                          =0                                  (2:13)
+                                      !0   Im F (E + i)
+
+a.e. w.r.t. sing . Also, we see from (2.8) that
+
+                                                            (Im F (z ))2
+                              Im F1 (z ) Im F (z ) =
+                                                            j1 + F (z)j2  1 ;                       (2:14)
+
+
+and thus (2.12) implies
+                                     lim jIm F(U f )1 (E + i)j = 0                                  (2:15)
+                                        !0
+a.e. w.r.t. sing . By using (2.12) and the equality in (2.14) to estimate jIm F(U f )1 (z )j in
+(2.11), we get
+                                                                        s
+                      (1 + F (E + i))j jIm F (E + i)j
+    jL(E + i)j  jRejIm F (E + i)j     j1 + F (E + i)j
+                                                                            Im F(U f )2 1 (E + i)
+                                                                              Im F (E + i)
+                                                           
+
+                     s                                                                                (2:16)
+                         Im F(U f )2 1 (E + i)
+                          Im F (E + i)
+                                                 ;
+
+
+
+and we thus see from (2.13) that
+
+                                              lim jL(E + i)j = 0                                     (2:17)
+                                                 !0
+
+a.e. w.r.t. sing . Combining (2.10), (2.15), and (2.17) with Proposition 2.2, now yields
+
+                                                           Im Ff  (E + i)
+                     lim F(U f )1 (E + i) = lim                           = f (E )                  (2:18)
+                        !0                            !0 Im F (E + i)
+
+
+
+a.e. w.r.t. sing . Thus, by going ba k to (2.9), dividing the two sides by F (z ), and applying
+Proposition 2.1, we get
+                                                                
+                 Ff  (E + i)          1
+            lim             = lim              +1                    F(U f )1 (E + i) = f (E )      (2:19)
+            !0 F (E + i)    !0 F (E + i)
+
+                                                        7
+a.e. w.r.t. sing .
+     This ompletes the proof for the spe ial ase of a positive  and a real valued f 2
+L (R ; d). To omplete the proof of the general ase, we essentially just follow Poltoratskii
+  2
+
+
+[4℄: Given a positive f 2 L1 (R ; d) ( is still positive here), let g = 1=(1 + f ) and
+ = (1 + f ). Then g 2 L2 (R ; d ) (in fa t, g is bounded) and  is absolutely ontinuous
+with respe t to  . Thus, by (2.19),
+
+                              F (E + i)                     Fg (E + i)                       1
+                  lim                              = lim                        = g (E ) =                 (2:20)
+                     !0 F(1+f ) (E + i)              !0 F (E + i)                      1 + f (E )
+
+a.e. w.r.t. sing , and so we have by the linearity of the Borel transform,
+
+                                   Ff  (E + i)              F(1+f ) (E + i)
+                         lim                       = lim                                1 = f (E )         (2:21)
+                            !0 F (E + i)             !0        F (E + i)
+
+
+a.e. w.r.t. sing . Sin e every omplex valued f 2 L1 (R ; d) is a linear ombination of four
+positive fun tions in L1 (R ; d), the linearity of the Borel transform immediately implies
+the result for any su h f 2 L1 (R ; d). Finally, if  is omplex valued, then we have  = g jj
+where jj is positive and g 2 L1 (R ; djj) with jg j = 1, so
+
+        Ff  (E + i)                Ff g jj (E + i)                 Ff g jj (E + i) Fjj (E + i)
+ lim                    = lim                             = lim
+    !0 F (E + i)              !0 Fgjj (E + i)              !0 Fjj (E + i) Fgjj (E + i) = f (E ) (2:22)
+
+a.e. w.r.t. sing . This ompletes the proof. pq
+                                             xy
+
+
+A knowledgments
+
+
+VJ's work was partially supported by NSERC. YL's work was partially supported by THE
+ISRAEL SCIENCE FOUNDATION (grant no. 188/02). We would like to thank Barry
+Simon for motivating this work and for useful dis ussions.
+
+
+Referen es
+
+
+ 1. L.C. Evans and R.F. Gariepy, Measure Theory and Fine Properties of Fun tions, CRC
+    Press, Bo a Raton, 1992
+
+ 2. V. Jaksi and Y. Last, Spe tral stru ture of Anderson type Hamiltonians, Invent.
+    Math. 141 (2000), 561{577
+
+                                                                   8
+3. V. Jaksi and Y. Last, Simpli ity of singular spe trum in Anderson type Hamiltonians,
+   in preparation
+
+4. A.G. Poltoratskii, The Boundary Behavior of Pseudo ontinuable Fun tions, St. Pe-
+   tersburg Math. J. 5 (1994), 389{406
+
+5. M. Reed and B. Simon, Methods of Modern Mathemati al Physi s, I. Fun tional Anal-
+   ysis, A ademi Press, London, San Diego, 1980
+
+6. W. Rudin, Real and Complex Analysis, 3rd edition, M Graw-Hill, New York, 1987
+
+7. S. Saks, Theory of the Integral, Hafner, New York, 1937
+
+8. B. Simon, Spe tral analysis and rank one perturbations and appli ations, CRM Le ture
+   Notes Vol. 8 (J. Feldman, R. Froese, L. Rosen, eds.), pp. 109{149, Amer. Math. So .,
+   Providen e, RI, 1995.
+
+
+
+
+                                           9
+
