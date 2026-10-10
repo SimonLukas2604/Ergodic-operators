@@ -638,7 +638,7 @@ theorem poltoratski_bounded (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ →
         (borelTransform σ (E + ε * I)).im / (borelTransform μ (E + ε * I)).im) (𝓝[>] 0)
           (𝓝 0)}) = 0 :=
       withDensity_absolutelyContinuous _ _ (measure_mono_null inter_subset_left hσT)
-    rw [h1, h2, add_zero]
+    exact add_eq_zero.2 ⟨h1, h2⟩
   filter_upwards [ae_tendsto_im_ratio μ hf, hN] with E hb hc hE
   refine jl_limit (Gz := fun ε => jlG μ f (E + ε * I))
     (A := fun ε => (borelTransform σ (E + ε * I)).im) hE hb (hc hE) ?_ ?_
@@ -722,10 +722,12 @@ theorem poltoratski_nonneg (μ : Measure ℝ) [IsFiniteMeasure μ] {f : ℝ → 
     refine integral_congr_ae (Eventually.of_forall fun x => ?_)
     simp only [Complex.real_smul]
     have hx : 0 < 1 + f x := by linarith [hf0 x]
+    have hx' : (1 + (f x : ℂ)) ≠ 0 := by exact_mod_cast hx.ne'
     rw [ENNReal.toReal_ofReal hx.le, hgdef]
     simp only
     push_cast
     field_simp
+    rw [div_mul_cancel_left₀ hx', one_div]
   filter_upwards [hsing.ae_le hBμ, hImμ] with E hE hIm
   -- `Im F_ν ≥ Im F_μ → ∞`
   have hImν : Tendsto (fun ε : ℝ => (borelTransform ν (E + ε * I)).im) (𝓝[>] 0) atTop := by
